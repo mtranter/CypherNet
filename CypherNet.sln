@@ -1,0 +1,26 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio 2012
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "CypherNet.UnitTests", "CypherNet.UnitTests\CypherNet.UnitTests.csproj", "{AC57399D-453D-4775-AE6E-E4FD550A0AEC}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "CypherNet", "CypherNet\CypherNet.csproj", "{0C5D4699-3FD4-4232-A75F-82F0FF22C884}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{AC57399D-453D-4775-AE6E-E4FD550A0AEC}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{AC57399D-453D-4775-AE6E-E4FD550A0AEC}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{AC57399D-453D-4775-AE6E-E4FD550A0AEC}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{AC57399D-453D-4775-AE6E-E4FD550A0AEC}.Release|Any CPU.Build.0 = Release|Any CPU
+		{0C5D4699-3FD4-4232-A75F-82F0FF22C884}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{0C5D4699-3FD4-4232-A75F-82F0FF22C884}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{0C5D4699-3FD4-4232-A75F-82F0FF22C884}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{0C5D4699-3FD4-4232-A75F-82F0FF22C884}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+EndGlobal
