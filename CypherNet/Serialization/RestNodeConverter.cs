@@ -26,8 +26,6 @@
                                         JsonSerializer serializer)
         {
             var values = serializer.Deserialize<Dictionary<string, object>>(reader);
-
-
             return base.ReadJson(reader, objectType, existingValue, serializer);
         }
     }

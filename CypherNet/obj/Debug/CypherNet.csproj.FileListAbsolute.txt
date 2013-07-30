@@ -1,0 +1,7 @@
+D:\Cypher.Net\CypherNet\obj\Debug\CypherNet.csprojResolveAssemblyReference.cache
+D:\Cypher.Net\CypherNet\bin\Debug\CypherNet.dll
+D:\Cypher.Net\CypherNet\bin\Debug\CypherNet.pdb
+D:\Cypher.Net\CypherNet\bin\Debug\Newtonsoft.Json.dll
+D:\Cypher.Net\CypherNet\bin\Debug\Newtonsoft.Json.xml
+D:\Cypher.Net\CypherNet\obj\Debug\CypherNet.dll
+D:\Cypher.Net\CypherNet\obj\Debug\CypherNet.pdb

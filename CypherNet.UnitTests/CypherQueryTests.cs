@@ -22,8 +22,8 @@
             cypher.Setup(c => c.ExecuteQuery<TestCypherClause>(It.IsAny<string>())).Returns(() => null);
             var query = new FluentCypherQueryBuilder<TestCypherClause>(cypher.Object, new TransactionEndpointCypherQueryBuilder());
             var results = query
-                .Start((s,v) => s.At(v.movie, 1))
-                .Match((m, v) => m.Start(v.movie).Incoming("STARED_IN", 1, 5).From(v.actor))
+                .Start(v => Start.At(v.movie, 1))
+                .Match(v => Pattern.Start(v.movie).Incoming("STARED_IN", 1, 5).From(v.actor))
                 .Return(v => new {v.actor, v.movie})
                 .Execute();
             
@@ -36,14 +36,15 @@
             var cypher = new Mock<ICypher>();
             cypher.Setup(c => c.ExecuteQuery<TestCypherClause>(It.IsAny<string>())).Returns(() => null);
             var query = new FluentCypherQueryBuilder<TestCypherClause>(cypher.Object, new TransactionEndpointCypherQueryBuilder());
+            
             var results = query
-                .Start((s, v) => s.AnyNode(v.movie))
-                .Match((m, v) => m.Start(v.movie).Incoming("STARED_IN", 1, 5).From(v.actor))
+                .Start(v => Start.Any(v.movie))
+                .Match(v => Pattern.Start(v.movie).Incoming("STARED_IN").From(v.actor))
                 .Where(v => v.actor.Prop<string>("name") == "Bob Dinero" || v.actor.Prop<string>("role") == "Keyser Söze")
                 .Return(v => new { v.actor, v.movie })
                 .Execute();
 
-            VerifyCypher(cypher, results.FirstOrDefault(), "START movie=node(*) MATCH (movie)<-[:STARED_IN*1..5]-(actor) WHERE ((actor.name = 'Bob Dinero') OR (actor.role = 'Keyser Söze')) RETURN actor as actor, movie as movie");
+            VerifyCypher(cypher, results.FirstOrDefault(), "START movie=node(*) MATCH (movie)<-[:STARED_IN]-(actor) WHERE ((actor.name = 'Bob Dinero') OR (actor.role = 'Keyser Söze')) RETURN actor as actor, movie as movie");
         }
 
         [TestMethod]
@@ -53,7 +54,7 @@
             cypher.Setup(c => c.ExecuteQuery<TestCypherClause>(It.IsAny<string>())).Returns(() => null);
             var query = new FluentCypherQueryBuilder<TestCypherClause>(cypher.Object, new TransactionEndpointCypherQueryBuilder());
             var results = query
-                .Match((m, v) => m.Start(v.actor, "METHOD_ACTOR").Outgoing("STARED_IN").To().Outgoing(v.directedBy, "DIRECTED_BY").To(v.director))
+                .Match(v => Pattern.Start(v.actor, "METHOD_ACTOR").Outgoing("STARED_IN").To().Outgoing(v.directedBy, "DIRECTED_BY").To(v.director))
                 .Return(v => new { v.actor, v.director })
                 .Execute();
 
@@ -67,7 +68,7 @@
             cypher.Setup(c => c.ExecuteQuery<TestCypherClause>(It.IsAny<string>())).Returns(() => null);
             var query = new FluentCypherQueryBuilder<TestCypherClause>(cypher.Object, new TransactionEndpointCypherQueryBuilder());
             var results = query
-                .Start((s,v) => s.At(v.actor, 1))
+                .Start(v => Start.At(v.actor, 1))
                 .Return(v => new { v.actor})
                 .Execute();
                                                            

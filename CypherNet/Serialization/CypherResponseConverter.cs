@@ -15,7 +15,7 @@ namespace CypherNet.Serialization
 
     #endregion
 
-    internal class CypherResponseConverterFactoryJsonConverter : JsonConverter
+    internal class CypherResultSetConverterFactoryJsonConverter : JsonConverter
     {
         public override void WriteJson(JsonWriter writer, object value, JsonSerializer serializer)
         {
@@ -31,7 +31,7 @@ namespace CypherNet.Serialization
 
         public override bool CanConvert(Type objectType)
         {
-            return typeof (ICypherResponse).IsAssignableFrom(objectType);
+            return objectType.IsGenericType && objectType.GetGenericTypeDefinition() == typeof (CypherResultSet<>);
         }
 
         private JsonConverter GetConverter(Type type)
@@ -42,7 +42,7 @@ namespace CypherNet.Serialization
         }
 
         private class TransactionalResponseConverter<TCypherResponse> :
-            CustomCreationConverter<CypherResponse<TCypherResponse>>
+            CustomCreationConverter<CypherResultSet<TCypherResponse>>
         {
             private const string ColumnsJsonProperty = "columns";
             private const string DataJsonProperty = "data";
@@ -55,7 +55,7 @@ namespace CypherNet.Serialization
                 get { return false; }
             }
 
-            public override CypherResponse<TCypherResponse> Create(Type objectType)
+            public override CypherResultSet<TCypherResponse> Create(Type objectType)
             {
                 throw new NotImplementedException();
             }
@@ -76,7 +76,7 @@ namespace CypherNet.Serialization
                         else if (reader.Value.ToString().ToLower() == DataJsonProperty.ToLower())
                         {
                             reader.Read();
-                            return new CypherResponse<TCypherResponse>(Deserialize(reader, serializer));
+                            return new CypherResultSet<TCypherResponse>(Deserialize(reader, serializer).ToArray());
                         }
                     }
                 }
@@ -86,20 +86,30 @@ namespace CypherNet.Serialization
 
             private void LoadPropertyCache(string[] columns)
             {
-                var entityProperties =
-                    Properties.Where(p =>
-                                     typeof (Node).IsAssignableFrom(p.PropertyType) ||
-                                     typeof (Relationship).IsAssignableFrom(p.PropertyType)).ToArray();
 
-                var expectedProperties =
-                    Properties.Select(s => s.Name);
-
-                foreach (var prop in expectedProperties)
+                foreach (var prop in Properties)
                 {
-                    if (columns.Contains(prop))
+                    if (columns.Contains(prop.Name))
                     {
-                        _propertyCache.Add(prop, Array.IndexOf(columns, prop));
+                        _propertyCache.Add(prop.Name, Array.IndexOf(columns, prop.Name));
+                        if (typeof(IGraphEntity).IsAssignableFrom(prop.PropertyType))
+                        {
+                            var idProp = prop.Name + "__Id";
+                            if (columns.Contains(idProp))
+                            {
+                                _propertyCache.Add(idProp, Array.IndexOf(columns, idProp));
+                            }
+                            if (prop.PropertyType == typeof (Relationship))
+                            {
+                                var typeProp = prop.Name + "__Type";
+                                if (columns.Contains(typeProp))
+                                {
+                                    _propertyCache.Add(typeProp, Array.IndexOf(columns, typeProp));
+                                }
+                            }
+                        }
                     }
+
                 }
             }
 
@@ -111,45 +121,56 @@ namespace CypherNet.Serialization
                     while (reader.TokenType != JsonToken.EndArray)
                     {
                         var record = serializer.Deserialize<JToken[]>(reader);
-                        var properties = new Dictionary<string, object>();
+                        var items = new Dictionary<string, object>();
                         foreach (var property in Properties)
                         {
+                            var itemproperties = new Dictionary<string, object>();
                             var restEntity = record[_propertyCache[property.Name]];
-                            var container = restEntity as JContainer;
                             if(typeof(IGraphEntity).IsAssignableFrom(property.PropertyType))
                             {
                                 var propertyProperty = property.Name;
                                 AssertNecesaryColumnForType(propertyProperty, typeof(IGraphEntity));
                                 var idProperty = property.Name + "__Id";
                                 AssertNecesaryColumnForType(idProperty, typeof(IGraphEntity));
-                                var entityProperties = container[propertyProperty].ToObject<Dictionary<string, object>>();
-                                var nodeId = container[idProperty].ToObject<long>();
-                                properties.Add("id", nodeId);
-                                properties.Add("properties", entityProperties);
+                                var entityProperties = record[_propertyCache[propertyProperty]].ToObject<Dictionary<string, object>>();
+                                var nodeId =  record[_propertyCache[idProperty]].ToObject<long>();
+                                itemproperties.Add("id", nodeId);
+                                itemproperties.Add("properties", entityProperties);
 
                                 if (typeof (Relationship).IsAssignableFrom(property.PropertyType))
                                 {
                                     var relTypeProperty = property.Name + "__Type";
                                     AssertNecesaryColumnForType(relTypeProperty, typeof(Relationship));
-                                    var relType = container[relTypeProperty].ToObject<long>();
-                                    properties.Add("type", relType);
+                                    var relType = record[_propertyCache[relTypeProperty]].ToObject<string>();
+                                    itemproperties.Add("type", relType);
                                 }
+                                var entity = HydrateWithCtr(itemproperties, property.PropertyType);
+                                items.Add(property.Name, entity);
                             }
                         else
                             {
-                                properties.Add(property.Name, restEntity.ToObject(property.PropertyType));
+                                itemproperties.Add(property.Name, restEntity.ToObject(property.PropertyType));
                             }
                         }
                         reader.Read();
-                        yield return HydrateWithCtr(properties);
+                        yield return HydrateWithCtr<TCypherResponse>(items);
                     }
                 }
             }
 
-            private TCypherResponse HydrateWithCtr(IEnumerable<KeyValuePair<string, object>> values)
+            private object HydrateWithCtr(IEnumerable<KeyValuePair<string, object>> values, Type returnType)
             {
-                var ctor = typeof (TCypherResponse).GetConstructor(Properties.Select(p => p.PropertyType).ToArray());
-                return (TCypherResponse) ctor.Invoke(values.Select(k => k.Value).ToArray());
+                var types = values.Select(k => k.Value.GetType()).ToArray();
+                var ctor = returnType.GetConstructor(BindingFlags.NonPublic | BindingFlags.Instance, null, types, null);
+                return  ctor.Invoke(values.Select(k => k.Value).ToArray());
+            }
+
+
+            private TReturn HydrateWithCtr<TReturn>(IEnumerable<KeyValuePair<string, object>> values)
+            {
+                var types = Properties.Select(p => p.PropertyType).ToArray();
+                var ctor = typeof(TReturn).GetConstructor(BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Instance, null, types, null);
+                return (TReturn)ctor.Invoke(values.Select(k => k.Value).ToArray());
             }
 
             private void AssertNecesaryColumnForType(string columnName, Type type)

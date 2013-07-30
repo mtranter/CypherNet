@@ -6,20 +6,32 @@
 
     #endregion
 
-    public interface IBeginRelationshipDefinition
+    public static class Pattern
     {
         [ParseToCypherAttribute("()")]
-        IDefineCypherRelationship Start();
+        public static IDefineCypherRelationship Start()
+        {
+            throw new ExpressionTreeOnlyUsageException();
+        }
 
         [ParseToCypherAttribute("({0})")]
-        IDefineCypherRelationship Start(
-            [ArgumentEvaluator(typeof (MemberNameArgumentEvaluator))] Node nodeReference);
+        public static IDefineCypherRelationship Start(
+            [ArgumentEvaluator(typeof(MemberNameArgumentEvaluator))] Node nodeReference)
+        {
+            throw new ExpressionTreeOnlyUsageException();
+        }
 
         [ParseToCypherAttribute("(:{0})")]
-        IDefineCypherRelationship Start(string label);
+        public static IDefineCypherRelationship Start(string label)
+        {
+            throw new ExpressionTreeOnlyUsageException();
+        }
 
         [ParseToCypherAttribute("({0}:{1})")]
-        IDefineCypherRelationship Start(
-            [ArgumentEvaluator(typeof(MemberNameArgumentEvaluator))] Node nodeReference, string label);
+        public static IDefineCypherRelationship Start(
+            [ArgumentEvaluator(typeof(MemberNameArgumentEvaluator))] Node nodeReference, string label)
+        {
+            throw new ExpressionTreeOnlyUsageException();
+        }
     }
 }

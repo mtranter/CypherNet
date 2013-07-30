@@ -18,7 +18,7 @@ namespace CypherNet.Queries
 
     internal class CypherStartClauseBuilder
     {
-        private static readonly IEnumerable<MethodInfo> AllowedMethods = typeof (IStartDefinition).GetMethods();
+        private static readonly IEnumerable<MethodInfo> AllowedMethods = typeof (Start).GetMethods(BindingFlags.Static | BindingFlags.Public);
 
         internal static string BuildStartClause(Expression exp)
         {

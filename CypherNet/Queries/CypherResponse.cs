@@ -1,4 +1,8 @@
-﻿namespace CypherNet.Queries
+﻿using System.Collections;
+using CypherNet.Serialization;
+using Newtonsoft.Json;
+
+namespace CypherNet.Queries
 {
     #region
 
@@ -14,16 +18,48 @@
 
     internal class CypherResponse<TResult> : ICypherResponse
     {
-        internal CypherResponse(IEnumerable<TResult> resultSet)
+        
+        [JsonProperty(PropertyName = "results")]
+        internal CypherResultSet<TResult> Results { get; set; }
+            
+        [JsonProperty(PropertyName = "errors")]
+        internal string[] Errors { get; private set; }
+
+        [JsonProperty(PropertyName = "transaction")]
+        internal TransactionDetails Transaction { get; private set; }
+        
+        internal class TransactionDetails
         {
-            Results = resultSet;
+            [JsonProperty(PropertyName = "expires")]
+            [JsonConverter(typeof(IsoDateConverter))]
+            public DateTime Expires { get; private set; }
         }
 
-        internal IEnumerable<TResult> Results { get; private set; }
-
+        [JsonIgnore]
         public Type ResponseType
         {
-            get { return typeof (TResult); }
+            get { return typeof(TResult); }
+        }
+    }
+
+
+    internal class CypherResultSet<TEnumerable> : IEnumerable<TEnumerable>
+    {
+        private readonly IEnumerable<TEnumerable> _results;
+
+        public CypherResultSet(IEnumerable<TEnumerable> results)
+        {
+            _results = results;
+        }
+
+        public IEnumerator<TEnumerable> GetEnumerator()
+        {
+            return _results.GetEnumerator();
+        }
+
+        IEnumerator IEnumerable.GetEnumerator()
+        {
+            return _results.GetEnumerator();
         }
     }
 }

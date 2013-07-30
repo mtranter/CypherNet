@@ -21,8 +21,8 @@
         private readonly ICypher _cypherEndpoint;
         private readonly string _cypherQuery = String.Empty;
         private readonly ICypherQueryBuilder _queryBuilder;
-        private Expression<Func<IBeginRelationshipDefinition, TIn, IDefineCypherRelationship>>[] _matchClauses;
-        private Expression<Action<IStartDefinition, TIn>> _startDef;
+        private Expression<Func<TIn, IDefineCypherRelationship>>[] _matchClauses;
+        private Expression<Action<TIn>> _startDef;
         private Expression<Func<TIn, bool>> _wherePredicate;
 
         internal FluentCypherQueryBuilder(ICypher cypherEndpoint, ICypherQueryBuilder queryBuilder)
@@ -36,14 +36,14 @@
             get { return _cypherQuery; }
         }
 
-        public ICypherQueryMatch<TIn> Start(Expression<Action<IStartDefinition, TIn>> startDef)
+        public ICypherQueryMatch<TIn> Start(Expression<Action<TIn>> startDef)
         {
             _startDef = startDef;
             return this;
         }
 
         public ICypherQueryWhere<TIn> Match(
-            params Expression<Func<IBeginRelationshipDefinition, TIn, IDefineCypherRelationship>>[] matchDefs)
+            params Expression<Func<TIn, IDefineCypherRelationship>>[] matchDefs)
         {
             _matchClauses = matchDefs;
             return this;

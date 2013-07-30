@@ -10,9 +10,9 @@
 
     internal interface ICypherQueryBuilder
     {
-        string BuildQueryString<TIn, TOut>(Expression<Action<IStartDefinition, TIn>> startClause,
+        string BuildQueryString<TIn, TOut>(Expression<Action<TIn>> startClause,
                                            Expression
-                                               <Func<IBeginRelationshipDefinition, TIn, IDefineCypherRelationship>>[]
+                                               <Func<TIn, IDefineCypherRelationship>>[]
                                                matchCaluses,
                                            Expression<Func<TIn, bool>> wherePredicate,
                                            Expression<Func<TIn, TOut>> returnClause);
@@ -20,10 +20,10 @@
 
     internal class TransactionEndpointCypherQueryBuilder : ICypherQueryBuilder
     {
-        public string BuildQueryString<TIn, TOut>(Expression<Action<IStartDefinition, TIn>> startClause,
+        public string BuildQueryString<TIn, TOut>(Expression<Action<TIn>> startClause,
                                                   Expression
                                                       <
-                                                      Func<IBeginRelationshipDefinition, TIn, IDefineCypherRelationship>
+                                                      Func<TIn, IDefineCypherRelationship>
                                                       >[] matchCaluses, Expression<Func<TIn, bool>> wherePredicate,
                                                   Expression<Func<TIn, TOut>> returnClause)
         {

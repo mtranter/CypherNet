@@ -33,7 +33,7 @@ namespace CypherNet.Queries
             {
                 return VisitMethod((MethodCallExpression) expression, currentClause);
             }
-            if (expression is ParameterExpression)
+            if (expression == null)
             {
                 return "";
             }

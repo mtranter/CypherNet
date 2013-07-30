@@ -19,7 +19,7 @@ namespace CypherNet.Serialization
         internal DefaultJsonSerializer()
         {
             _serializer = new JsonSerializer();
-            _serializer.Converters.Insert(0, new CypherResponseConverterFactoryJsonConverter());
+            _serializer.Converters.Insert(0, new CypherResultSetConverterFactoryJsonConverter());
         }
 
         #region IJsonSerializer Members
