@@ -60,6 +60,7 @@
     </Otherwise>
   </Choose>
   <ItemGroup>
+    <Compile Include="CypherWriteTests.cs" />
     <Compile Include="CypherQueryTests.cs" />
     <Compile Include="DeserializationTests.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />

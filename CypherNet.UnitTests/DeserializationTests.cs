@@ -49,6 +49,21 @@ namespace CypherNet.UnitTests
                   ""title"":""developer""
                },
                3746
+            ],[
+               {
+                  ""age"":21,
+                  ""name"":""John""
+               },
+               3747,
+               {
+
+               },
+               39491,
+               ""IS_A"",
+               {
+                  ""title"":""leg""
+               },
+               3748
             ]
          ]
       }
@@ -64,8 +79,10 @@ namespace CypherNet.UnitTests
             var deserializer = new DefaultJsonSerializer();
 
             var retval = deserializer.Deserialize<CypherResponse<DeserializationTestClass>>(json);
-
-
+            Assert.AreEqual(retval.Results.Count(),2);
+            dynamic actor = retval.Results.Select(r => r.Actor).First();
+            Assert.AreEqual(actor.age,33);
+            Assert.AreEqual(actor.name, "mark");
 
         }
     }
@@ -80,7 +97,6 @@ namespace CypherNet.UnitTests
             ActedIn = actedIn;
             Movie = movie;
         }
-
 
         public Node Actor { get; set; }
         public Relationship ActedIn { get; set; }

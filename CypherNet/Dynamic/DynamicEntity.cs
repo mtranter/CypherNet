@@ -18,10 +18,10 @@ namespace CypherNet.Dynamic
         // ReSharper disable StaticFieldInGenericType
         
         private static readonly MethodInfo SetMethodInfo = 
-            typeof(DynamicEntity<TEntity>).GetMethod("SetDictionaryEntry");
+            typeof(DynamicEntity<TEntity>).GetMethod("SetDictionaryEntry", BindingFlags.Instance | BindingFlags.NonPublic);
 
         private static readonly MethodInfo GetMethodInfo =
-            typeof(DynamicEntity<TEntity>).GetMethod("GetDictionaryEntry");
+            typeof(DynamicEntity<TEntity>).GetMethod("GetDictionaryEntry", BindingFlags.Instance | BindingFlags.NonPublic);
 
         // ReSharper restore StaticFieldInGenericType
 
