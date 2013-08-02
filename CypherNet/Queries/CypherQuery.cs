@@ -60,10 +60,36 @@
             return this;
         }
 
-        public ICypherExecute<TOut> Return<TOut>(Expression<Func<TIn, TOut>> func)
+        public ICypherOrderBy<TIn,TOut> Return<TOut>(Expression<Func<TIn, TOut>> func)
         {
             var query = _queryBuilder.BuildQueryString(_startDef, _matchClauses, _wherePredicate, func);
             return new CypherQueryExecute<TOut>(_cypherEndpoint, query);
+        }
+
+        internal class CypherQueryExecute<TOut> : ICypherOrderBy<TIn,TOut>
+        {
+            private readonly ICypher _cypherEndpoint;
+            private readonly string _query;
+
+            internal CypherQueryExecute(ICypher cypherEndpoint, string query)
+            {
+                _cypherEndpoint = cypherEndpoint;
+                _query = query;
+            }
+
+            #region ICypherExecute<TOut> Members
+
+            public IEnumerable<TOut> Execute()
+            {
+                return _cypherEndpoint.ExecuteQuery<TOut>(_query);
+            }
+
+            #endregion
+
+            public ICypherExecuteable<TIn> OrderBy(params Expression<Func<TIn, dynamic>>[] orderBy)
+            {
+                throw new NotImplementedException();
+            }
         }
     }
 }

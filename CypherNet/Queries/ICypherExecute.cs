@@ -9,13 +9,13 @@ namespace CypherNet.Queries
 
     #endregion
 
-    public interface ICypherExecute<out TResult>
+    public interface ICypherExecuteable<out TResult>
     {
         IEnumerable<TResult> Execute();
     }
 
-    public interface ICypherOrderBy<TParams>
+    public interface ICypherOrderBy<TParams, out TResult> :  ICypherExecuteable<TResult>
     {
-        IEnumerable<TParams> OrderBy(params Expression<Func<TParams>>[] orderBy);
+        ICypherExecuteable<TParams> OrderBy(params Expression<Func<TParams, dynamic>>[] orderBy);
     }
 }

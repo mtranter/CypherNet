@@ -70,6 +70,7 @@
             var results = query
                 .Start(v => Start.At(v.actor, 1))
                 .Return(v => new { v.actor})
+                .OrderBy(p => p.actedIn.Prop<int>("fgds"), p => p.actedIn.Prop<string>("name"))
                 .Execute();
                                                            
             VerifyCypher(cypher, results.FirstOrDefault(), "START actor=node(1) RETURN actor as actor");
