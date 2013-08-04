@@ -9,7 +9,7 @@ namespace CypherNet.Queries
 
     #endregion
 
-    public interface ICypherExecuteable<TIn, out TResult>
+    public interface ICypherExecuteable<out TResult>
     {
         IEnumerable<TResult> Execute();
     }
@@ -24,8 +24,8 @@ namespace CypherNet.Queries
         ICypherLimit<TParams, TResult> Skip(int skip);
     }
 
-    public interface ICypherLimit<TParams, out TResult> : ICypherExecuteable<TParams, TResult>
+    public interface ICypherLimit<TParams, out TResult> : ICypherExecuteable<TResult>
     {
-        ICypherExecuteable<TParams, TResult> Limit(int limit);
+        ICypherExecuteable<TResult> Limit(int limit);
     }
 }

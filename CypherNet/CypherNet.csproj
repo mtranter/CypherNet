@@ -37,6 +37,7 @@
     </Reference>
     <Reference Include="System" />
     <Reference Include="System.Core" />
+    <Reference Include="System.Transactions" />
     <Reference Include="System.Xml.Linq" />
     <Reference Include="System.Data.DataSetExtensions" />
     <Reference Include="Microsoft.CSharp" />
@@ -50,8 +51,12 @@
     <Compile Include="Dynamic\CachedDictionaryPropertiesProvider.cs" />
     <Compile Include="Dynamic\DynamicEntity.cs" />
     <Compile Include="Dynamic\IDynamicMetaData.cs" />
-    <Compile Include="Graph\IGraphReference.cs" />
-    <Compile Include="ICypher.cs" />
+    <Compile Include="Graph\GraphEntity.cs" />
+    <Compile Include="Graph\IGraphEntity.cs" />
+    <Compile Include="Graph\Node.cs" />
+    <Compile Include="Graph\Relationship.cs" />
+    <Compile Include="CypherQueryBegin.cs" />
+    <Compile Include="ITransactionalEndpoint.cs" />
     <Compile Include="Linq\QueryBase.cs" />
     <Compile Include="Linq\QueryProviderBase.cs" />
     <Compile Include="Linq\TypeSystem.cs" />
@@ -64,6 +69,7 @@
     <Compile Include="Queries\CypherQueryExecute.cs" />
     <Compile Include="Queries\CypherResponse.cs" />
     <Compile Include="Queries\CypherReturnsClauseBuilder.cs" />
+    <Compile Include="Queries\CypherSetClauseBuilder.cs" />
     <Compile Include="Queries\CypherStartClauseBuilder.cs" />
     <Compile Include="Queries\CypherTypeSystem.cs" />
     <Compile Include="Queries\CypherWhereClauseBuilder.cs" />
@@ -78,6 +84,7 @@
     <Compile Include="Queries\ICypherExecute.cs" />
     <Compile Include="Queries\ICypherQueryBegin.cs" />
     <Compile Include="Queries\ICypherQueryBuilder.cs" />
+    <Compile Include="Queries\ICypherQueryCreateNode.cs" />
     <Compile Include="Queries\ICypherQueryMatch.cs" />
     <Compile Include="Queries\ICypherQueryMatchOnly.cs" />
     <Compile Include="Queries\ICypherQueryReturns.cs" />
@@ -96,10 +103,12 @@
     <Compile Include="Serialization\IsoDateConverter.cs" />
     <Compile Include="Serialization\JTokenExtensions.cs" />
     <Compile Include="Serialization\RestNodeConverter.cs" />
+    <Compile Include="Transaction\ResourceManager.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="packages.config" />
   </ItemGroup>
+  <ItemGroup />
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
        Other similar extension points exist, see Microsoft.Common.targets.

@@ -13,5 +13,6 @@
         public Node movie { get; set; }
         public Relationship directedBy { get; set; }
         public Relationship actedIn { get; set; }
+
     }
 }

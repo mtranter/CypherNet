@@ -30,6 +30,21 @@
         }
 
         [TestMethod]
+        public void BuildCypherQuery_UsingSetMethod_ExecutesCorrectQuery()
+        {
+            var cypher = new Mock<ICypher>();
+            cypher.Setup(c => c.ExecuteQuery<TestCypherClause>(It.IsAny<string>())).Returns(() => null);
+            var query = new FluentCypherQueryBuilder<TestCypherClause>(cypher.Object, new TransactionEndpointCypherQueryBuilder());
+            var results = query
+                .Match(v => Pattern.Start(v.movie, "arthouse"))
+                .Set(v => v.movie.Set("genre","Probably French"))
+                .Return(v => new { v.actor, v.movie })
+                .Execute();
+
+            VerifyCypher(cypher, results.FirstOrDefault(), "MATCH (movie:arthouse) SET movie.genre = 'Probably French' RETURN actor as actor, movie as movie");
+        }
+
+        [TestMethod]
         public void BuildCypherQuery_WithStartMatchWhere_ExecutesCorrectQuery()
         {
             var cypher = new Mock<ICypher>();
@@ -39,7 +54,7 @@
             var results = query
                 .Start(v => Start.Any(v.movie))
                 .Match(v => Pattern.Start(v.movie).Incoming("STARED_IN").From(v.actor))
-                .Where(v => v.actor.Prop<string>("name") == "Bob Dinero" || v.actor.Prop<string>("role") == "Keyser Söze")
+                .Where(v => v.actor.Get<string>("name") == "Bob Dinero" || v.actor.Get<string>("role") == "Keyser Söze")
                 .Return(v => new { v.actor, v.movie })
                 .Execute();
 
@@ -69,7 +84,7 @@
             var results = query
                 .Start(v => Start.At(v.actor, 1))
                 .Return(v => new { v.actor})
-                .OrderBy(p => p.actedIn.Prop<int>("fgds"), p => p.actedIn.Prop<string>("name"))
+                .OrderBy(p => p.actedIn.Get<int>("fgds"), p => p.actedIn.Get<string>("name"))
                 .Skip(2)
                 .Limit(1)
                 .Execute();

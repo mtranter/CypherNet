@@ -22,6 +22,9 @@
         private readonly List<Expression<Func<TIn, dynamic>>> _orderByClauses =
             new List<Expression<Func<TIn, dynamic>>>();
 
+        private readonly List<Expression<Action<TIn>>> _setterClauses =
+            new List<Expression<Action<TIn>>>();
+
         internal Expression<Action<TIn>> StartClause { get; set; }
         internal IEnumerable<Expression<Func<TIn, IDefineCypherRelationship>>> MatchClauses {
             get { return _matchClauses.AsEnumerable(); }
@@ -29,6 +32,8 @@
         internal Expression<Func<TIn, bool>> WherePredicate { get; set; }
         internal Expression<Func<TIn, TOut>> ReturnClause { get; set; }
         internal IEnumerable<Expression<Func<TIn, dynamic>>> OrderByClauses { get { return _orderByClauses.AsEnumerable(); }}
+
+        internal IEnumerable<Expression<Action<TIn>>> SetterClauses { get { return _setterClauses.AsEnumerable(); } }
 
         internal int? Skip { get; set; }
         internal int? Limit { get; set; }
@@ -41,6 +46,11 @@
         internal void AddOrderByClause(Expression<Func<TIn, dynamic>> match)
         {
             _orderByClauses.Add(match);
+        }
+
+        internal void AddSetClause(Expression<Action<TIn>> match)
+        {
+            _setterClauses.Add(match);
         }
     }
 
@@ -56,11 +66,13 @@
             var start = queryDefinition.StartClause == null ? null : "START " + BuildStartClause(queryDefinition.StartClause);
             var match = queryDefinition.MatchClauses.Any() ? "MATCH " + String.Join(", ", queryDefinition.MatchClauses.Select(BuildMatchClause)) : null;
             var where = queryDefinition.WherePredicate == null ? null : "WHERE " + BuildWhereClause(queryDefinition.WherePredicate);
+            var setClause = queryDefinition.SetterClauses == null ? null : "SET " + String.Join(" SET ",queryDefinition.SetterClauses.Select(BuildSetClause));
             var orderBy = queryDefinition.OrderByClauses.Any() ? "ORDER BY " + String.Join(", ", queryDefinition.OrderByClauses.Select(BuildOrderByClause)) : null;
+            
             var @return = "RETURN " + BuildReturnClause(queryDefinition.ReturnClause);
             var skip = queryDefinition.Skip == null ? null : String.Format("SKIP {0}", queryDefinition.Skip);
             var limit = queryDefinition.Limit == null ? null : String.Format("LIMIT {0}", queryDefinition.Limit);
-            return String.Join(" ", new[] { start, match, where, @return, orderBy, skip, limit }.Where(s => s != null));
+            return String.Join(" ", new[] { start, match, where, setClause, @return, orderBy, skip, limit }.Where(s => s != null));
         }
 
         internal string BuildStartClause(Expression exp)
@@ -86,6 +98,11 @@
         internal string BuildOrderByClause(Expression exp)
         {
             return CypherOrderByClauseBuilder.BuildOrderByClause(exp);
+        }
+
+        internal string BuildSetClause(Expression exp)
+        {
+            return CypherSetClauseBuilder.BuildSetClause(exp);
         }
     }
 }

@@ -23,7 +23,7 @@ namespace CypherNet.Queries
 
     internal class ValueArgumentEvaluator : IArgumentEvaluator
     {
-        public object Evaluate(Expression argument, ParameterInfo paramInfo)
+        public virtual object Evaluate(Expression argument, ParameterInfo paramInfo)
         {
             var val = ExpressionEvaluator.PartialEval(argument) as ConstantExpression;
             return val == null ? null : val.Value;
@@ -46,6 +46,21 @@ namespace CypherNet.Queries
         public bool CanEvaluate(Expression argument, ParameterInfo parameterInfo)
         {
             return argument.NodeType == ExpressionType.MemberAccess;
+        }
+    }
+
+    internal class StringWrapperArgumentEvaluator : ValueArgumentEvaluator
+    {
+        private static readonly Type[] WrappedTypes = new[] {typeof (string), typeof (char)};
+
+        public override object Evaluate(Expression argument, ParameterInfo paramInfo)
+        {
+            var value = base.Evaluate(argument, paramInfo);
+            if (value == null)
+            {
+                return "Null";
+            }
+            return WrappedTypes.Contains(value.GetType()) ? String.Format("'{0}'", value) : value;
         }
     }
 

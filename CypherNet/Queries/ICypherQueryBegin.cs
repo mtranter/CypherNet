@@ -9,6 +9,6 @@
 
     public interface ICypherQueryBegin
     {
-        ICypherQueryStart<TVariables> Variables<TVariables>(Expression<Func<TVariables>> func);
+        ICypherQueryStart<TVariables> QueryUsing<TVariables>(Expression<Func<TVariables>> func);
     }
 }

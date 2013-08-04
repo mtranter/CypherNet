@@ -11,4 +11,5 @@
     {
         ICypherQueryMatch<TVariables> Start(Expression<Action<TVariables>> startDef);
     }
+
 }

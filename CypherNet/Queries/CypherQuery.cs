@@ -17,7 +17,7 @@
     }
 
     internal class FluentCypherQueryBuilder<TIn> : ICypherQueryStart<TIn>, ICypherQueryMatch<TIn>,
-                                                   ICypherQueryWhere<TIn>, ICypherQueryReturns<TIn>
+                                                   ICypherQueryWhere<TIn>, ICypherQueryReturns<TIn>, ICypherQuerySetable<TIn>
     {
         private readonly ICypher _cypherEndpoint;
         private readonly string _cypherQuery = String.Empty;
@@ -50,6 +50,12 @@
             return this;
         }
 
+        public ICypherQueryReturns<TIn> Set(params Expression<Action<TIn>>[] setters)
+        {
+            _setters = setters;
+            return this;
+        }
+
         public ICypherQueryReturns<TIn> Where(Expression<Func<TIn, bool>> predicate)
         {
             _wherePredicate = predicate;
@@ -73,6 +79,10 @@
             foreach (var m in _matchClauses ?? Enumerable.Empty<Expression<Func<TIn, IDefineCypherRelationship>>>())
             {
                 query.AddMatchClause(m);
+            }
+            foreach (var m in _setters ?? Enumerable.Empty<Expression<Action<TIn>>>())
+            {
+                query.AddSetClause(m);
             }
 
             return new CypherQueryExecute<TOut>(_cypherEndpoint, _queryBuilder, query);
@@ -111,7 +121,7 @@
                 return this;
             }
 
-            public ICypherExecuteable<TIn, TOut> Limit(int limit)
+            public ICypherExecuteable<TOut> Limit(int limit)
             {
                 _query.Limit = limit;
                 return this;
@@ -123,5 +133,7 @@
                 return this;
             }
         }
+
+        public Expression<Action<TIn>>[] _setters { get; set; }
     }
 }
