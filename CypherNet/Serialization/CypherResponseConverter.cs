@@ -128,22 +128,24 @@ namespace CypherNet.Serialization
                             var restEntity = record[_propertyCache[property.Name]];
                             if(typeof(IGraphEntity).IsAssignableFrom(property.PropertyType))
                             {
-                                var propertyProperty = property.Name;
-                                AssertNecesaryColumnForType(propertyProperty, typeof(IGraphEntity));
-                                var idProperty = property.Name + "__Id";
-                                AssertNecesaryColumnForType(idProperty, typeof(IGraphEntity));
-                                var entityProperties = record[_propertyCache[propertyProperty]].ToObject<Dictionary<string, object>>();
-                                var nodeId =  record[_propertyCache[idProperty]].ToObject<long>();
+
+                                var entityPropertyNames = new EntityReturnColumns(property);
+
+                                AssertNecesaryColumnForType(entityPropertyNames.IdPropertyName, typeof(IGraphEntity));
+                                var nodeId = record[_propertyCache[entityPropertyNames.IdPropertyName]].ToObject<long>();
                                 itemproperties.Add("id", nodeId);
+
+                                AssertNecesaryColumnForType(entityPropertyNames.PropertiesPropertyName, typeof(IGraphEntity));
+                                var entityProperties = record[_propertyCache[entityPropertyNames.PropertiesPropertyName]].ToObject<Dictionary<string, object>>();
                                 itemproperties.Add("properties", entityProperties);
 
-                                if (typeof (Relationship).IsAssignableFrom(property.PropertyType))
+                                if (entityPropertyNames.RequiresTypeProperty)
                                 {
-                                    var relTypeProperty = property.Name + "__Type";
-                                    AssertNecesaryColumnForType(relTypeProperty, typeof(Relationship));
-                                    var relType = record[_propertyCache[relTypeProperty]].ToObject<string>();
+                                    AssertNecesaryColumnForType(entityPropertyNames.TypePropertyName, typeof(Relationship));
+                                    var relType = record[_propertyCache[entityPropertyNames.TypePropertyName]].ToObject<string>();
                                     itemproperties.Add("type", relType);
                                 }
+
                                 var entity = HydrateWithCtr(itemproperties, property.PropertyType);
                                 items.Add(property.Name, entity);
                             }

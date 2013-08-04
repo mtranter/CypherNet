@@ -99,6 +99,8 @@
     <Compile Include="Serialization\CypherColumnNotPresentException.cs" />
     <Compile Include="Serialization\CypherResponseConverter.cs" />
     <Compile Include="Serialization\DefaultJsonSerializer.cs" />
+    <Compile Include="Serialization\DeserializationAttribute.cs" />
+    <Compile Include="Serialization\EntityReturnColumns.cs" />
     <Compile Include="Serialization\IJsonSerializer.cs" />
     <Compile Include="Serialization\IsoDateConverter.cs" />
     <Compile Include="Serialization\JTokenExtensions.cs" />

@@ -130,7 +130,6 @@
                 return _cypherEndpoint.ExecuteQuery<TOut>(cypherQuery);
             }
 
-
             void ICypherExecuteable.Execute()
             {
                 var cypherQuery = _builder.BuildQueryString(_query);

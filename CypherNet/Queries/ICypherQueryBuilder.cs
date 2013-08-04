@@ -66,7 +66,7 @@
             var start = queryDefinition.StartClause == null ? null : "START " + BuildStartClause(queryDefinition.StartClause);
             var match = queryDefinition.MatchClauses.Any() ? "MATCH " + String.Join(", ", queryDefinition.MatchClauses.Select(BuildMatchClause)) : null;
             var where = queryDefinition.WherePredicate == null ? null : "WHERE " + BuildWhereClause(queryDefinition.WherePredicate);
-            var setClause = queryDefinition.SetterClauses == null ? null : "SET " + String.Join(" SET ",queryDefinition.SetterClauses.Select(BuildSetClause));
+            var setClause = queryDefinition.SetterClauses.Any() ? "SET " + String.Join(" SET ",queryDefinition.SetterClauses.Select(BuildSetClause)) : null;
             var orderBy = queryDefinition.OrderByClauses.Any() ? "ORDER BY " + String.Join(", ", queryDefinition.OrderByClauses.Select(BuildOrderByClause)) : null;
             
             var @return = "RETURN " + BuildReturnClause(queryDefinition.ReturnClause);

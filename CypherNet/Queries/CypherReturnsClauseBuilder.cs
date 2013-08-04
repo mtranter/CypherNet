@@ -7,6 +7,7 @@
     using System.Linq.Expressions;
     using System.Reflection;
     using Graph;
+    using Serialization;
 
     #endregion
 
@@ -39,7 +40,15 @@
             // new { prop = param.EntityRef }
             if (member != null)
             {
-                return String.Format("{0} as {1}", member.Member.Name, memberInfo.Name);
+                var entityName = member.Member.Name;
+                var entityPropertyNames = new EntityReturnColumns((PropertyInfo)member.Member);
+        
+                var retval = String.Format("{0} as {1}, id({0}) as {2}", entityName, entityPropertyNames.PropertiesPropertyName, entityPropertyNames.IdPropertyName);
+                if (entityPropertyNames.RequiresTypeProperty)
+                {
+                    retval += String.Format(", type({0}) as {1}", entityName, entityPropertyNames.TypePropertyName);
+                }
+                return retval;
             }
 
             var method = node as MethodCallExpression;
@@ -53,7 +62,8 @@
                     {
                         var entityName = methodMember.Member.Name;
                         var args = MethodExpressionArgumentEvaluator.EvaluateArguments(method);
-                        return String.Format("{0}.{1}? as {2}", entityName, args[0], memberInfo.Name);
+                        var retval = String.Format("{0}.{1}? as {2}", entityName, args[0], memberInfo.Name);
+                        return retval;
                     }
                 }
 

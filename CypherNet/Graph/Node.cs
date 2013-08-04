@@ -1,6 +1,8 @@
 ﻿namespace CypherNet.Graph
 {
+    using System;
     using System.Collections.Generic;
+    using Serialization;
 
     public class Node : GraphEntity<Node>
     {
@@ -9,9 +11,11 @@
         {
         }
 
+        [DeserializeUsing]
         internal Node(long id, IDictionary<string, object> properties)
             : base(id, properties)
         {
         }
     }
+
 }
