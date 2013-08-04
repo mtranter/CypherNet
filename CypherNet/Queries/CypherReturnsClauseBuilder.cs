@@ -19,7 +19,6 @@
             {
                 throw new InvalidCypherReturnsExpressionException();
             }
-            expression = ExpressionEvaluator.PartialEval(expression);
             var body = lambda.Body;
             var newVal = body as NewExpression;
 
@@ -28,6 +27,8 @@
 
         private static string ParseExpressionToTerm(Expression node, MemberInfo memberInfo)
         {
+
+            node = ExpressionEvaluator.PartialEval(node);
             var constantExp = node as ConstantExpression;
             if (constantExp != null)
             {

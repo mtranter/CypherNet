@@ -9,13 +9,23 @@ namespace CypherNet.Queries
 
     #endregion
 
-    public interface ICypherExecuteable<out TResult>
+    public interface ICypherExecuteable<TIn, out TResult>
     {
         IEnumerable<TResult> Execute();
     }
 
-    public interface ICypherOrderBy<TParams, out TResult> :  ICypherExecuteable<TResult>
+    public interface ICypherOrderBy<TParams, out TResult> :  ICypherSkip<TParams, TResult>
     {
-        ICypherExecuteable<TParams> OrderBy(params Expression<Func<TParams, dynamic>>[] orderBy);
+        ICypherSkip<TParams, TResult> OrderBy(params Expression<Func<TParams, dynamic>>[] orderBy);
+    }
+
+    public interface ICypherSkip<TParams, out TResult> : ICypherLimit<TParams, TResult>
+    {
+        ICypherLimit<TParams, TResult> Skip(int skip);
+    }
+
+    public interface ICypherLimit<TParams, out TResult> : ICypherExecuteable<TParams, TResult>
+    {
+        ICypherExecuteable<TParams, TResult> Limit(int limit);
     }
 }

@@ -13,7 +13,6 @@
     [TestClass]
     public class CypherQueryIntegrationTests
     {
-        
 
         [TestMethod]
         public void BuildCypherQuery_WithStartAndMatch_ExecutesCorrectQuery()
@@ -71,9 +70,11 @@
                 .Start(v => Start.At(v.actor, 1))
                 .Return(v => new { v.actor})
                 .OrderBy(p => p.actedIn.Prop<int>("fgds"), p => p.actedIn.Prop<string>("name"))
+                .Skip(2)
+                .Limit(1)
                 .Execute();
-                                                           
-            VerifyCypher(cypher, results.FirstOrDefault(), "START actor=node(1) RETURN actor as actor");
+            
+            VerifyCypher(cypher, results.FirstOrDefault(), "START actor=node(1) RETURN actor as actor ORDER BY actedIn.fgds, actedIn.name SKIP 2 LIMIT 1");
         }
 
         void VerifyCypher<TResult>(Mock<ICypher> mock, TResult proto, string query)

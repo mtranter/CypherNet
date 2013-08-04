@@ -4,6 +4,7 @@
 
     using System;
     using System.Collections.Generic;
+    using System.Linq;
     using System.Linq.Expressions;
     using System.Reflection;
     using Graph;
@@ -62,18 +63,31 @@
 
         public ICypherOrderBy<TIn,TOut> Return<TOut>(Expression<Func<TIn, TOut>> func)
         {
-            var query = _queryBuilder.BuildQueryString(_startDef, _matchClauses, _wherePredicate, func);
-            return new CypherQueryExecute<TOut>(_cypherEndpoint, query);
+
+            var query = new CypherQueryDefinition<TIn, TOut>()
+                            {
+                                StartClause = _startDef,
+                                WherePredicate = _wherePredicate,
+                                ReturnClause = func
+                            };
+            foreach (var m in _matchClauses ?? Enumerable.Empty<Expression<Func<TIn, IDefineCypherRelationship>>>())
+            {
+                query.AddMatchClause(m);
+            }
+
+            return new CypherQueryExecute<TOut>(_cypherEndpoint, _queryBuilder, query);
         }
 
         internal class CypherQueryExecute<TOut> : ICypherOrderBy<TIn,TOut>
         {
             private readonly ICypher _cypherEndpoint;
-            private readonly string _query;
-
-            internal CypherQueryExecute(ICypher cypherEndpoint, string query)
+            private readonly ICypherQueryBuilder _builder;
+            private readonly CypherQueryDefinition<TIn, TOut> _query;
+            
+            internal CypherQueryExecute(ICypher cypherEndpoint, ICypherQueryBuilder builder, CypherQueryDefinition<TIn,TOut> query)
             {
                 _cypherEndpoint = cypherEndpoint;
+                _builder = builder;
                 _query = query;
             }
 
@@ -81,14 +95,32 @@
 
             public IEnumerable<TOut> Execute()
             {
-                return _cypherEndpoint.ExecuteQuery<TOut>(_query);
+                var cypherQuery = _builder.BuildQueryString(_query);
+                return _cypherEndpoint.ExecuteQuery<TOut>(cypherQuery);
             }
 
             #endregion
 
-            public ICypherExecuteable<TIn> OrderBy(params Expression<Func<TIn, dynamic>>[] orderBy)
+            public ICypherSkip<TIn, TOut> OrderBy(params Expression<Func<TIn, dynamic>>[] orderBy)
             {
-                throw new NotImplementedException();
+                foreach (var clause in orderBy)
+                {
+                    _query.AddOrderByClause(clause);
+                }
+
+                return this;
+            }
+
+            public ICypherExecuteable<TIn, TOut> Limit(int limit)
+            {
+                _query.Limit = limit;
+                return this;
+            }
+
+            public ICypherLimit<TIn, TOut> Skip(int skip)
+            {
+                _query.Skip = skip;
+                return this;
             }
         }
     }

@@ -59,6 +59,7 @@
     <Compile Include="Queries\CypherFunctions.cs" />
     <Compile Include="Queries\CypherGraphEntityNameAttribute.cs" />
     <Compile Include="Queries\CypherMatchClauseBuilder.cs" />
+    <Compile Include="Queries\CypherOrderByQueryBuilder.cs" />
     <Compile Include="Queries\CypherQuery.cs" />
     <Compile Include="Queries\CypherQueryExecute.cs" />
     <Compile Include="Queries\CypherResponse.cs" />
