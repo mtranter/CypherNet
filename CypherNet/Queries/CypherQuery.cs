@@ -25,6 +25,7 @@
         private Expression<Func<TIn, IDefineCypherRelationship>>[] _matchClauses;
         private Expression<Action<TIn>> _startDef;
         private Expression<Func<TIn, bool>> _wherePredicate;
+        private Expression<Action<TIn>>[] _setters;
 
         internal FluentCypherQueryBuilder(ICypher cypherEndpoint, ICypherQueryBuilder queryBuilder)
         {
@@ -50,7 +51,7 @@
             return this;
         }
 
-        public ICypherQueryReturns<TIn> Set(params Expression<Action<TIn>>[] setters)
+        public ICypherQueryReturns<TIn> Update(params Expression<Action<TIn>>[] setters)
         {
             _setters = setters;
             return this;
@@ -101,16 +102,6 @@
                 _query = query;
             }
 
-            #region ICypherExecute<TOut> Members
-
-            public IEnumerable<TOut> Execute()
-            {
-                var cypherQuery = _builder.BuildQueryString(_query);
-                return _cypherEndpoint.ExecuteQuery<TOut>(cypherQuery);
-            }
-
-            #endregion
-
             public ICypherSkip<TIn, TOut> OrderBy(params Expression<Func<TIn, dynamic>>[] orderBy)
             {
                 foreach (var clause in orderBy)
@@ -121,7 +112,7 @@
                 return this;
             }
 
-            public ICypherExecuteable<TOut> Limit(int limit)
+            public ICypherFetchable<TOut> Limit(int limit)
             {
                 _query.Limit = limit;
                 return this;
@@ -132,8 +123,21 @@
                 _query.Skip = skip;
                 return this;
             }
+
+            public IEnumerable<TOut> Fetch()
+            {
+                var cypherQuery = _builder.BuildQueryString(_query);
+                return _cypherEndpoint.ExecuteQuery<TOut>(cypherQuery);
+            }
+
+
+            void ICypherExecuteable.Execute()
+            {
+                var cypherQuery = _builder.BuildQueryString(_query);
+                _cypherEndpoint.ExecuteCommand(cypherQuery);
+            }
+
         }
 
-        public Expression<Action<TIn>>[] _setters { get; set; }
     }
 }

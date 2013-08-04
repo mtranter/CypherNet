@@ -24,7 +24,7 @@
                 .Start(v => Start.At(v.movie, 1))
                 .Match(v => Pattern.Start(v.movie).Incoming("STARED_IN", 1, 5).From(v.actor))
                 .Return(v => new {v.actor, v.movie})
-                .Execute();
+                .Fetch();
             
             VerifyCypher(cypher, results.FirstOrDefault(), "START movie=node(1) MATCH (movie)<-[:STARED_IN*1..5]-(actor) RETURN actor as actor, movie as movie");
         }
@@ -37,11 +37,11 @@
             var query = new FluentCypherQueryBuilder<TestCypherClause>(cypher.Object, new TransactionEndpointCypherQueryBuilder());
             var results = query
                 .Match(v => Pattern.Start(v.movie, "arthouse"))
-                .Set(v => v.movie.Set("genre","Probably French"))
+                .Update(v => v.movie.Set("requiresSubtitles", "yes"))
                 .Return(v => new { v.actor, v.movie })
-                .Execute();
+                .Fetch();
 
-            VerifyCypher(cypher, results.FirstOrDefault(), "MATCH (movie:arthouse) SET movie.genre = 'Probably French' RETURN actor as actor, movie as movie");
+            VerifyCypher(cypher, results.FirstOrDefault(), "MATCH (movie:arthouse) SET movie.requiresSubtitles = 'yes'yesTURN actor as actor, movie as movie");
         }
 
         [TestMethod]
@@ -56,7 +56,7 @@
                 .Match(v => Pattern.Start(v.movie).Incoming("STARED_IN").From(v.actor))
                 .Where(v => v.actor.Get<string>("name") == "Bob Dinero" || v.actor.Get<string>("role") == "Keyser Söze")
                 .Return(v => new { v.actor, v.movie })
-                .Execute();
+                .Fetch();
 
             VerifyCypher(cypher, results.FirstOrDefault(), "START movie=node(*) MATCH (movie)<-[:STARED_IN]-(actor) WHERE ((actor.name = 'Bob Dinero') OR (actor.role = 'Keyser Söze')) RETURN actor as actor, movie as movie");
         }
@@ -70,7 +70,7 @@
             var results = query
                 .Match(v => Pattern.Start(v.actor, "METHOD_ACTOR").Outgoing("STARED_IN").To().Outgoing(v.directedBy, "DIRECTED_BY").To(v.director))
                 .Return(v => new { v.actor, v.director })
-                .Execute();
+                .Fetch();
 
             VerifyCypher(cypher, results.FirstOrDefault(), "MATCH (actor:METHOD_ACTOR)-[:STARED_IN]->()-[directedBy:DIRECTED_BY]->(director) RETURN actor as actor, director as director");
         }
@@ -87,7 +87,7 @@
                 .OrderBy(p => p.actedIn.Get<int>("fgds"), p => p.actedIn.Get<string>("name"))
                 .Skip(2)
                 .Limit(1)
-                .Execute();
+                .Fetch();
             
             VerifyCypher(cypher, results.FirstOrDefault(), "START actor=node(1) RETURN actor as actor ORDER BY actedIn.fgds, actedIn.name SKIP 2 LIMIT 1");
         }

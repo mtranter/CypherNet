@@ -9,9 +9,14 @@ namespace CypherNet.Queries
 
     #endregion
 
-    public interface ICypherExecuteable<out TResult>
+    public interface ICypherFetchable<out TResult> : ICypherExecuteable
     {
-        IEnumerable<TResult> Execute();
+        IEnumerable<TResult> Fetch();
+    }
+
+    public interface ICypherExecuteable
+    {
+        void Execute();
     }
 
     public interface ICypherOrderBy<TParams, out TResult> :  ICypherSkip<TParams, TResult>
@@ -24,8 +29,8 @@ namespace CypherNet.Queries
         ICypherLimit<TParams, TResult> Skip(int skip);
     }
 
-    public interface ICypherLimit<TParams, out TResult> : ICypherExecuteable<TResult>
+    public interface ICypherLimit<TParams, out TResult> : ICypherFetchable<TResult>
     {
-        ICypherExecuteable<TResult> Limit(int limit);
+        ICypherFetchable<TResult> Limit(int limit);
     }
 }

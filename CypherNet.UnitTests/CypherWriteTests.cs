@@ -24,7 +24,7 @@
                 .Start(v => Start.At(v.movie, 1))
                 .Match(v => Pattern.Start(v.movie).Incoming("STARED_IN", 1, 5).From(v.actor))
                 .Return(v => new {v.actor, v.movie})
-                .Execute();
+                .Fetch();
             
             VerifyCypher(cypher, results.FirstOrDefault(), "START movie=node(1) MATCH (movie)<-[:STARED_IN*1..5]-(actor) RETURN actor as actor, movie as movie");
         }

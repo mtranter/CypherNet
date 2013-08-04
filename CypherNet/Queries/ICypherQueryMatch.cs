@@ -9,6 +9,6 @@
 
     public interface ICypherQuerySetable<TVariables>
     {
-        ICypherQueryReturns<TVariables> Set(params Expression<Action<TVariables>>[] setters);
+        ICypherQueryReturns<TVariables> Update(params Expression<Action<TVariables>>[] setters);
     }
 }

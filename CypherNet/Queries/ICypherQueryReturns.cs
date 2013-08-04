@@ -12,8 +12,13 @@
         ICypherOrderBy<TVariables,TOut> Return<TOut>(Expression<Func<TVariables, TOut>> func);
     }
 
+    public interface ICypherQueryDelete<TVariables>
+    {
+        ICypherFetchable<TOut> Delete<TOut>(Expression<Func<TVariables, TOut>> func);
+    }
+
     public interface ICypherQueryReturnOnly<TVariables>
     {
-        ICypherExecuteable<TVariables> Return(Expression<Func<TVariables, TVariables>> func);
+        ICypherFetchable<TVariables> Return(Expression<Func<TVariables, TVariables>> func);
     }
 }
