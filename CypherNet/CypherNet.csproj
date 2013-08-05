@@ -79,6 +79,7 @@
     <Compile Include="Queries\FindsGraphEntityMethodAttribute.cs" />
     <Compile Include="Queries\GraphEntityExtensions.cs" />
     <Compile Include="Queries\IBeginRelationshipDefinition.cs" />
+    <Compile Include="Queries\ICreateCypherRelationship.cs" />
     <Compile Include="Queries\ICypher.cs" />
     <Compile Include="Queries\ICypherEntityReference.cs" />
     <Compile Include="Queries\ICypherExecute.cs" />

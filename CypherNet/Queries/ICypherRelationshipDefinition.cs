@@ -34,8 +34,7 @@
         [ParseToCypherAttribute("({0})")]
         IDefineCypherRelationship From(
             [ArgumentEvaluator(typeof(MemberNameArgumentEvaluator))] Node nodeReference);
-
-
+        
         [ParseToCypherAttribute("(:{0})")]
         IDefineCypherRelationship From(string label);
 

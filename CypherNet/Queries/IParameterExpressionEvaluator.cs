@@ -4,6 +4,9 @@
 
 #endregion
 
+using System.Text;
+using CypherNet.Dynamic;
+
 namespace CypherNet.Queries
 {
     #region
@@ -60,7 +63,35 @@ namespace CypherNet.Queries
             {
                 return "Null";
             }
+            return WrapValue(value);
+        }
+
+        internal static object WrapValue(object value)
+        {
             return WrappedTypes.Contains(value.GetType()) ? String.Format("'{0}'", value) : value;
+        }
+    }
+
+    internal class JsonArgumentEvaluator : ValueArgumentEvaluator
+    {
+        private static readonly Type[] WrappedTypes = new[] { typeof(string), typeof(char) };
+
+        public override object Evaluate(Expression argument, ParameterInfo paramInfo)
+        {
+            var value = base.Evaluate(argument, paramInfo);
+            if (value == null)
+            {
+                return "";
+            }
+            var dict = CachedDictionaryPropertiesProvider.LoadProperties(value);
+            var json = new StringBuilder("{");
+            foreach (var kvp in dict)
+            {
+                json.AppendFormat("{0}: {1}, ", kvp.Key, StringWrapperArgumentEvaluator.WrapValue(value));
+            }
+            json.Remove(0, json.Length - 2);
+            json.Append("}");
+            return json.ToString();
         }
     }
 

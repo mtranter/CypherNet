@@ -11,4 +11,9 @@
     {
         ICypherQueryReturns<TVariables> Update(params Expression<Action<TVariables>>[] setters);
     }
+
+    public interface ICypherQueryCreate<TVariables>
+    {
+        ICypherQueryWhere<TVariables> Match(Expression<Func<TVariables, ICreateCypherRelationship>> matchDef);
+    }
 }
