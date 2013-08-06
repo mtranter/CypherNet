@@ -11,7 +11,7 @@
     #endregion
 
     [TestClass]
-    public class CypherQueryIntegrationTests
+    public class CypherQueryTests
     {
 
         [TestMethod]
