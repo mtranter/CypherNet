@@ -8,7 +8,7 @@
     #endregion
 
     [CypherGraphEntityName("rels")]
-    public interface IDefineCypherToNode : IBeginRelationshipDefinition
+    public interface IDefineCypherToNode
     {
         [ParseToCypherAttribute("()")]
         IDefineCypherRelationship To();
@@ -26,7 +26,7 @@
     }
 
     [CypherGraphEntityName("rels")]
-    public interface IDefineCypherFromNode : IBeginRelationshipDefinition
+    public interface IDefineCypherFromNode
     {
         [ParseToCypherAttribute("()")]
         IDefineCypherRelationship From();
@@ -44,7 +44,7 @@
     }
 
     [CypherGraphEntityName("rels")]
-    public interface IDefineCypherWithNode : IBeginRelationshipDefinition
+    public interface IDefineCypherWithNode
     {
         [ParseToCypherAttribute("()")]
         IDefineCypherRelationship With();

@@ -26,14 +26,18 @@
             new List<Expression<Action<TIn>>>();
 
         internal Expression<Action<TIn>> StartClause { get; set; }
-        internal IEnumerable<Expression<Func<TIn, IDefineCypherRelationship>>> MatchClauses {
-            get { return _matchClauses.AsEnumerable(); }
-        }
+
         internal Expression<Func<TIn, bool>> WherePredicate { get; set; }
+
         internal Expression<Func<TIn, TOut>> ReturnClause { get; set; }
-        internal IEnumerable<Expression<Func<TIn, dynamic>>> OrderByClauses { get { return _orderByClauses.AsEnumerable(); }}
+
+        internal Expression<Func<TIn, ICreateCypherRelationship>> CreateRelationpClause { get; set; }
+
+        internal IEnumerable<Expression<Func<TIn, dynamic>>> OrderByClauses { get { return _orderByClauses.AsEnumerable(); } }
 
         internal IEnumerable<Expression<Action<TIn>>> SetterClauses { get { return _setterClauses.AsEnumerable(); } }
+
+        internal IEnumerable<Expression<Func<TIn, IDefineCypherRelationship>>> MatchClauses { get { return _matchClauses.AsEnumerable(); } }
 
         internal int? Skip { get; set; }
         internal int? Limit { get; set; }
@@ -65,6 +69,7 @@
 
             var start = queryDefinition.StartClause == null ? null : "START " + BuildStartClause(queryDefinition.StartClause);
             var match = queryDefinition.MatchClauses.Any() ? "MATCH " + String.Join(", ", queryDefinition.MatchClauses.Select(BuildMatchClause)) : null;
+            var createRel = queryDefinition.CreateRelationpClause == null ? null : "CREATE " + BuildCreateRelationshipClause(queryDefinition.CreateRelationpClause);
             var where = queryDefinition.WherePredicate == null ? null : "WHERE " + BuildWhereClause(queryDefinition.WherePredicate);
             var setClause = queryDefinition.SetterClauses.Any() ? "SET " + String.Join(" SET ",queryDefinition.SetterClauses.Select(BuildSetClause)) : null;
             var orderBy = queryDefinition.OrderByClauses.Any() ? "ORDER BY " + String.Join(", ", queryDefinition.OrderByClauses.Select(BuildOrderByClause)) : null;
@@ -72,12 +77,17 @@
             var @return = "RETURN " + BuildReturnClause(queryDefinition.ReturnClause);
             var skip = queryDefinition.Skip == null ? null : String.Format("SKIP {0}", queryDefinition.Skip);
             var limit = queryDefinition.Limit == null ? null : String.Format("LIMIT {0}", queryDefinition.Limit);
-            return String.Join(" ", new[] { start, match, where, setClause, @return, orderBy, skip, limit }.Where(s => s != null));
+            return String.Join(" ", new[] { start, createRel, match, where, setClause, @return, orderBy, skip, limit }.Where(s => s != null));
         }
 
         internal string BuildStartClause(Expression exp)
         {
             return CypherStartClauseBuilder.BuildStartClause(exp);
+        }
+
+        internal string BuildCreateRelationshipClause(Expression exp)
+        {
+            return CypherCreateRelationshipClauseBuilder.BuildCreateClause(exp);
         }
 
         internal string BuildMatchClause(Expression exp)

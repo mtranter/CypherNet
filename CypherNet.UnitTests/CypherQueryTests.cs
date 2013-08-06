@@ -45,6 +45,21 @@
         }
 
         [TestMethod]
+        public void BuildCypherQuery_CreateRelationship_ExecutesCorrectQuery()
+        {
+            var cypher = new Mock<ICypher>();
+            cypher.Setup(c => c.ExecuteQuery<TestCypherClause>(It.IsAny<string>())).Returns(() => null);
+            var query = new FluentCypherQueryBuilder<TestCypherClause>(cypher.Object, new TransactionEndpointCypherQueryBuilder());
+            var results = query
+                .Start(v => Start.At(v.actor,1).At(v.movie,2))
+                .Create(v => Create.Relationship(v.actor, v.actedIn, "ACTED_IN", v.movie))
+                .Return(v => new { v.actedIn })
+                .Fetch();
+                                                            
+            VerifyCypher(cypher, results.FirstOrDefault(), "START actor=node(1), movie=node(2) CREATE (actor)-[actedIn:ACTED_IN]->(movie) RETURN actedIn as actedIn, id(actedIn) as actedIn__Id, type(actedIn) as actedIn__Type");
+        }
+
+        [TestMethod]
         public void BuildCypherQuery_WithStartMatchWhere_ExecutesCorrectQuery()
         {
             var cypher = new Mock<ICypher>();

@@ -50,6 +50,7 @@ namespace CypherNet.Queries
         }
     }
 
+
     public class InvalidCypherMatchExpressionException : Exception
     {
     }

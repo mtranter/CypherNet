@@ -61,6 +61,7 @@
     <Compile Include="Linq\QueryProviderBase.cs" />
     <Compile Include="Linq\TypeSystem.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="Queries\CypherCreateRelationshipClauseBuilder.cs" />
     <Compile Include="Queries\CypherFunctions.cs" />
     <Compile Include="Queries\CypherGraphEntityNameAttribute.cs" />
     <Compile Include="Queries\CypherMatchClauseBuilder.cs" />

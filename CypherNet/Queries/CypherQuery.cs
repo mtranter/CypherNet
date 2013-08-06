@@ -17,7 +17,8 @@
     }
 
     internal class FluentCypherQueryBuilder<TIn> : ICypherQueryStart<TIn>, ICypherQueryMatch<TIn>,
-                                                   ICypherQueryWhere<TIn>, ICypherQueryReturns<TIn>, ICypherQuerySetable<TIn>
+                                                   ICypherQueryWhere<TIn>, ICypherQueryReturns<TIn>,
+                                                   ICypherQuerySetable<TIn>, ICypherQueryCreate<TIn>
     {
         private readonly ICypher _cypherEndpoint;
         private readonly string _cypherQuery = String.Empty;
@@ -26,6 +27,7 @@
         private Expression<Action<TIn>> _startDef;
         private Expression<Func<TIn, bool>> _wherePredicate;
         private Expression<Action<TIn>>[] _setters;
+        private Expression<Func<TIn, ICreateCypherRelationship>> _createClause;
 
         internal FluentCypherQueryBuilder(ICypher cypherEndpoint, ICypherQueryBuilder queryBuilder)
         {
@@ -48,6 +50,12 @@
             params Expression<Func<TIn, IDefineCypherRelationship>>[] matchDefs)
         {
             _matchClauses = matchDefs;
+            return this;
+        }
+
+        public ICypherQueryReturns<TIn> Create(Expression<Func<TIn, ICreateCypherRelationship>> createClause)
+        {
+            _createClause = createClause;
             return this;
         }
 
@@ -75,7 +83,8 @@
                             {
                                 StartClause = _startDef,
                                 WherePredicate = _wherePredicate,
-                                ReturnClause = func
+                                ReturnClause = func,
+                                CreateRelationpClause = _createClause
                             };
             foreach (var m in _matchClauses ?? Enumerable.Empty<Expression<Func<TIn, IDefineCypherRelationship>>>())
             {
@@ -137,6 +146,5 @@
             }
 
         }
-
     }
 }
