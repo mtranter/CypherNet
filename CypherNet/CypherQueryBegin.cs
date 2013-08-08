@@ -20,6 +20,11 @@
             return new FluentCypherQueryBuilder<TVariables>(_cypher, new TransactionEndpointCypherQueryBuilder());
         }
 
+        public ICypherQueryStart<TVariables> QueryUsing<TVariables>()
+        {
+            throw new NotImplementedException();
+        }
+
         #endregion
     }
 }

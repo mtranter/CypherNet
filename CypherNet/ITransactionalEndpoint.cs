@@ -6,9 +6,10 @@ namespace CypherNet
     using Queries;
     using Transaction;
 
-    interface ITransactionalEndpoint
+    interface ITransactionalEndpoint : ICypherUnitOfWork
     {
-        ICypherQueryStart<TVariables> QueryUsing<TVariables>(System.Linq.Expressions.Expression<Func<TVariables>> func);
+        ICypherQueryStart<TVariables> BeginQuery<TVariables>();
+        ICypherQueryStart<TVariables> BeginQuery<TVariables>(System.Linq.Expressions.Expression<Func<TVariables>> variablePrototype);
         ICypherQueryReturnOnly<Node> CreateNode(object properties);
         ICypherQueryReturnOnly<Node> CreateNode(object properties, string label);
     }
