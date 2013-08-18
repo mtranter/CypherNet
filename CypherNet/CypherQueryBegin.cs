@@ -17,7 +17,7 @@
 
         public ICypherQueryStart<TVariables> QueryUsing<TVariables>(System.Linq.Expressions.Expression<Func<TVariables>> func)
         {
-            return new FluentCypherQueryBuilder<TVariables>(_cypher, new TransactionEndpointCypherQueryBuilder());
+            return new FluentCypherQueryBuilder<TVariables>(_cypher, new CypherQueryBuilder());
         }
 
         #endregion

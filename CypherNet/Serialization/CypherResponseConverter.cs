@@ -109,7 +109,6 @@ namespace CypherNet.Serialization
                             }
                         }
                     }
-
                 }
             }
 

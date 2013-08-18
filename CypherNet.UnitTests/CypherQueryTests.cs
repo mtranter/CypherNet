@@ -19,7 +19,7 @@
         {
             var cypher = new Mock<ICypher>();
             cypher.Setup(c => c.ExecuteQuery<TestCypherClause>(It.IsAny<string>())).Returns(() => null);
-            var query = new FluentCypherQueryBuilder<TestCypherClause>(cypher.Object, new TransactionEndpointCypherQueryBuilder());
+            var query = new FluentCypherQueryBuilder<TestCypherClause>(cypher.Object, new CypherQueryBuilder());
             var results = query
                 .Start(v => Start.At(v.movie, 1))
                 .Match(v => Pattern.Start(v.movie).Incoming("STARED_IN", 1, 5).From(v.actor))
@@ -34,7 +34,7 @@
         {
             var cypher = new Mock<ICypher>();
             cypher.Setup(c => c.ExecuteQuery<TestCypherClause>(It.IsAny<string>())).Returns(() => null);
-            var query = new FluentCypherQueryBuilder<TestCypherClause>(cypher.Object, new TransactionEndpointCypherQueryBuilder());
+            var query = new FluentCypherQueryBuilder<TestCypherClause>(cypher.Object, new CypherQueryBuilder());
             var results = query
                 .Match(v => Pattern.Start(v.movie, "arthouse"))
                 .Update(v => v.movie.Set("requiresSubtitles", "yes"))
@@ -49,7 +49,7 @@
         {
             var cypher = new Mock<ICypher>();
             cypher.Setup(c => c.ExecuteQuery<TestCypherClause>(It.IsAny<string>())).Returns(() => null);
-            var query = new FluentCypherQueryBuilder<TestCypherClause>(cypher.Object, new TransactionEndpointCypherQueryBuilder());
+            var query = new FluentCypherQueryBuilder<TestCypherClause>(cypher.Object, new CypherQueryBuilder());
             
             var results = query
                 .Start(v => Start.Any(v.movie))
@@ -66,7 +66,7 @@
         {
             var cypher = new Mock<ICypher>();
             cypher.Setup(c => c.ExecuteQuery<TestCypherClause>(It.IsAny<string>())).Returns(() => null);
-            var query = new FluentCypherQueryBuilder<TestCypherClause>(cypher.Object, new TransactionEndpointCypherQueryBuilder());
+            var query = new FluentCypherQueryBuilder<TestCypherClause>(cypher.Object, new CypherQueryBuilder());
             var results = query
                 .Match(v => Pattern.Start(v.actor, "METHOD_ACTOR").Outgoing("STARED_IN").To().Outgoing(v.directedBy, "DIRECTED_BY").To(v.director))
                 .Return(v => new { v.actor, v.director })
@@ -80,7 +80,7 @@
         {
             var cypher = new Mock<ICypher>();
             cypher.Setup(c => c.ExecuteQuery<TestCypherClause>(It.IsAny<string>())).Returns(() => null);
-            var query = new FluentCypherQueryBuilder<TestCypherClause>(cypher.Object, new TransactionEndpointCypherQueryBuilder());
+            var query = new FluentCypherQueryBuilder<TestCypherClause>(cypher.Object, new CypherQueryBuilder());
             var results = query
                 .Start(v => Start.At(v.actor, 1))
                 .Return(v => new { v.actor})
