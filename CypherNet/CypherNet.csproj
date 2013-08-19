@@ -37,6 +37,8 @@
     </Reference>
     <Reference Include="System" />
     <Reference Include="System.Core" />
+    <Reference Include="System.Net.Http" />
+    <Reference Include="System.Net.Http.WebRequest" />
     <Reference Include="System.Transactions" />
     <Reference Include="System.Xml.Linq" />
     <Reference Include="System.Data.DataSetExtensions" />
@@ -66,7 +68,6 @@
     <Compile Include="Queries\CypherMatchClauseBuilder.cs" />
     <Compile Include="Queries\CypherOrderByQueryBuilder.cs" />
     <Compile Include="Queries\CypherQuery.cs" />
-    <Compile Include="Queries\CypherQueryExecute.cs" />
     <Compile Include="Queries\CypherResponse.cs" />
     <Compile Include="Queries\CypherReturnsClauseBuilder.cs" />
     <Compile Include="Queries\CypherSetClauseBuilder.cs" />

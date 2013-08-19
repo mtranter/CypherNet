@@ -18,6 +18,4 @@ namespace CypherNet
         ICypherQueryReturnOnly<Node> CreateNode(object properties);
         ICypherQueryReturnOnly<Node> CreateNode(object properties, string label);
     }
-
-    
 }
