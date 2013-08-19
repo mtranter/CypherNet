@@ -55,7 +55,6 @@
     <Compile Include="Graph\IGraphEntity.cs" />
     <Compile Include="Graph\Node.cs" />
     <Compile Include="Graph\Relationship.cs" />
-    <Compile Include="CypherQueryBegin.cs" />
     <Compile Include="ITransactionalEndpoint.cs" />
     <Compile Include="Linq\QueryBase.cs" />
     <Compile Include="Linq\QueryProviderBase.cs" />
@@ -107,7 +106,8 @@
     <Compile Include="Serialization\IsoDateConverter.cs" />
     <Compile Include="Serialization\JTokenExtensions.cs" />
     <Compile Include="Serialization\RestNodeConverter.cs" />
-    <Compile Include="Transaction\ResourceManager.cs" />
+    <Compile Include="Transaction\CypherEndpointFactory.cs" />
+    <Compile Include="Transaction\ICypherUnitOfWork.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="packages.config" />

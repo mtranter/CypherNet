@@ -20,7 +20,7 @@ namespace CypherNet.UnitTests
             var uow = new Mock<ICypherUnitOfWork>();
             using (var rm = new CypherEndpointFactory(uow.Object))
             {
-
+                
             }
             uow.Verify(u => u.Commit());
         }
