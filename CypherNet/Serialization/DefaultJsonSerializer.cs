@@ -6,13 +6,12 @@ namespace CypherNet.Serialization
 
     using System;
     using System.IO;
-    using Dynamic4Neo.Serialization;
     using Newtonsoft.Json;
     using Newtonsoft.Json.Linq;
 
     #endregion
 
-    internal class DefaultJsonSerializer : IJsonSerializer
+    internal class DefaultJsonSerializer : IWebSerializer
     {
         private readonly JsonSerializer _serializer;
 

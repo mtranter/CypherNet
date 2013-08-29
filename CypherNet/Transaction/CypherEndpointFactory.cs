@@ -1,22 +1,31 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Transactions;
+﻿
 
 namespace CypherNet.Transaction
 {
-    class CypherEndpointFactory : IDisposable
+    using System;
+    using System.Collections.Generic;
+    using System.Transactions;
+    using Http;
+    using Serialization;
+
+    public class CypherEndpointFactory
     {
         private static readonly Dictionary<string, ResourceManager> CurrentNotifications =
             new Dictionary<string, ResourceManager>();
 
         private static readonly object Lock = new object();
-        private readonly ICypherUnitOfWork _unitOfWork;
-
-        internal CypherEndpointFactory(ICypherUnitOfWork unitOfWork)
+        
+        public ICypherEndpoint Create(string sourceUri)
         {
-            if (System.Transactions.Transaction.Current != null)
+            return Create(sourceUri, new WebClient(new DefaultJsonSerializer()));
+        }
+
+        public ICypherEndpoint Create(string sourceUri, IWebClient webClient)
+        {
+            if (Transaction.Current != null)
             {
-                var key = System.Transactions.Transaction.Current.TransactionInformation.LocalIdentifier;
+                var unitOfWork = new TransactionalCypherClient(sourceUri, webClient);
+                var key = Transaction.Current.TransactionInformation.LocalIdentifier;
                 var notifier = new ResourceManager(unitOfWork);
                 lock (Lock)
                 {
@@ -30,25 +39,14 @@ namespace CypherNet.Transaction
 
                     CurrentNotifications.Add(key, notifier);
                     System.Transactions.Transaction.Current.EnlistVolatile(notifier, EnlistmentOptions.EnlistDuringPrepareRequired);
+                    return new CypherEndpoint(unitOfWork);
                 }
             }
             else
             {
-                _unitOfWork = unitOfWork;
+                return new CypherEndpoint(new NonTransactionalCypherClient(sourceUri, webClient));
             }
         }
-
-        #region IDisposable Members
-
-        public void Dispose()
-        {
-            if (_unitOfWork != null)
-            {
-                _unitOfWork.Commit();
-            }
-        }
-
-        #endregion
 
         class ResourceManager : IEnlistmentNotification
         {
@@ -96,9 +94,9 @@ namespace CypherNet.Transaction
 
             internal event EventHandler Complete;
 
-            internal void OnComplete()
+            private void OnComplete()
             {
-                EventHandler handler = Complete;
+                var handler = Complete;
                 if (handler != null)
                 {
                     handler(this, EventArgs.Empty);

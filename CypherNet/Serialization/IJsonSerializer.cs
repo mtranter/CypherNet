@@ -1,6 +1,6 @@
-﻿namespace Dynamic4Neo.Serialization
+﻿namespace CypherNet.Serialization
 {
-    public interface IJsonSerializer
+    public interface IWebSerializer
     {
         string Serialize(object objToSerialize);
         TItem Deserialize<TItem>(string json);
