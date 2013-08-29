@@ -58,16 +58,13 @@
     <Compile Include="Graph\Node.cs" />
     <Compile Include="Graph\Relationship.cs" />
     <Compile Include="ITransactionalEndpoint.cs" />
-    <Compile Include="Linq\QueryBase.cs" />
-    <Compile Include="Linq\QueryProviderBase.cs" />
-    <Compile Include="Linq\TypeSystem.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Queries\CypherCreateRelationshipClauseBuilder.cs" />
     <Compile Include="Queries\CypherFunctions.cs" />
     <Compile Include="Queries\CypherGraphEntityNameAttribute.cs" />
     <Compile Include="Queries\CypherMatchClauseBuilder.cs" />
     <Compile Include="Queries\CypherOrderByQueryBuilder.cs" />
-    <Compile Include="Queries\CypherQuery.cs" />
+    <Compile Include="Queries\FluentCypherQueryBuilder.cs" />
     <Compile Include="Queries\CypherQueryBuilder.cs" />
     <Compile Include="Queries\CypherQueryDefinition.cs" />
     <Compile Include="Queries\CypherResponse.cs" />

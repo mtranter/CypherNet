@@ -11,11 +11,6 @@
 
     #endregion
 
-    internal static class CypherQuery
-    {
-        internal static readonly Type[] ValidGraphEntityTypes = new[] {typeof (IGraphEntity)};
-    }
-
     internal class FluentCypherQueryBuilder<TIn> : ICypherQueryStart<TIn>, ICypherQueryMatch<TIn>,
                                                    ICypherQueryWhere<TIn>, ICypherQueryReturns<TIn>,
                                                    ICypherQuerySetable<TIn>, ICypherQueryCreate<TIn>
@@ -144,7 +139,6 @@
                 var cypherQuery = _builder.BuildQueryString(_query);
                 _cypherEndpoint.ExecuteCommand(cypherQuery);
             }
-
         }
     }
 }
