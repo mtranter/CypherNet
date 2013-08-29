@@ -1,4 +1,6 @@
-﻿namespace CypherNet.Queries
+﻿using System;
+
+namespace CypherNet.Queries
 {
     #region
 
@@ -7,42 +9,48 @@
 
     #endregion
 
-    public static class Start
+    public class Start
     {
         [ParseToCypherAttribute("{0}=node({1})")]
-        public static void At([ArgumentEvaluator(typeof (MemberNameArgumentEvaluator))] Node nodeRef, long id)
+        public static IBeginRelationshipDefinition At([ArgumentEvaluator(typeof(MemberNameArgumentEvaluator))] Node nodeRef, long id)
         {
+            throw new NotImplementedException();
         }
 
         [ParseToCypherAttribute("{0}=node:{1}({2})")]
-        public static void At([ArgumentEvaluator(typeof (MemberNameArgumentEvaluator))] Node nodeRef, string index,
+        public static IBeginRelationshipDefinition At([ArgumentEvaluator(typeof(MemberNameArgumentEvaluator))] Node nodeRef, string index,
                               string query)
         {
+            throw new NotImplementedException();
         }
 
         [ParseToCypherAttribute("{0}=relationship({1})")]
-        public static void At(
+        public static IBeginRelationshipDefinition At(
             [ArgumentEvaluator(typeof (MemberNameArgumentEvaluator))] Relationship relationshipReference,
             long id)
         {
+            throw new NotImplementedException();
         }
 
         [ParseToCypherAttribute("{0}=relationship:{1}({2})")]
-        public static void At(
+        public static IBeginRelationshipDefinition At(
             [ArgumentEvaluator(typeof (MemberNameArgumentEvaluator))] Relationship relationshipReference,
             string index, string query)
         {
+            throw new NotImplementedException();
         }
 
         [ParseToCypherAttribute("{0}=node(*)")]
-        public static void Any([ArgumentEvaluator(typeof(MemberNameArgumentEvaluator))] Node nodeRe)
+        public static IBeginRelationshipDefinition Any([ArgumentEvaluator(typeof(MemberNameArgumentEvaluator))] Node nodeRe)
         {
+            throw new NotImplementedException();
         }
 
         [ParseToCypherAttribute("{0}=relationship(*)")]
-        public static void Any(
+        public static IBeginRelationshipDefinition Any(
             [ArgumentEvaluator(typeof (MemberNameArgumentEvaluator))] Relationship nodeRe)
         {
+            throw new NotImplementedException();
         }
     }
 

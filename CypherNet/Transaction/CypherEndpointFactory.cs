@@ -1,11 +1,9 @@
-﻿
+﻿using System;
+using System.Collections.Generic;
+using System.Transactions;
 
 namespace CypherNet.Transaction
 {
-    using System;
-    using System.Collections.Generic;
-    using System.Transactions;
-
     class CypherEndpointFactory : IDisposable
     {
         private static readonly Dictionary<string, ResourceManager> CurrentNotifications =
@@ -16,22 +14,22 @@ namespace CypherNet.Transaction
 
         internal CypherEndpointFactory(ICypherUnitOfWork unitOfWork)
         {
-            if (Transaction.Current != null)
+            if (System.Transactions.Transaction.Current != null)
             {
-                var key = Transaction.Current.TransactionInformation.LocalIdentifier;
+                var key = System.Transactions.Transaction.Current.TransactionInformation.LocalIdentifier;
                 var notifier = new ResourceManager(unitOfWork);
                 lock (Lock)
                 {
                     notifier.Complete += (o, e) =>
-                                             {
-                                                 lock (Lock)
-                                                 {
-                                                     CurrentNotifications.Remove(key);
-                                                 }
-                                             };
+                        {
+                            lock (Lock)
+                            {
+                                CurrentNotifications.Remove(key);
+                            }
+                        };
 
                     CurrentNotifications.Add(key, notifier);
-                    Transaction.Current.EnlistVolatile(notifier, EnlistmentOptions.EnlistDuringPrepareRequired);
+                    System.Transactions.Transaction.Current.EnlistVolatile(notifier, EnlistmentOptions.EnlistDuringPrepareRequired);
                 }
             }
             else
@@ -51,7 +49,6 @@ namespace CypherNet.Transaction
         }
 
         #endregion
-
 
         class ResourceManager : IEnlistmentNotification
         {
@@ -108,13 +105,5 @@ namespace CypherNet.Transaction
                 }
             }
         }
-
-    }
-
-    public interface ICypherUnitOfWork
-    {
-        void Commit();
-        void Rollback();
-        bool KeepAlive();
     }
 }

@@ -83,7 +83,6 @@ namespace CypherNet.UnitTests
             dynamic actor = retval.Results.Select(r => r.Actor).First();
             Assert.AreEqual(actor.age,33);
             Assert.AreEqual(actor.name, "mark");
-
         }
     }
 

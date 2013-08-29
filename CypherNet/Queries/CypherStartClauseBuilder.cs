@@ -18,7 +18,7 @@ namespace CypherNet.Queries
 
     internal class CypherStartClauseBuilder
     {
-        private static readonly IEnumerable<MethodInfo> AllowedMethods = typeof (Start).GetMethods(BindingFlags.Static | BindingFlags.Public);
+        private static readonly IEnumerable<MethodInfo> AllowedMethods = typeof (Start).GetMethods(BindingFlags.Static | BindingFlags.Public).Union(typeof(IBeginRelationshipDefinition).GetMethods());
 
         internal static string BuildStartClause(Expression exp)
         {
@@ -34,16 +34,27 @@ namespace CypherNet.Queries
                 throw new InvalidCypherStartExpressionException();
             }
 
+            return BuildStartClause(body, null);
+        }
+
+        private static string BuildStartClause(MethodCallExpression body, string currentExpression)
+        {
             var declareAssignMethod = body.Method;
             if (!AllowedMethods.Contains(declareAssignMethod))
             {
                 throw new InvalidCypherStartExpressionException();
             }
 
+            if (body.Object is MethodCallExpression)
+            {
+                currentExpression = BuildStartClause((MethodCallExpression) body.Object, currentExpression);
+            }
+
             var findMethodFormat =
                 declareAssignMethod.GetCustomAttribute<ParseToCypherAttribute>().Format;
             var @params = MethodExpressionArgumentEvaluator.EvaluateArguments(body);
-            return string.Format(findMethodFormat, @params);
+            var thisAssignment = string.Format(findMethodFormat, @params);
+            return String.Join(", ", new[]{currentExpression, thisAssignment}.Where(s => !String.IsNullOrEmpty(s)));
         }
     }
 

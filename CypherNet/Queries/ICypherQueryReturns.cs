@@ -7,7 +7,7 @@
 
     #endregion
 
-    public interface ICypherQueryReturns<TVariables>
+    public interface ICypherQueryReturns<TVariables> : ICypherQueryCreate<TVariables>
     {
         ICypherOrderBy<TVariables,TOut> Return<TOut>(Expression<Func<TVariables, TOut>> func);
     }

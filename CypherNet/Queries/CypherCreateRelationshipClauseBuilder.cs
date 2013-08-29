@@ -1,22 +1,12 @@
-﻿#region
-
-
-
-#endregion
+﻿using System;
+using System.Linq.Expressions;
+using System.Reflection;
 
 namespace CypherNet.Queries
 {
-    #region
-
-    using System;
-    using System.Linq.Expressions;
-    using System.Reflection;
-
-    #endregion
-
-    internal class CypherMatchClauseBuilder
+    internal class CypherCreateRelationshipClauseBuilder
     {
-        internal static string BuildMatchClause(Expression exp)
+        internal static string BuildCreateClause(Expression exp)
         {
             var lambda = exp as LambdaExpression;
             if (lambda == null)
@@ -24,14 +14,14 @@ namespace CypherNet.Queries
                 throw new InvalidCypherMatchExpressionException();
             }
 
-            return VisitExpression(lambda.Body, "");
+            return VisitExpression(ExpressionEvaluator.PartialEval(lambda.Body), "");
         }
 
         private static string VisitExpression(Expression expression, string currentClause)
         {
             if (expression is MethodCallExpression)
             {
-                return VisitMethod((MethodCallExpression) expression, currentClause);
+                return VisitMethod((MethodCallExpression)expression, currentClause);
             }
             if (expression == null)
             {
@@ -51,7 +41,7 @@ namespace CypherNet.Queries
     }
 
 
-    public class InvalidCypherMatchExpressionException : Exception
+    public class InvalidCypherCreateRelationshipExpressionException : Exception
     {
     }
 }

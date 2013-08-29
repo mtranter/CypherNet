@@ -1,4 +1,3 @@
-D:\Cypher.Net\CypherNet\obj\Debug\CypherNet.csprojResolveAssemblyReference.cache
 D:\Cypher.Net\CypherNet\bin\Debug\CypherNet.dll
 D:\Cypher.Net\CypherNet\bin\Debug\CypherNet.pdb
 D:\Cypher.Net\CypherNet\bin\Debug\Newtonsoft.Json.dll
@@ -11,3 +10,4 @@ c:\Projects\Git\CypherNet\CypherNet\bin\Debug\Newtonsoft.Json.dll
 c:\Projects\Git\CypherNet\CypherNet\bin\Debug\Newtonsoft.Json.xml
 c:\Projects\Git\CypherNet\CypherNet\obj\Debug\CypherNet.dll
 c:\Projects\Git\CypherNet\CypherNet\obj\Debug\CypherNet.pdb
+D:\Cypher.Net\CypherNet\obj\Debug\CypherNet.csprojResolveAssemblyReference.cache

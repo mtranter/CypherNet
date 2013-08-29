@@ -68,8 +68,12 @@
     <Compile Include="Queries\CypherMatchClauseBuilder.cs" />
     <Compile Include="Queries\CypherOrderByQueryBuilder.cs" />
     <Compile Include="Queries\CypherQuery.cs" />
+<<<<<<< HEAD
     <Compile Include="Queries\CypherQueryBuilder.cs" />
     <Compile Include="Queries\CypherQueryDefinition.cs" />
+    <Compile Include="Queries\CypherQueryExecute.cs" />
+=======
+>>>>>>> 4b7576275b586e64d2d25c04f36d95c6a1257bb4
     <Compile Include="Queries\CypherResponse.cs" />
     <Compile Include="Queries\CypherReturnsClauseBuilder.cs" />
     <Compile Include="Queries\CypherSetClauseBuilder.cs" />
