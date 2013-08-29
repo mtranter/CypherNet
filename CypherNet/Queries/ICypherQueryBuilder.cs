@@ -1,5 +1,6 @@
 ﻿namespace CypherNet.Queries
 {
+
     #region
 
     
@@ -10,109 +11,4 @@
     {
         string BuildQueryString<TIn, TOut>(CypherQueryDefinition<TIn, TOut> queryDefinition);
     }
-<<<<<<< HEAD
-=======
-
-    internal class CypherQueryDefinition<TIn, TOut>
-    {
-        private readonly List<Expression<Func<TIn, IDefineCypherRelationship>>> _matchClauses =
-            new List<Expression<Func<TIn, IDefineCypherRelationship>>>();
-
-        private readonly List<Expression<Func<TIn, dynamic>>> _orderByClauses =
-            new List<Expression<Func<TIn, dynamic>>>();
-
-        private readonly List<Expression<Action<TIn>>> _setterClauses =
-            new List<Expression<Action<TIn>>>();
-
-        internal Expression<Action<TIn>> StartClause { get; set; }
-
-        internal Expression<Func<TIn, bool>> WherePredicate { get; set; }
-
-        internal Expression<Func<TIn, TOut>> ReturnClause { get; set; }
-
-        internal Expression<Func<TIn, ICreateCypherRelationship>> CreateRelationpClause { get; set; }
-
-        internal IEnumerable<Expression<Func<TIn, dynamic>>> OrderByClauses { get { return _orderByClauses.AsEnumerable(); } }
-
-        internal IEnumerable<Expression<Action<TIn>>> SetterClauses { get { return _setterClauses.AsEnumerable(); } }
-
-        internal IEnumerable<Expression<Func<TIn, IDefineCypherRelationship>>> MatchClauses { get { return _matchClauses.AsEnumerable(); } }
-
-        internal int? Skip { get; set; }
-        internal int? Limit { get; set; }
-
-        internal void AddMatchClause(Expression<Func<TIn, IDefineCypherRelationship>> match)
-        {
-            _matchClauses.Add(match);
-        }
-
-        internal void AddOrderByClause(Expression<Func<TIn, dynamic>> match)
-        {
-            _orderByClauses.Add(match);
-        }
-
-        internal void AddSetClause(Expression<Action<TIn>> match)
-        {
-            _setterClauses.Add(match);
-        }
-    }
-
-    internal class TransactionEndpointCypherQueryBuilder : ICypherQueryBuilder
-    {
-        public string BuildQueryString<TIn, TOut>(CypherQueryDefinition<TIn, TOut> queryDefinition)
-        {
-            if (queryDefinition.ReturnClause == null)
-            {
-                throw new ArgumentNullException("ReturnClause");
-            }
-
-            var start = queryDefinition.StartClause == null ? null : "START " + BuildStartClause(queryDefinition.StartClause);
-            var match = queryDefinition.MatchClauses.Any() ? "MATCH " + String.Join(", ", queryDefinition.MatchClauses.Select(BuildMatchClause)) : null;
-            var createRel = queryDefinition.CreateRelationpClause == null ? null : "CREATE " + BuildCreateRelationshipClause(queryDefinition.CreateRelationpClause);
-            var where = queryDefinition.WherePredicate == null ? null : "WHERE " + BuildWhereClause(queryDefinition.WherePredicate);
-            var setClause = queryDefinition.SetterClauses.Any() ? "SET " + String.Join(" SET ",queryDefinition.SetterClauses.Select(BuildSetClause)) : null;
-            var orderBy = queryDefinition.OrderByClauses.Any() ? "ORDER BY " + String.Join(", ", queryDefinition.OrderByClauses.Select(BuildOrderByClause)) : null;
-            
-            var @return = "RETURN " + BuildReturnClause(queryDefinition.ReturnClause);
-            var skip = queryDefinition.Skip == null ? null : String.Format("SKIP {0}", queryDefinition.Skip);
-            var limit = queryDefinition.Limit == null ? null : String.Format("LIMIT {0}", queryDefinition.Limit);
-            return String.Join(" ", new[] { start, createRel, match, where, setClause, @return, orderBy, skip, limit }.Where(s => s != null));
-        }
-
-        internal string BuildStartClause(Expression exp)
-        {
-            return CypherStartClauseBuilder.BuildStartClause(exp);
-        }
-
-        internal string BuildCreateRelationshipClause(Expression exp)
-        {
-            return CypherCreateRelationshipClauseBuilder.BuildCreateClause(exp);
-        }
-
-        internal string BuildMatchClause(Expression exp)
-        {
-            return CypherMatchClauseBuilder.BuildMatchClause(exp);
-        }
-
-        internal string BuildWhereClause(Expression exp)
-        {
-            return CypherWhereClauseBuilder.BuildWhereClause(exp);
-        }
-
-        internal string BuildReturnClause(Expression exp)
-        {
-            return CypherReturnsClauseBuilder.BuildReturnClause(exp);
-        }
-
-        internal string BuildOrderByClause(Expression exp)
-        {
-            return CypherOrderByClauseBuilder.BuildOrderByClause(exp);
-        }
-
-        internal string BuildSetClause(Expression exp)
-        {
-            return CypherSetClauseBuilder.BuildSetClause(exp);
-        }
-    }
->>>>>>> 4b7576275b586e64d2d25c04f36d95c6a1257bb4
 }

@@ -5,6 +5,7 @@
     using System.Linq;
     using System.Linq.Expressions;
 
+
     internal class CypherQueryDefinition<TIn, TOut>
     {
         private readonly List<Expression<Func<TIn, IDefineCypherRelationship>>> _matchClauses =
@@ -17,14 +18,18 @@
             new List<Expression<Action<TIn>>>();
 
         internal Expression<Action<TIn>> StartClause { get; set; }
-        internal IEnumerable<Expression<Func<TIn, IDefineCypherRelationship>>> MatchClauses {
-            get { return _matchClauses.AsEnumerable(); }
-        }
+
         internal Expression<Func<TIn, bool>> WherePredicate { get; set; }
+
         internal Expression<Func<TIn, TOut>> ReturnClause { get; set; }
-        internal IEnumerable<Expression<Func<TIn, dynamic>>> OrderByClauses { get { return _orderByClauses.AsEnumerable(); }}
+
+        internal Expression<Func<TIn, ICreateCypherRelationship>> CreateRelationpClause { get; set; }
+
+        internal IEnumerable<Expression<Func<TIn, dynamic>>> OrderByClauses { get { return _orderByClauses.AsEnumerable(); } }
 
         internal IEnumerable<Expression<Action<TIn>>> SetterClauses { get { return _setterClauses.AsEnumerable(); } }
+
+        internal IEnumerable<Expression<Func<TIn, IDefineCypherRelationship>>> MatchClauses { get { return _matchClauses.AsEnumerable(); } }
 
         internal int? Skip { get; set; }
         internal int? Limit { get; set; }
