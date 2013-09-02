@@ -1,4 +1,6 @@
 ﻿
+using System.Net.Http.Headers;
+
 namespace CypherNet.Http
 {
     using System;
@@ -55,6 +57,7 @@ namespace CypherNet.Http
         private async Task<TResult> Execute<TResult>(string url, HttpMethod method)
         {
             var msg = new HttpRequestMessage(method, url);
+    
             using (var client = new HttpClient())
             {
                 var result = await client.SendAsync(msg);
@@ -66,10 +69,12 @@ namespace CypherNet.Http
         private async Task<TResult> Execute<TResult>(string url, object body, HttpMethod method)
         {
             var msg = new HttpRequestMessage(method, url);
+      
             if (body != null)
             {
                 var jsonBody = _serializer.Serialize(body);
                 msg.Content = new StringContent(jsonBody);
+                msg.Content.Headers.ContentType = new MediaTypeHeaderValue("application/json");
             }
 
             using (var client = new HttpClient())
@@ -81,3 +86,4 @@ namespace CypherNet.Http
         }
     }
 }
+

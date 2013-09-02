@@ -8,7 +8,8 @@
 
     internal class TransactionalCypherClient : IRawCypherClient, ICypherUnitOfWork
     {
-        private readonly string _transactionUri;
+        private bool _isInitialized;
+        private string _transactionUri;
         private readonly IWebClient _webClient;
 
         internal TransactionalCypherClient(string baseUri, IWebClient webClient)
@@ -22,7 +23,14 @@
         public System.Collections.Generic.IEnumerable<TOut> ExecuteQuery<TOut>(string cypherQuery)
         {
             var request = CypherQueryRequest.Create(cypherQuery);
-            throw new NotImplementedException();
+            var responseTask = _webClient.PostAsync<CypherResponse<TOut>>(_transactionUri, request);
+            var response = responseTask.Result;
+            if (!_isInitialized)
+            {
+                _transactionUri = response.Commit;
+                _isInitialized = true;
+            }
+            return response.Results;
         }
 
         public void ExecuteCommand(string cypherCommand)
@@ -34,17 +42,32 @@
 
         public void Commit()
         {
-            throw new NotImplementedException();
+            var commitUri = UriHelper.Combine(_transactionUri, "commit");
+            var emptyRequest = new CypherQueryRequest();
+            var resultTask = _webClient.PostAsync<object>(commitUri, emptyRequest);
+            var result = resultTask.Result;
+
         }
 
         public void Rollback()
         {
-            throw new NotImplementedException();
+            var commitUri = UriHelper.Combine(_transactionUri, "rollback");
+            var emptyRequest = new CypherQueryRequest();
+            var resultTask = _webClient.PostAsync<CypherResponse<object>>(commitUri, emptyRequest);
+            var result = resultTask.Result;
+            if (result.Errors.Any())
+                throw new Exception("Errors returned from Neo Server: " + String.Join(",", result.Errors));
         }
 
         public bool KeepAlive()
         {
-            throw new NotImplementedException();
+            var emptyRequest = new CypherQueryRequest();
+            var resultTask = _webClient.PostAsync<CypherResponse<object>>(_transactionUri, emptyRequest);
+            var result = resultTask.Result;
+            if (result.Errors.Any())
+                throw new Exception("Errors returned from Neo Server: " + String.Join(",", result.Errors));
+            return true;
         }
+
     }
 }

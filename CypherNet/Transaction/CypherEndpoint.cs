@@ -1,4 +1,6 @@
-﻿namespace CypherNet.Transaction
+﻿using CypherNet.Graph;
+
+namespace CypherNet.Transaction
 {
     using System;
     using Queries;
@@ -16,12 +18,12 @@
 
         public ICypherQueryStart<TVariables> BeginQuery<TVariables>()
         {
-            throw new NotImplementedException();
+            return new FluentCypherQueryBuilder<TVariables>(CypherClient);
         }
 
         public ICypherQueryStart<TVariables> BeginQuery<TVariables>(System.Linq.Expressions.Expression<Func<TVariables>> variablePrototype)
         {
-            throw new NotImplementedException();
+            return new FluentCypherQueryBuilder<TVariables>(CypherClient);
         }
 
         public ICypherQueryReturnOnly<Graph.Node> CreateNode(object properties)

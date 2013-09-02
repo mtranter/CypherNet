@@ -124,7 +124,7 @@ namespace CypherNet.Serialization
                         foreach (var property in Properties)
                         {
                             var itemproperties = new Dictionary<string, object>();
-                            var restEntity = record[_propertyCache[property.Name]];
+                            
                             if(typeof(IGraphEntity).IsAssignableFrom(property.PropertyType))
                             {
 
@@ -150,6 +150,7 @@ namespace CypherNet.Serialization
                             }
                         else
                             {
+                                var restEntity = record[_propertyCache[property.Name]];
                                 itemproperties.Add(property.Name, restEntity.ToObject(property.PropertyType));
                             }
                         }

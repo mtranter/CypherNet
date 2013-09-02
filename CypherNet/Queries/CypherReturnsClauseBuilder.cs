@@ -41,7 +41,7 @@
             if (member != null)
             {
                 var entityName = member.Member.Name;
-                var entityPropertyNames = new EntityReturnColumns((PropertyInfo)member.Member);
+                var entityPropertyNames = new EntityReturnColumns((PropertyInfo)memberInfo);
         
                 var retval = String.Format("{0} as {1}, id({0}) as {2}", entityName, entityPropertyNames.PropertiesPropertyName, entityPropertyNames.IdPropertyName);
                 if (entityPropertyNames.RequiresTypeProperty)

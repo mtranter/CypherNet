@@ -18,6 +18,9 @@ namespace CypherNet.Queries
 
     internal class CypherResponse<TResult> : ICypherResponse
     {
+
+        [JsonProperty(PropertyName = "commit")]
+        internal string Commit { get; set; }
         
         [JsonProperty(PropertyName = "results")]
         internal CypherResultSet<TResult> Results { get; set; }

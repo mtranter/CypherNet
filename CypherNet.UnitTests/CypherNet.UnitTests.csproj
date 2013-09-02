@@ -63,6 +63,7 @@
   <ItemGroup>
     <Compile Include="CypherQueryTests.cs" />
     <Compile Include="DeserializationTests.cs" />
+    <Compile Include="IntegrationTests.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="ScratchPad.cs" />
     <Compile Include="TestCypherClause.cs" />

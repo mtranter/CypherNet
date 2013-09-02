@@ -15,17 +15,17 @@ namespace CypherNet.Transaction
 
         private static readonly object Lock = new object();
         
-        public ICypherEndpoint Create(string sourceUri)
+        public static ICypherEndpoint Create(string sourceUri)
         {
             return Create(sourceUri, new DefaultJsonSerializer());
         }
 
-        public ICypherEndpoint Create(string sourceUri, IWebSerializer webSerializer)
+        public static ICypherEndpoint Create(string sourceUri, IWebSerializer webSerializer)
         {
             return Create(sourceUri, new WebClient(webSerializer));
         }
 
-        public ICypherEndpoint Create(string sourceUri, IWebClient webClient)
+        public static ICypherEndpoint Create(string sourceUri, IWebClient webClient)
         {
             if (Transaction.Current != null)
             {
