@@ -1,4 +1,6 @@
 ﻿
+using StaticReflection;
+
 namespace CypherNet.Dynamic
 {
     #region
@@ -15,15 +17,14 @@ namespace CypherNet.Dynamic
     public abstract class DynamicEntity<TEntity> : IDynamicMetaObjectProvider, IDynamicMetaData
         where TEntity : DynamicEntity<TEntity>
     {
+
         // ReSharper disable StaticFieldInGenericType
-        
-        private static readonly MethodInfo SetMethodInfo = 
-            typeof(DynamicEntity<TEntity>).GetMethod("SetDictionaryEntry", BindingFlags.Instance | BindingFlags.NonPublic);
+
+        private static readonly MethodInfo SetMethodInfo =
+            ReflectOn<DynamicEntity<TEntity>>.Member(m => m.SetDictionaryEntry("", null)).MemberInfo as MethodInfo;
 
         private static readonly MethodInfo GetMethodInfo =
-            typeof(DynamicEntity<TEntity>).GetMethod("GetDictionaryEntry", BindingFlags.Instance | BindingFlags.NonPublic);
-
-        // ReSharper restore StaticFieldInGenericType
+            ReflectOn<DynamicEntity<TEntity>>.Member(m => m.GetDictionaryEntry("")).MemberInfo as MethodInfo;
 
         private static readonly IEnumerable<string> ExistingSetProperties =
             typeof (TEntity).GetProperties().Where(p => p.GetSetMethod() != null).Select(p => p.Name);
@@ -31,9 +32,10 @@ namespace CypherNet.Dynamic
         private static readonly IEnumerable<string> ExistingGetProperties =
             typeof (TEntity).GetProperties().Where(p => p.GetGetMethod() != null).Select(p => p.Name);
 
+        // ReSharper restore StaticFieldInGenericType
+
         private readonly IDictionary<string, object> _storage;
-
-
+        
         protected internal DynamicEntity()
         {
             _storage = new Dictionary<string, object>();

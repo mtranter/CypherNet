@@ -13,7 +13,7 @@ using Newtonsoft.Json.Linq;
 namespace CypherNet.UnitTests
 {
     [TestClass]
-    public class DeserializationTests
+    public class SerializationTests
     {
 
         [TestMethod]
@@ -84,9 +84,16 @@ namespace CypherNet.UnitTests
             Assert.AreEqual(actor.age,33);
             Assert.AreEqual(actor.name, "mark");
         }
+
+        [TestMethod]
+        public void SerializeCypherRequest__IsValid()
+        {
+            var request = CypherQueryRequest.Create(@"START x=node(1), y=node(2) CREATE x-[r:OWNS {""name"":""mark""}]->y<-[r2:IS_OWNED_BY {""age"": 33}]");
+            var serializer = new DefaultJsonSerializer();
+            var result = serializer.Serialize(request);
+            Console.WriteLine(result);
+        }
     }
-
-
 
     public class DeserializationTestClass
     {

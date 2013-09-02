@@ -22,3 +22,4 @@ c:\Projects\Git\CypherNet\CypherNet.UnitTests\bin\Debug\Newtonsoft.Json.xml
 c:\Projects\Git\CypherNet\CypherNet.UnitTests\obj\Debug\CypherNet.UnitTests.csprojResolveAssemblyReference.cache
 c:\Projects\Git\CypherNet\CypherNet.UnitTests\obj\Debug\CypherNet.UnitTests.dll
 c:\Projects\Git\CypherNet\CypherNet.UnitTests\obj\Debug\CypherNet.UnitTests.pdb
+D:\Cypher.Net\CypherNet.UnitTests\bin\Debug\StaticReflection.dll

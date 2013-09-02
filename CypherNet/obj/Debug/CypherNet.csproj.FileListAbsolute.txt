@@ -12,3 +12,4 @@ c:\Projects\Git\CypherNet\CypherNet\obj\Debug\CypherNet.dll
 c:\Projects\Git\CypherNet\CypherNet\obj\Debug\CypherNet.pdb
 D:\Cypher.Net\CypherNet\obj\Debug\CypherNet.csprojResolveAssemblyReference.cache
 C:\Projects\Git\CypherNet\CypherNet\obj\Debug\CypherNet.csprojResolveAssemblyReference.cache
+D:\Cypher.Net\CypherNet\bin\Debug\StaticReflection.dll
