@@ -18,7 +18,7 @@
         [TestMethod]
         public void BuildCypherQuery_WithStartAndMatch_ExecutesCorrectQuery()
         {
-            var cypher = new Mock<IRawCypherClient>();
+            var cypher = new Mock<ICypherClient>();
             cypher.Setup(c => c.ExecuteQuery<TestCypherClause>(It.IsAny<string>())).Returns(() => null);
             var factory = new Mock<ICypherClientFactory>();
             factory.Setup(f => f.Create()).Returns(cypher.Object);
@@ -35,7 +35,7 @@
         [TestMethod]
         public void BuildCypherQuery_UsingSetMethod_ExecutesCorrectQuery()
         {
-            var cypher = new Mock<IRawCypherClient>();
+            var cypher = new Mock<ICypherClient>();
             cypher.Setup(c => c.ExecuteQuery<TestCypherClause>(It.IsAny<string>())).Returns(() => null);
             var factory = new Mock<ICypherClientFactory>();
             factory.Setup(f => f.Create()).Returns(cypher.Object);
@@ -52,7 +52,7 @@
         [TestMethod]
         public void BuildCypherQuery_CreateRelationship_ExecutesCorrectQuery()
         {
-            var cypher = new Mock<IRawCypherClient>();
+            var cypher = new Mock<ICypherClient>();
             cypher.Setup(c => c.ExecuteQuery<TestCypherClause>(It.IsAny<string>())).Returns(() => null);
             var factory = new Mock<ICypherClientFactory>();
             factory.Setup(f => f.Create()).Returns(cypher.Object);
@@ -69,7 +69,7 @@
         [TestMethod]
         public void BuildCypherQuery_CreateRelationshipWithProperties_ExecutesCorrectQuery()
         {
-            var cypher = new Mock<IRawCypherClient>();
+            var cypher = new Mock<ICypherClient>();
             cypher.Setup(c => c.ExecuteQuery<TestCypherClause>(It.IsAny<string>())).Returns(() => null);
             var factory = new Mock<ICypherClientFactory>();
             factory.Setup(f => f.Create()).Returns(cypher.Object);
@@ -86,7 +86,7 @@
         [TestMethod]
         public void BuildCypherQuery_WithStartMatchWhere_ExecutesCorrectQuery()
         {
-            var cypher = new Mock<IRawCypherClient>();
+            var cypher = new Mock<ICypherClient>();
             cypher.Setup(c => c.ExecuteQuery<TestCypherClause>(It.IsAny<string>())).Returns(() => null);
             var factory = new Mock<ICypherClientFactory>();
             factory.Setup(f => f.Create()).Returns(cypher.Object);
@@ -105,7 +105,7 @@
         [TestMethod]
         public void BuildCypherQuery_MatchByLabel_ExecutesCorrectQuery()
         {
-            var cypher = new Mock<IRawCypherClient>();
+            var cypher = new Mock<ICypherClient>();
             cypher.Setup(c => c.ExecuteQuery<TestCypherClause>(It.IsAny<string>())).Returns(() => null);
             var factory = new Mock<ICypherClientFactory>();
             factory.Setup(f => f.Create()).Returns(cypher.Object);
@@ -121,7 +121,7 @@
         [TestMethod]
         public void BuildCypherQuery_StartAtNodeN_ExecutesCorrectQuery()
         {
-            var cypher = new Mock<IRawCypherClient>();
+            var cypher = new Mock<ICypherClient>();
             cypher.Setup(c => c.ExecuteQuery<TestCypherClause>(It.IsAny<string>())).Returns(() => null);
             var factory = new Mock<ICypherClientFactory>();
             factory.Setup(f => f.Create()).Returns(cypher.Object);
@@ -137,7 +137,7 @@
             VerifyCypher(cypher, results.FirstOrDefault(), "START actor=node(1) RETURN actor as actor, id(actor) as actor__Id ORDER BY actedIn.fgds, actedIn.name SKIP 2 LIMIT 1");
         }
 
-        void VerifyCypher<TResult>(Mock<IRawCypherClient> mock, TResult proto, string query)
+        void VerifyCypher<TResult>(Mock<ICypherClient> mock, TResult proto, string query)
         {
             mock.Verify(
               c =>

@@ -5,7 +5,7 @@
     using Http;
     using Queries;
 
-    internal class TransactionalCypherClient : IRawCypherClient, ICypherUnitOfWork
+    internal class TransactionalCypherClient : ICypherClient, ICypherUnitOfWork
     {
         private bool _isInitialized;
         private string _transactionUri;

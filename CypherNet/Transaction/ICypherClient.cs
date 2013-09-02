@@ -3,7 +3,7 @@
     using System.Collections.Generic;
     using Queries;
 
-    public interface IRawCypherClient 
+    public interface ICypherClient 
     {
         IEnumerable<TOut> ExecuteQuery<TOut>(string cypherQuery);
         void ExecuteCommand(string cypherCommand);

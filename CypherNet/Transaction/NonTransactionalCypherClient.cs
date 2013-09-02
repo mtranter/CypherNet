@@ -5,7 +5,7 @@ namespace CypherNet.Transaction
     using System;
     using Http;
 
-    internal class NonTransactionalCypherClient : IRawCypherClient
+    internal class NonTransactionalCypherClient : ICypherClient
     {
         private readonly string _baseUri;
         private readonly IWebClient _webClient;

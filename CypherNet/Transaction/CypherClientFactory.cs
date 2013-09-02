@@ -10,10 +10,10 @@ namespace CypherNet.Transaction
 
     public interface ICypherClientFactory
     {
-        IRawCypherClient Create();
-        IRawCypherClient Create(string sourceUri);
-        IRawCypherClient Create(string sourceUri, IWebSerializer webSerializer);
-        IRawCypherClient Create(string sourceUri, IWebClient webClient);
+        ICypherClient Create();
+        ICypherClient Create(string sourceUri);
+        ICypherClient Create(string sourceUri, IWebSerializer webSerializer);
+        ICypherClient Create(string sourceUri, IWebClient webClient);
     }
 
     internal class CypherClientFactory : ICypherClientFactory
@@ -30,22 +30,22 @@ namespace CypherNet.Transaction
             _baseUri = baseUri;
         }
 
-        public IRawCypherClient Create()
+        public ICypherClient Create()
         {
             return Create(_baseUri, new DefaultJsonSerializer());
         }
         
-        public IRawCypherClient Create(string sourceUri)
+        public ICypherClient Create(string sourceUri)
         {
             return Create(sourceUri, new DefaultJsonSerializer());
         }
 
-        public IRawCypherClient Create(string sourceUri, IWebSerializer webSerializer)
+        public ICypherClient Create(string sourceUri, IWebSerializer webSerializer)
         {
             return Create(sourceUri, new WebClient(webSerializer));
         }
 
-        public IRawCypherClient Create(string sourceUri, IWebClient webClient)
+        public ICypherClient Create(string sourceUri, IWebClient webClient)
         {
             if (Transaction.Current != null)
             {
@@ -75,19 +75,19 @@ namespace CypherNet.Transaction
 
         class ResourceManager : IEnlistmentNotification
         {
+            private readonly ICypherUnitOfWork _unitOfWork;
 
             internal ResourceManager(ICypherUnitOfWork unitOfWork)
             {
-                UnitOfWork = unitOfWork;
+                _unitOfWork = unitOfWork;
+                ;
             }
-
-            internal ICypherUnitOfWork UnitOfWork { get; private set; }
 
             #region IEnlistmentNotification Members
 
             public void Commit(Enlistment enlistment)
             {
-                UnitOfWork.Commit();
+                _unitOfWork.Commit();
                 OnComplete();
                 enlistment.Done();
             }
@@ -99,7 +99,7 @@ namespace CypherNet.Transaction
 
             public void Prepare(PreparingEnlistment preparingEnlistment)
             {
-                if (UnitOfWork.KeepAlive())
+                if (_unitOfWork.KeepAlive())
                 {
                     preparingEnlistment.Prepared();
                 }
@@ -111,7 +111,7 @@ namespace CypherNet.Transaction
 
             public void Rollback(Enlistment enlistment)
             {
-                UnitOfWork.Rollback();
+                _unitOfWork.Rollback();
                 OnComplete();
             }
 
