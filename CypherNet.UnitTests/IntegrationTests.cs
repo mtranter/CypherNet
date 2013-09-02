@@ -18,7 +18,8 @@ namespace CypherNet.UnitTests
         [TestMethod]
         public void QueryGraph_SimpleQueryNotInsideTransaction_ReturnsResults()
         {
-            var endpoint = CypherEndpointFactory.Create("http://localhost:7474/db/data/");
+            var clientFactory = new CypherClientFactory("http://localhost:7474/db/data/");
+            var endpoint = new CypherEndpoint(clientFactory);
 
             var nodes = endpoint.BeginQuery(p => new { node = p.Node })
                     .Start(n => Start.At(n.node, 1874))
@@ -32,7 +33,8 @@ namespace CypherNet.UnitTests
         [TestMethod]
         public void QueryWithJoins_NotInsideTransaction_ReturnsResults()
         {
-            var endpoint = CypherEndpointFactory.Create("http://localhost:7474/db/data/");
+            var clientFactory = new CypherClientFactory("http://localhost:7474/db/data/");
+            var endpoint = new CypherEndpoint(clientFactory);
 
             var nodes = endpoint.BeginQuery(p => new { mystart = p.Node, rel = p.Rel, end= p.Node })
                     .Start(n => Start.At(n.mystart, 1873))
@@ -51,7 +53,8 @@ namespace CypherNet.UnitTests
         [TestMethod]
         public void QueryWithJoinsOverMany_NotInsideTransaction_ReturnsMultipleResults()
         {
-            var endpoint = CypherEndpointFactory.Create("http://localhost:7474/db/data/");
+            var clientFactory = new CypherClientFactory("http://localhost:7474/db/data/");
+            var endpoint = new CypherEndpoint(clientFactory);
 
             var nodes = endpoint
                     .BeginQuery(p => new { mystart = p.Node, rel = p.Rel, end = p.Node })
@@ -76,7 +79,8 @@ namespace CypherNet.UnitTests
         {
             using (var trans = new TransactionScope(TransactionScopeOption.RequiresNew, TimeSpan.FromDays(1)))
             {
-                var endpoint = CypherEndpointFactory.Create("http://localhost:7474/db/data/");
+                var clientFactory = new CypherClientFactory("http://localhost:7474/db/data/");
+                var endpoint = new CypherEndpoint(clientFactory);
                 var nodes = endpoint.BeginQuery(p => new {node = p.Node})
                         .Start(n => Start.At(n.node, 1874))
                         .Return(r => new {Node = r.node })

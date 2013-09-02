@@ -110,7 +110,7 @@
     <Compile Include="Serialization\IsoDateConverter.cs" />
     <Compile Include="Serialization\JTokenExtensions.cs" />
     <Compile Include="Serialization\RestNodeConverter.cs" />
-    <Compile Include="Transaction\CypherEndpointFactory.cs" />
+    <Compile Include="Transaction\CypherClientFactory.cs" />
     <Compile Include="Transaction\ICypherUnitOfWork.cs" />
     <Compile Include="Transaction\IRawCypherClient.cs" />
     <Compile Include="Transaction\CypherEndpoint.cs" />

@@ -16,7 +16,7 @@
                                                    ICypherQueryWhere<TIn>, ICypherQueryReturns<TIn>,
                                                    ICypherQuerySetable<TIn>, ICypherQueryCreate<TIn>
     {
-        private readonly IRawCypherClient _cypherEndpoint;
+        private readonly ICypherClientFactory _clientFactory;
         private readonly string _cypherQuery = String.Empty;
         private Expression<Func<TIn, IDefineCypherRelationship>>[] _matchClauses;
         private Expression<Action<TIn>> _startDef;
@@ -24,9 +24,9 @@
         private Expression<Action<TIn>>[] _setters;
         private Expression<Func<TIn, ICreateCypherRelationship>> _createClause;
 
-        internal FluentCypherQueryBuilder(IRawCypherClient cypherEndpoint)
+        internal FluentCypherQueryBuilder(ICypherClientFactory clientFactory)
         {
-            _cypherEndpoint = cypherEndpoint;
+            _clientFactory = clientFactory;
         }
 
         internal string CypherQuery
@@ -89,17 +89,17 @@
                 query.AddSetClause(m);
             }
 
-            return new CypherQueryExecute<TOut>(_cypherEndpoint, query);
+            return new CypherQueryExecute<TOut>(_clientFactory, query);
         }
 
         internal class CypherQueryExecute<TOut> : ICypherOrderBy<TIn,TOut>
         {
-            private readonly IRawCypherClient _cypherEndpoint;
+            private readonly ICypherClientFactory _clientFactory;
             private readonly CypherQueryDefinition<TIn, TOut> _query;
 
-            internal CypherQueryExecute(IRawCypherClient cypherEndpoint,  CypherQueryDefinition<TIn, TOut> query)
+            internal CypherQueryExecute(ICypherClientFactory clientFactory, CypherQueryDefinition<TIn, TOut> query)
             {
-                _cypherEndpoint = cypherEndpoint;
+                _clientFactory = clientFactory;
                 _query = query;
             }
 
@@ -128,13 +128,15 @@
             public IEnumerable<TOut> Fetch()
             {
                 var cypherQuery = _query.BuildStatement();
-                return _cypherEndpoint.ExecuteQuery<TOut>(cypherQuery);
+                var client = _clientFactory.Create();
+                return client.ExecuteQuery<TOut>(cypherQuery);
             }
 
             void ICypherExecuteable.Execute()
             {
                 var cypherQuery = _query.BuildStatement();
-                _cypherEndpoint.ExecuteCommand(cypherQuery);
+                var client = _clientFactory.Create();
+                client.ExecuteCommand(cypherQuery);
             }
         }
     }

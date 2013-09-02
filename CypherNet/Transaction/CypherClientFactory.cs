@@ -8,24 +8,44 @@ namespace CypherNet.Transaction
     using Http;
     using Serialization;
 
-    public class CypherEndpointFactory
+    public interface ICypherClientFactory
     {
+        IRawCypherClient Create();
+        IRawCypherClient Create(string sourceUri);
+        IRawCypherClient Create(string sourceUri, IWebSerializer webSerializer);
+        IRawCypherClient Create(string sourceUri, IWebClient webClient);
+    }
+
+    internal class CypherClientFactory : ICypherClientFactory
+    {
+        private readonly string _baseUri;
+
         private static readonly Dictionary<string, ResourceManager> CurrentNotifications =
             new Dictionary<string, ResourceManager>();
 
         private static readonly object Lock = new object();
+
+        public CypherClientFactory(string baseUri)
+        {
+            _baseUri = baseUri;
+        }
+
+        public IRawCypherClient Create()
+        {
+            return Create(_baseUri, new DefaultJsonSerializer());
+        }
         
-        public static ICypherEndpoint Create(string sourceUri)
+        public IRawCypherClient Create(string sourceUri)
         {
             return Create(sourceUri, new DefaultJsonSerializer());
         }
 
-        public static ICypherEndpoint Create(string sourceUri, IWebSerializer webSerializer)
+        public IRawCypherClient Create(string sourceUri, IWebSerializer webSerializer)
         {
             return Create(sourceUri, new WebClient(webSerializer));
         }
 
-        public static ICypherEndpoint Create(string sourceUri, IWebClient webClient)
+        public IRawCypherClient Create(string sourceUri, IWebClient webClient)
         {
             if (Transaction.Current != null)
             {
@@ -44,12 +64,12 @@ namespace CypherNet.Transaction
 
                     CurrentNotifications.Add(key, notifier);
                     System.Transactions.Transaction.Current.EnlistVolatile(notifier, EnlistmentOptions.EnlistDuringPrepareRequired);
-                    return new CypherEndpoint(unitOfWork);
+                    return unitOfWork;
                 }
             }
             else
             {
-                return new CypherEndpoint(new NonTransactionalCypherClient(sourceUri, webClient));
+                return new NonTransactionalCypherClient(sourceUri, webClient);
             }
         }
 

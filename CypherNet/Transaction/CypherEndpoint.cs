@@ -5,25 +5,25 @@ namespace CypherNet.Transaction
     using System;
     using Queries;
 
-    class CypherEndpoint : ICypherEndpoint
+    public class CypherEndpoint : ICypherEndpoint
     {
-        protected IRawCypherClient CypherClient {get; private set;}
+        private readonly ICypherClientFactory _clientFactory;
 
-        internal CypherEndpoint(IRawCypherClient requestBuilder)
+        internal CypherEndpoint(ICypherClientFactory clientFactory)
         {
-            CypherClient = requestBuilder;
+            _clientFactory = clientFactory;
         }
 
         #region ICypherEndpoint Members
 
         public ICypherQueryStart<TVariables> BeginQuery<TVariables>()
         {
-            return new FluentCypherQueryBuilder<TVariables>(CypherClient);
+            return new FluentCypherQueryBuilder<TVariables>(_clientFactory);
         }
 
         public ICypherQueryStart<TVariables> BeginQuery<TVariables>(System.Linq.Expressions.Expression<Func<ICypherPrototype,TVariables>> variablePrototype)
         {
-            return new FluentCypherQueryBuilder<TVariables>(CypherClient);
+            return new FluentCypherQueryBuilder<TVariables>(_clientFactory);
         }
 
         public ICypherQueryReturnOnly<Graph.Node> CreateNode(object properties)
