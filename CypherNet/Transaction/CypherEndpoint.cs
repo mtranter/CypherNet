@@ -21,7 +21,7 @@ namespace CypherNet.Transaction
             return new FluentCypherQueryBuilder<TVariables>(CypherClient);
         }
 
-        public ICypherQueryStart<TVariables> BeginQuery<TVariables>(System.Linq.Expressions.Expression<Func<TVariables>> variablePrototype)
+        public ICypherQueryStart<TVariables> BeginQuery<TVariables>(System.Linq.Expressions.Expression<Func<ICypherPrototype,TVariables>> variablePrototype)
         {
             return new FluentCypherQueryBuilder<TVariables>(CypherClient);
         }

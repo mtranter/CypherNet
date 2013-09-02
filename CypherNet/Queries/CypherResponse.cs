@@ -19,7 +19,7 @@ namespace CypherNet.Queries
     internal class CypherResponse<TResult> : ICypherResponse
     {
 
-        [JsonProperty(PropertyName = "commit")]
+        [JsonProperty(PropertyName = "commit", NullValueHandling = NullValueHandling.Ignore)]
         internal string Commit { get; set; }
         
         [JsonProperty(PropertyName = "results")]
@@ -28,7 +28,7 @@ namespace CypherNet.Queries
         [JsonProperty(PropertyName = "errors")]
         internal string[] Errors { get; private set; }
 
-        [JsonProperty(PropertyName = "transaction")]
+        [JsonProperty(PropertyName = "transaction", NullValueHandling = NullValueHandling.Ignore)]
         internal TransactionDetails Transaction { get; private set; }
         
         internal class TransactionDetails

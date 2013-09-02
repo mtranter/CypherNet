@@ -1,4 +1,6 @@
-﻿namespace CypherNet.Transaction
+﻿using CypherNet.Queries;
+
+namespace CypherNet.Transaction
 {
     using System;
     using Http;
@@ -10,7 +12,7 @@
 
         internal NonTransactionalCypherClient(string baseUri, IWebClient webClient)
         {
-            _baseUri = baseUri;
+            _baseUri = UriHelper.Combine(baseUri, "transaction/commit");
             _webClient = webClient;
         }
 
@@ -18,12 +20,17 @@
 
         public System.Collections.Generic.IEnumerable<TOut> ExecuteQuery<TOut>(string cypherQuery)
         {
-            throw new NotImplementedException();
+            var request = CypherQueryRequest.Create(cypherQuery);
+            var responseTask = _webClient.PostAsync<CypherResponse<TOut>>(_baseUri, request);
+            var response = responseTask.Result;
+
+            return response.Results;
         }
 
         public void ExecuteCommand(string cypherCommand)
         {
-            throw new NotImplementedException();
+            var request = CypherQueryRequest.Create(cypherCommand);
+            _webClient.PostAsync<CypherResponse<object>>(_baseUri, request);
         }
 
         #endregion

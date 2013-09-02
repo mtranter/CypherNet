@@ -2,7 +2,6 @@
 {
     using System;
     using System.Linq;
-    using System.Text;
     using Http;
     using Queries;
 
@@ -27,7 +26,7 @@
             var response = responseTask.Result;
             if (!_isInitialized)
             {
-                _transactionUri = response.Commit;
+                _transactionUri = response.Commit.Substring(0, response.Commit.Length - ("/commit").Length);
                 _isInitialized = true;
             }
             return response.Results;
@@ -35,7 +34,14 @@
 
         public void ExecuteCommand(string cypherCommand)
         {
-            throw new NotImplementedException();
+            var request = CypherQueryRequest.Create(cypherCommand);
+            var responseTask = _webClient.PostAsync<CypherResponse<object>>(_transactionUri, request);
+            var response = responseTask.Result;
+            if (!_isInitialized)
+            {
+                _transactionUri = response.Commit.Substring(0, response.Commit.Length - ("/commit").Length);
+                _isInitialized = true;
+            }
         }
 
         #endregion
@@ -43,10 +49,11 @@
         public void Commit()
         {
             var commitUri = UriHelper.Combine(_transactionUri, "commit");
-            var emptyRequest = new CypherQueryRequest();
-            var resultTask = _webClient.PostAsync<object>(commitUri, emptyRequest);
+            var emptyRequest = CypherQueryRequest.Empty();
+            var resultTask = _webClient.PostAsync<CypherResponse<object>>(commitUri, emptyRequest);
             var result = resultTask.Result;
-
+            if (result.Errors.Any())
+                throw new Exception("Errors returned from Neo Server: " + String.Join(",", result.Errors));
         }
 
         public void Rollback()

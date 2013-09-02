@@ -9,6 +9,12 @@ namespace CypherNet.Queries
 
     #endregion
 
+    public interface ICypherPrototype
+    {
+        Node Node { get; }
+        Relationship Rel { get; }
+    }
+
     public class Start
     {
         [ParseToCypherAttribute("{0}=node({1})")]

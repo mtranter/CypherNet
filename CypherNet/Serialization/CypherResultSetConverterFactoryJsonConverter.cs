@@ -63,10 +63,20 @@ namespace CypherNet.Serialization
             public override object ReadJson(JsonReader reader, Type objectType, object existingValue,
                                             JsonSerializer serializer)
             {
-                while (reader.Read())
+                bool isEmptyInArray = false;
+                do
                 {
-                    if (reader.TokenType == JsonToken.PropertyName)
+                    if (reader.TokenType == JsonToken.StartArray)
                     {
+                        isEmptyInArray = true;
+                    }
+                    else if (reader.TokenType == JsonToken.EndArray && isEmptyInArray)
+                    {
+                        return null;
+                    }
+                    else if (reader.TokenType == JsonToken.PropertyName)
+                    {
+                        isEmptyInArray = false;
                         if (reader.Value.ToString().ToLower() == ColumnsJsonProperty.ToLower())
                         {
                             reader.Read();
@@ -79,7 +89,8 @@ namespace CypherNet.Serialization
                             return new CypherResultSet<TCypherResponse>(Deserialize(reader, serializer).ToArray());
                         }
                     }
-                }
+
+                } while (reader.Read());
 
                 return null;
             }

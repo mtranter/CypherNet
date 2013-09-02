@@ -40,5 +40,10 @@
         {
             get { return _statements; }
         }
+
+        internal static CypherQueryRequest Empty()
+        {
+            return new CypherQueryRequest();
+        }
     }
 }
