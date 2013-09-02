@@ -1,8 +1,6 @@
 ﻿namespace CypherNet.Transaction
 {
     using System;
-    using System.Collections.Generic;
-    using System.Transactions;
     using Queries;
 
     class CypherEndpoint : ICypherEndpoint

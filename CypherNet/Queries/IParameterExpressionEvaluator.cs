@@ -68,7 +68,7 @@ namespace CypherNet.Queries
 
         internal static object WrapValue(object value)
         {
-            return WrappedTypes.Contains(value.GetType()) ? String.Format("'{0}'", value) : value;
+            return WrappedTypes.Contains(value.GetType()) ? String.Format(@"""{0}""", value) : value;
         }
     }
 
@@ -87,9 +87,9 @@ namespace CypherNet.Queries
             var json = new StringBuilder("{");
             foreach (var kvp in dict)
             {
-                json.AppendFormat("{0}: {1}, ", kvp.Key, StringWrapperArgumentEvaluator.WrapValue(value));
+                json.AppendFormat(@"""{0}"": {1}, ", kvp.Key, StringWrapperArgumentEvaluator.WrapValue(kvp.Value));
             }
-            json.Remove(0, json.Length - 2);
+            json.Remove(json.Length - 2,2);
             json.Append("}");
             return json.ToString();
         }

@@ -6,8 +6,10 @@ using System.Threading.Tasks;
 
 namespace CypherNet.UnitTests
 {
+    using System.IO;
     using System.Linq.Expressions;
     using Microsoft.VisualStudio.TestTools.UnitTesting;
+    using CypherNet.Transaction;
 
     [TestClass]
     public class ScratchPad
@@ -15,14 +17,7 @@ namespace CypherNet.UnitTests
         [TestMethod]
         public void TestExtensionMethodInQueries()
         {
-            Expression<Action<Car>> carFunc = c => c.Drive(5);
-            var body = carFunc.Body;
-            Console.WriteLine(body.NodeType);
-            var method = body as MethodCallExpression;
-            foreach (var arg in method.Arguments)
-            {
-                Console.WriteLine(arg.NodeType);
-            }
+            var val = UriHelper.Combine("Http://mysite", "something");
         }
     }
 

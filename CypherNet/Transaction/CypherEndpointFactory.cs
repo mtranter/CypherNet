@@ -17,7 +17,12 @@ namespace CypherNet.Transaction
         
         public ICypherEndpoint Create(string sourceUri)
         {
-            return Create(sourceUri, new WebClient(new DefaultJsonSerializer()));
+            return Create(sourceUri, new DefaultJsonSerializer());
+        }
+
+        public ICypherEndpoint Create(string sourceUri, IWebSerializer webSerializer)
+        {
+            return Create(sourceUri, new WebClient(webSerializer));
         }
 
         public ICypherEndpoint Create(string sourceUri, IWebClient webClient)

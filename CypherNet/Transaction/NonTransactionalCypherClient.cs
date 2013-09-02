@@ -14,9 +14,18 @@
             _webClient = webClient;
         }
 
-        public TResult Run<TResult>(string cypher)
+        #region IRawCypherClient Members
+
+        public System.Collections.Generic.IEnumerable<TOut> ExecuteQuery<TOut>(string cypherQuery)
         {
             throw new NotImplementedException();
         }
+
+        public void ExecuteCommand(string cypherCommand)
+        {
+            throw new NotImplementedException();
+        }
+
+        #endregion
     }
 }

@@ -14,6 +14,7 @@ namespace CypherNet.UnitTests
     [TestClass]
     public class TransactionTests
     {
+
     }
 }
 

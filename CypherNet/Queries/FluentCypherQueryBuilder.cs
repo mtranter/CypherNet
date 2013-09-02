@@ -8,6 +8,7 @@
     using System.Linq.Expressions;
     using System.Reflection;
     using Graph;
+    using Transaction;
 
     #endregion
 
@@ -15,19 +16,17 @@
                                                    ICypherQueryWhere<TIn>, ICypherQueryReturns<TIn>,
                                                    ICypherQuerySetable<TIn>, ICypherQueryCreate<TIn>
     {
-        private readonly ICypher _cypherEndpoint;
+        private readonly IRawCypherClient _cypherEndpoint;
         private readonly string _cypherQuery = String.Empty;
-        private readonly ICypherQueryBuilder _queryBuilder;
         private Expression<Func<TIn, IDefineCypherRelationship>>[] _matchClauses;
         private Expression<Action<TIn>> _startDef;
         private Expression<Func<TIn, bool>> _wherePredicate;
         private Expression<Action<TIn>>[] _setters;
         private Expression<Func<TIn, ICreateCypherRelationship>> _createClause;
 
-        internal FluentCypherQueryBuilder(ICypher cypherEndpoint, ICypherQueryBuilder queryBuilder)
+        internal FluentCypherQueryBuilder(IRawCypherClient cypherEndpoint)
         {
             _cypherEndpoint = cypherEndpoint;
-            _queryBuilder = queryBuilder;
         }
 
         internal string CypherQuery
@@ -90,19 +89,17 @@
                 query.AddSetClause(m);
             }
 
-            return new CypherQueryExecute<TOut>(_cypherEndpoint, _queryBuilder, query);
+            return new CypherQueryExecute<TOut>(_cypherEndpoint, query);
         }
 
         internal class CypherQueryExecute<TOut> : ICypherOrderBy<TIn,TOut>
         {
-            private readonly ICypher _cypherEndpoint;
-            private readonly ICypherQueryBuilder _builder;
+            private readonly IRawCypherClient _cypherEndpoint;
             private readonly CypherQueryDefinition<TIn, TOut> _query;
-            
-            internal CypherQueryExecute(ICypher cypherEndpoint, ICypherQueryBuilder builder, CypherQueryDefinition<TIn,TOut> query)
+
+            internal CypherQueryExecute(IRawCypherClient cypherEndpoint,  CypherQueryDefinition<TIn, TOut> query)
             {
                 _cypherEndpoint = cypherEndpoint;
-                _builder = builder;
                 _query = query;
             }
 
@@ -130,13 +127,13 @@
 
             public IEnumerable<TOut> Fetch()
             {
-                var cypherQuery = _builder.BuildQueryString(_query);
+                var cypherQuery = _query.BuildStatement();
                 return _cypherEndpoint.ExecuteQuery<TOut>(cypherQuery);
             }
 
             void ICypherExecuteable.Execute()
             {
-                var cypherQuery = _builder.BuildQueryString(_query);
+                var cypherQuery = _query.BuildStatement();
                 _cypherEndpoint.ExecuteCommand(cypherQuery);
             }
         }

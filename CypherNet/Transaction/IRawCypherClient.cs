@@ -1,7 +1,11 @@
 ﻿namespace CypherNet.Transaction
 {
-    internal interface IRawCypherClient 
+    using System.Collections.Generic;
+    using Queries;
+
+    public interface IRawCypherClient 
     {
-        TResult Run<TResult>(string cypher);
+        IEnumerable<TOut> ExecuteQuery<TOut>(string cypherQuery);
+        void ExecuteCommand(string cypherCommand);
     }
 }

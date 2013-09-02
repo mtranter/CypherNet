@@ -65,8 +65,10 @@
     <Compile Include="Queries\CypherGraphEntityNameAttribute.cs" />
     <Compile Include="Queries\CypherMatchClauseBuilder.cs" />
     <Compile Include="Queries\CypherOrderByQueryBuilder.cs" />
+    <Compile Include="Queries\CypherQueryParameter.cs" />
+    <Compile Include="Queries\CypherQueryRequest.cs" />
+    <Compile Include="Queries\CypherQueryStatement.cs" />
     <Compile Include="Queries\FluentCypherQueryBuilder.cs" />
-    <Compile Include="Queries\CypherQueryBuilder.cs" />
     <Compile Include="Queries\CypherQueryDefinition.cs" />
     <Compile Include="Queries\CypherResponse.cs" />
     <Compile Include="Queries\CypherReturnsClauseBuilder.cs" />
@@ -81,11 +83,9 @@
     <Compile Include="Queries\GraphEntityExtensions.cs" />
     <Compile Include="Queries\IBeginRelationshipDefinition.cs" />
     <Compile Include="Queries\ICreateCypherRelationship.cs" />
-    <Compile Include="Queries\ICypher.cs" />
     <Compile Include="Queries\ICypherEntityReference.cs" />
     <Compile Include="Queries\ICypherExecute.cs" />
     <Compile Include="Queries\ICypherQueryBegin.cs" />
-    <Compile Include="Queries\ICypherQueryBuilder.cs" />
     <Compile Include="Queries\ICypherQueryCreateNode.cs" />
     <Compile Include="Queries\ICypherQueryMatch.cs" />
     <Compile Include="Queries\ICypherQueryMatchOnly.cs" />
@@ -98,9 +98,8 @@
     <Compile Include="Queries\IRelationshipDefiniton.cs" />
     <Compile Include="Queries\IsA.cs" />
     <Compile Include="Queries\IStartDefinition.cs" />
-    <Compile Include="Queries\TransactionEndpointCypherQueryBuilder.cs" />
     <Compile Include="Serialization\CypherColumnNotPresentException.cs" />
-    <Compile Include="Serialization\CypherResponseConverter.cs" />
+    <Compile Include="Serialization\CypherResultSetConverterFactoryJsonConverter.cs" />
     <Compile Include="Serialization\DefaultJsonSerializer.cs" />
     <Compile Include="Serialization\DeserializationAttribute.cs" />
     <Compile Include="Serialization\EntityReturnColumns.cs" />
@@ -114,6 +113,7 @@
     <Compile Include="Transaction\CypherEndpoint.cs" />
     <Compile Include="Transaction\NonTransactionalCypherClient.cs" />
     <Compile Include="Transaction\TransactionalCypherClient.cs" />
+    <Compile Include="UriHelper.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="packages.config" />
