@@ -12,7 +12,7 @@ namespace CypherNet.Queries
         public static TProp Get<TProp>([ArgumentEvaluator(typeof(MemberNameArgumentEvaluator))] this IGraphEntity entity, string propName)
         {
             var dynamicEntity = entity as IDynamicMetaData;
-            var prop = dynamicEntity.GetAllValues().Where(kvp => kvp.Key == propName);
+            var prop = dynamicEntity.GetAllValues().First(kvp => kvp.Key == propName).Value;
             return (TProp)prop;
         }
 

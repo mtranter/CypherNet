@@ -1,8 +1,5 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using System.Transactions;
 using CypherNet.Graph;
 using CypherNet.Queries;
@@ -14,7 +11,7 @@ namespace CypherNet.UnitTests
     [TestClass]
     public class IntegrationTests
     {
-        private static Node _developerPersonNode, _roleNode, _positionNode;
+        private static Node _personNode, _positionNode;
 
         [TestMethod]
         public void CreateNode_WithLabel_ReturnsNewNode()
@@ -22,8 +19,8 @@ namespace CypherNet.UnitTests
             var clientFactory = new CypherClientFactory("http://localhost:7474/db/data/");
             var endpoint = new CypherEndpoint(clientFactory);
 
-            _developerPersonNode = endpoint.CreateNode(new { name = "mark", age = 33 }, "person");
-            dynamic node = _developerPersonNode;
+            _personNode = endpoint.CreateNode(new { name = "mark", age = 33 }, "person");
+            dynamic node = _personNode;
 
             Assert.AreEqual(node.name, "mark");
             Assert.AreEqual(node.age, 33);
@@ -35,42 +32,36 @@ namespace CypherNet.UnitTests
             var clientFactory = new CypherClientFactory("http://localhost:7474/db/data/");
             var endpoint = new CypherEndpoint(clientFactory);
 
-            _roleNode = endpoint.CreateNode(new { role = "developer"});
+            _positionNode = endpoint.CreateNode(new { position = "developer" });
 
             var newnode = endpoint
                         .BeginQuery(s => new { n = s.Node })
-                        .Start(v => Start.At(v.n, _roleNode.Id))
+                        .Start(v => Start.At(v.n, _positionNode.Id))
                         .Return(r => new { NewNode = r.n })
                         .Fetch().Select(s => s.NewNode).FirstOrDefault();
 
             Assert.IsNotNull(newnode);
-            Assert.IsTrue(_roleNode.Id == newnode.Id);
-            
+            Assert.IsTrue(_positionNode.Id == newnode.Id);
         }
-
 
         [TestMethod]
-        public void CreateNodeWithinTransaction_Commit_QueryFindsNewNode()
+        public void CreateRelationship_ReturnsResults()
         {
             var clientFactory = new CypherClientFactory("http://localhost:7474/db/data/");
-    
-            using (var trans = new TransactionScope())
-            {
-                var endpoint = new CypherEndpoint(clientFactory);
-                _positionNode = endpoint.CreateNode(new { job = "Neo4J Analyst" });
-                trans.Complete();
-            }
+            var endpoint = new CypherEndpoint(clientFactory);
 
-            var readEndpoint = new CypherEndpoint(clientFactory);
-            var newnode = readEndpoint
-                        .BeginQuery(s => new { n = s.Node })
-                        .Start(v => Start.At(v.n, _positionNode.Id))
-                        .Return(r => new { NewNode = r.n })
+            var path = endpoint
+                        .BeginQuery(s => new { person = s.Node, worksAs = s.Rel, position = s.Node })
+                        .Start(v => Start.At(v.person, _personNode.Id).At(v.position, _positionNode.Id))
+                        .Create(v => Create.Relationship(v.person, v.worksAs, "WORKS_AS", v.position))
+                        .Return(s => new { s.person, s.worksAs, s.position })
                         .Fetch().FirstOrDefault();
 
-            Assert.IsNotNull(newnode);
-            Assert.AreEqual(newnode.NewNode.Id, _positionNode.Id);
+            Assert.IsNotNull(path);
+            Assert.AreEqual("mark WORKS_AS developer", String.Format("{0} {1} {2}", path.person.Get<string>("name"), path.worksAs.Type, path.position.Get<string>("position")));
+
         }
+
 
 
         [TestMethod]
@@ -102,12 +93,12 @@ namespace CypherNet.UnitTests
             var endpoint = new CypherEndpoint(clientFactory);
 
             var nodes = endpoint.BeginQuery(p => new { node = p.Node })
-                    .Start(n => Start.At(n.node, _developerPersonNode.Id))
+                    .Start(n => Start.At(n.node, _personNode.Id))
                     .Return(r => new { Node = r.node })
                     .Fetch();
 
             Assert.AreEqual(nodes.Count(), 1);
-            Assert.AreEqual(nodes.First().Node.Id, _developerPersonNode.Id);
+            Assert.AreEqual(nodes.First().Node.Id, _personNode.Id);
         }
 
         [TestMethod]
