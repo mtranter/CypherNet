@@ -8,7 +8,7 @@
     internal class CypherQueryRequest
     {
 
-        const string JsonRegex = @"{(\s*""\w+""\s*:\s*""?\w+""?\s*)(\s*,\s*(\s*""\w+""\s*:\s*""?\w+""?\s*))*\}";
+        const string JsonRegex = @"{(\s*""\w+""\s*:\s*""?[\w\s]+""?\s*)(\s*,\s*(\s*""\w+""\s*:\s*""?[\w\s]+""?\s*))*\}";
         public static CypherQueryRequest Create(string statement)
         {
             var match = Regex.Match(statement, JsonRegex);

@@ -9,7 +9,7 @@ namespace CypherNet
     {
         ICypherQueryStart<TVariables> BeginQuery<TVariables>();
         ICypherQueryStart<TVariables> BeginQuery<TVariables>(System.Linq.Expressions.Expression<Func<ICypherPrototype,TVariables>> variablePrototype);
-        ICypherQueryReturnOnly<Node> CreateNode(object properties);
-        ICypherQueryReturnOnly<Node> CreateNode(object properties, string label);
+        Node CreateNode(object properties);
+        Node CreateNode(object properties, string label);
     }
 }

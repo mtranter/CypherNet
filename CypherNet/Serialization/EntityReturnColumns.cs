@@ -12,16 +12,23 @@ namespace CypherNet.Serialization
     class EntityReturnColumns
     {
         private readonly PropertyInfo _cypherVariableProperty;
+        private readonly string _propertyName;
 
         public EntityReturnColumns(PropertyInfo cypherVariableProperty)
+            : this(cypherVariableProperty.Name)
         {
             _cypherVariableProperty = cypherVariableProperty;
         }
 
-        public bool RequiresTypeProperty {get { return _cypherVariableProperty.PropertyType == typeof (Relationship); }}
+        public EntityReturnColumns(string propertyName)
+        {
+            _propertyName = propertyName;
+        }
 
-        public string PropertiesPropertyName { get { return _cypherVariableProperty.Name; } }
-        public string IdPropertyName { get { return _cypherVariableProperty.Name + "__Id"; } }
-        public string TypePropertyName { get { return _cypherVariableProperty.Name + "__Type"; } }
+        public bool RequiresTypeProperty {get { return _cypherVariableProperty != null && _cypherVariableProperty.PropertyType == typeof (Relationship); }}
+
+        public string PropertiesPropertyName { get { return _propertyName; } }
+        public string IdPropertyName { get { return _propertyName + "__Id"; } }
+        public string TypePropertyName { get { return _propertyName + "__Type"; } }
     }
 }

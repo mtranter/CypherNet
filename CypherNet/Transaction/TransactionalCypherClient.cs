@@ -58,9 +58,7 @@
 
         public void Rollback()
         {
-            var commitUri = UriHelper.Combine(_transactionUri, "rollback");
-            var emptyRequest = new CypherQueryRequest();
-            var resultTask = _webClient.PostAsync<CypherResponse<object>>(commitUri, emptyRequest);
+            var resultTask = _webClient.DeleteAsync<CypherResponse<object>>(_transactionUri);
             var result = resultTask.Result;
             if (result.Errors.Any())
                 throw new Exception("Errors returned from Neo Server: " + String.Join(",", result.Errors));

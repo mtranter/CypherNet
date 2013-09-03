@@ -1,17 +1,24 @@
-﻿namespace CypherNet.Queries
+﻿
+
+namespace CypherNet.Queries
 {
     #region
 
     using System;
+    using System.Linq;
     using System.Linq.Expressions;
     using System.Reflection;
     using System.Text;
     using Graph;
+    using StaticReflection;
 
     #endregion
 
     internal class CypherWhereClauseBuilder
     {
+        private static readonly MemberInfo NodeIdMember = ReflectOn<Node>.Member(n => n.Id).MemberInfo;
+        private static readonly MemberInfo RelIdMember = ReflectOn<Relationship>.Member(n => n.Id).MemberInfo;
+
         internal static string BuildWhereClause(Expression exp)
         {
             var lambda = exp as LambdaExpression;
@@ -118,6 +125,12 @@
                 if (node.Expression != null && node.Expression.NodeType == ExpressionType.Parameter)
                 {
                     _queryBuilder.Append(node.Member.Name);
+                    return node;
+                }
+                else if (new[] { NodeIdMember, RelIdMember }.Any(m => m == node.Member) && node.Expression.NodeType == ExpressionType.MemberAccess)
+                {
+                    var parent = node.Expression as MemberExpression;
+                    _queryBuilder.AppendFormat("id({0})", parent.Member.Name);
                     return node;
                 }
                
