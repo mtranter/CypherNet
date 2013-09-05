@@ -20,8 +20,8 @@ namespace CypherNet.Transaction
     {
         private readonly string _baseUri;
 
-        private static readonly Dictionary<string, ResourceManager> CurrentNotifications =
-            new Dictionary<string, ResourceManager>();
+        private static readonly Dictionary<string, ICypherClient> ActiveClients =
+            new Dictionary<string, ICypherClient>();
 
         private static readonly object Lock = new object();
 
@@ -49,45 +49,53 @@ namespace CypherNet.Transaction
         {
             if (Transaction.Current != null)
             {
-                var unitOfWork = new TransactionalCypherClient(sourceUri, webClient);
-                var key = Transaction.Current.TransactionInformation.LocalIdentifier;
-                var notifier = new ResourceManager(unitOfWork);
                 lock (Lock)
                 {
-                    notifier.Complete += (o, e) =>
-                        {
-                            lock (Lock)
-                            {
-                                CurrentNotifications.Remove(key);
-                            }
-                        };
+                    var key = Transaction.Current.TransactionInformation.LocalIdentifier;
+                    ICypherClient client;
+                    if (ActiveClients.ContainsKey(key))
+                    {
+                        client = ActiveClients[key];
+                    }
+                    else
+                    {
+                        client = new TransactionalCypherClient(sourceUri, webClient);
+                        var notifier = new ResourceManager((ICypherUnitOfWork) client);
 
-                    CurrentNotifications.Add(key, notifier);
-                    System.Transactions.Transaction.Current.EnlistVolatile(notifier, EnlistmentOptions.EnlistDuringPrepareRequired);
-                    return unitOfWork;
+                        notifier.Complete += (o, e) =>
+                            {
+                                lock (Lock)
+                                {
+                                    ActiveClients.Remove(key);
+                                }
+                            };
+
+                        ActiveClients.Add(key, client);
+                        Transaction.Current.EnlistVolatile(notifier, EnlistmentOptions.EnlistDuringPrepareRequired);
+                    }
+                    return client;
                 }
             }
-            else
-            {
-                return new NonTransactionalCypherClient(sourceUri, webClient);
-            }
+
+            return new NonTransactionalCypherClient(sourceUri, webClient);
         }
 
         class ResourceManager : IEnlistmentNotification
         {
-            private readonly ICypherUnitOfWork _unitOfWork;
 
             internal ResourceManager(ICypherUnitOfWork unitOfWork)
             {
-                _unitOfWork = unitOfWork;
-                ;
+                UnitOfWork = unitOfWork;
+                
             }
+
+            internal ICypherUnitOfWork UnitOfWork { get; private set; }
 
             #region IEnlistmentNotification Members
 
             public void Commit(Enlistment enlistment)
             {
-                _unitOfWork.Commit();
+                UnitOfWork.Commit();
                 OnComplete();
                 enlistment.Done();
             }
@@ -99,7 +107,7 @@ namespace CypherNet.Transaction
 
             public void Prepare(PreparingEnlistment preparingEnlistment)
             {
-                if (_unitOfWork.KeepAlive())
+                if (UnitOfWork.KeepAlive())
                 {
                     preparingEnlistment.Prepared();
                 }
@@ -111,7 +119,7 @@ namespace CypherNet.Transaction
 
             public void Rollback(Enlistment enlistment)
             {
-                _unitOfWork.Rollback();
+                UnitOfWork.Rollback();
                 OnComplete();
             }
 

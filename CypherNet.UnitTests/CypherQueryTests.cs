@@ -1,4 +1,7 @@
-﻿namespace CypherNet.UnitTests
+﻿using System;
+using System.Linq.Expressions;
+
+namespace CypherNet.UnitTests
 {
     #region
 
@@ -142,6 +145,11 @@
             mock.Verify(
               c =>
               c.ExecuteQuery<TResult>(query));
+        }
+
+        void DoIt<TResult, TInput>(TInput proto, Expression<Func<TResult>> inputFunc) where TResult : TInput, ICypherClientFactory 
+        {
+            
         }
     }
 }
