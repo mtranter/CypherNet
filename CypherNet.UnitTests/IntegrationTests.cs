@@ -154,12 +154,47 @@ namespace CypherNet.UnitTests
                 var clientFactory = new CypherClientFactory("http://localhost:7474/db/data/");
                 var endpoint = new CypherEndpoint(clientFactory);
                 var nodes = endpoint.BeginQuery(p => new {node = p.Node})
-                        .Start(n => Start.At(n.node, 1874))
+                        .Start(n => Start.Any(n.node))
+                        .Where(n => n.node.Id == _personNode.Id)
                         .Return(r => new {Node = r.node })
                         .Fetch();
                 Assert.AreEqual(nodes.Count(), 1);
                 trans.Complete();
             }
+        }
+
+        [TestMethod]
+        public void NestedTransactions_CommitInnerRollbackOuter_DoesNotCreateOuterNode()
+        {
+            var clientFactory = new CypherClientFactory("http://localhost:7474/db/data/");
+            var endpoint = new CypherEndpoint(clientFactory);
+            using (var trans1 = new TransactionScope(TransactionScopeOption.RequiresNew, TimeSpan.FromDays(1)))
+            {
+
+                var node1 = endpoint.CreateNode(new {name = "test node1"});
+                using (var trans2 = new TransactionScope(TransactionScopeOption.RequiresNew))
+                {
+                    var node2 = endpoint.CreateNode(new { name = "test node2" });
+                    trans2.Complete();
+                }
+            }
+
+            var node1Query = endpoint.BeginQuery(s => new {node1 = s.Node})
+                                     .Start(s => Start.Any(s.node1))
+                                     .Where(n => n.node1.Get<string>("name") == "test node1")
+                                     .Return(r => new {r.node1})
+                                     .Fetch()
+                                     .FirstOrDefault();
+            var node2Query = endpoint.BeginQuery(s => new { node1 = s.Node })
+                         .Start(s => Start.Any(s.node1))
+                         .Where(n => n.node1.Get<string>("name!") == "test node2")
+                         .Return(r => new { r.node1 })
+                         .Fetch()
+                         .FirstOrDefault();
+
+            Assert.IsNull(node1Query);
+            Assert.IsNotNull(node2Query);
+
         }
     }
 }

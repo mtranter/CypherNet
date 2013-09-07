@@ -1,7 +1,6 @@
 ﻿namespace CypherNet.Transaction
 {
     using System.Collections.Generic;
-    using Queries;
 
     public interface ICypherClient 
     {

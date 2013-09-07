@@ -16,7 +16,6 @@ c:\Projects\Git\CypherNet\CypherNet.UnitTests\bin\Debug\CypherNet.dll
 c:\Projects\Git\CypherNet\CypherNet.UnitTests\bin\Debug\Moq.dll
 c:\Projects\Git\CypherNet\CypherNet.UnitTests\bin\Debug\Newtonsoft.Json.dll
 c:\Projects\Git\CypherNet\CypherNet.UnitTests\bin\Debug\CypherNet.pdb
-c:\Projects\Git\CypherNet\CypherNet.UnitTests\bin\Debug\Moq.pdb
 c:\Projects\Git\CypherNet\CypherNet.UnitTests\bin\Debug\Moq.xml
 c:\Projects\Git\CypherNet\CypherNet.UnitTests\bin\Debug\Newtonsoft.Json.xml
 c:\Projects\Git\CypherNet\CypherNet.UnitTests\obj\Debug\CypherNet.UnitTests.csprojResolveAssemblyReference.cache
@@ -24,3 +23,5 @@ c:\Projects\Git\CypherNet\CypherNet.UnitTests\obj\Debug\CypherNet.UnitTests.dll
 c:\Projects\Git\CypherNet\CypherNet.UnitTests\obj\Debug\CypherNet.UnitTests.pdb
 D:\Cypher.Net\CypherNet.UnitTests\bin\Debug\StaticReflection.dll
 D:\Cypher.Net\CypherNet.UnitTests\bin\Debug\IntegrationTests.orderedtest
+C:\Projects\Git\CypherNet\CypherNet.UnitTests\bin\Debug\IntegrationTests.orderedtest
+C:\Projects\Git\CypherNet\CypherNet.UnitTests\bin\Debug\StaticReflection.dll

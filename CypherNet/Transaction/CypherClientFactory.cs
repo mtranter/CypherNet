@@ -82,20 +82,18 @@ namespace CypherNet.Transaction
 
         class ResourceManager : IEnlistmentNotification
         {
+            private readonly ICypherUnitOfWork _unitOfWork;
 
             internal ResourceManager(ICypherUnitOfWork unitOfWork)
             {
-                UnitOfWork = unitOfWork;
-                
+                _unitOfWork = unitOfWork;
             }
-
-            internal ICypherUnitOfWork UnitOfWork { get; private set; }
 
             #region IEnlistmentNotification Members
 
             public void Commit(Enlistment enlistment)
             {
-                UnitOfWork.Commit();
+                _unitOfWork.Commit();
                 OnComplete();
                 enlistment.Done();
             }
@@ -107,7 +105,7 @@ namespace CypherNet.Transaction
 
             public void Prepare(PreparingEnlistment preparingEnlistment)
             {
-                if (UnitOfWork.KeepAlive())
+                if (_unitOfWork.KeepAlive())
                 {
                     preparingEnlistment.Prepared();
                 }
@@ -119,7 +117,7 @@ namespace CypherNet.Transaction
 
             public void Rollback(Enlistment enlistment)
             {
-                UnitOfWork.Rollback();
+                _unitOfWork.Rollback();
                 OnComplete();
             }
 
