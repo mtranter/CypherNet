@@ -30,3 +30,35 @@ Exposes strongly typed, lambda expression based Graph Query API based on the Neo
       Console.WriteLine(String.Format("{0} {1} {2}", start.name, node.Rel.Type, end.title)); // Prints "mark IS_A developer"
   }
 ```
+<dl>
+    <dt>Transactional</dt>
+    <dd></dd>
+</dl>
+```C#
+    using (var trans1 = new TransactionScope(TransactionScopeOption.RequiresNew, TimeSpan.FromDays(1)))
+    {
+        var node1 = cypherEndpoint.CreateNode(new {name = "test node1"});
+        using (var trans2 = new TransactionScope(TransactionScopeOption.RequiresNew))
+        {
+            var node2 = cypherEndpoint.CreateNode(new { name = "test node2" });
+            trans2.Complete();
+        }
+    }
+    
+    var node1Query = cypherEndpoint.BeginQuery(s => new {node1 = s.Node})
+                             .Start(s => Start.Any(s.node1))
+                             .Where(n => n.node1.Get<string>("name") == "test node1")
+                             .Return(r => new {r.node1})
+                             .Fetch()
+                             .FirstOrDefault();
+    
+    var node2Query = cypherEndpoint.BeginQuery(s => new {node1 = s.Node})
+                             .Start(s => Start.Any(s.node1))
+                             .Where(n => n.node1.Get<string>("name!") == "test node2")
+                             .Return(r => new {r.node1})
+                             .Fetch()
+                             .FirstOrDefault();
+    
+    Assert.IsNull(node1Query);
+    Assert.IsNotNull(node2Query);
+```
