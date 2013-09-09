@@ -14,9 +14,9 @@ Exposes strongly typed, lambda expression based Graph Query API based on the Neo
   var nodes = cypherEndpoint
           .BeginQuery(p => new { person = p.Node, rel = p.Rel, role = p.Node }) // Define query variables
           .Start(vars => Start.Any(vars.person)) // Cypher START clause
-          .Match(v => Pattern.Start(v.person).Outgoing(v.rel).To(v.role))  // Cypher MATCH clause
-          .Where(v => v.person.Get<string>("name!") == "mark" && v.role.Get<string>("title!") == "developer") // Cypher WHERE predicate
-          .Return(r => new { Person = r.person, Rel = r.rel, Role = r.role }) // Cypher RETURN clause
+          .Match(vars => Pattern.Start(vars.person).Outgoing(vars.rel).To(vars.role))  // Cypher MATCH clause
+          .Where(vars => vars.person.Get<string>("name!") == "mark" && vars.role.Get<string>("title!") == "developer") // Cypher WHERE predicate
+          .Return(vars => new { Person = vars.person, Rel = vars.rel, Role = vars.role }) // Cypher RETURN clause
           .Fetch();  // GO!
 
   Assert.IsTrue(nodes.Any());
