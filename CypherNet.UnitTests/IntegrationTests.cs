@@ -172,37 +172,31 @@ namespace CypherNet.UnitTests
         {
             var clientFactory = new CypherClientFactory("http://localhost:7474/db/data/");
             var cypherEndpoint = new CypherEndpoint(clientFactory);
-
+            Node node1, node2;
             using (var trans1 = new TransactionScope(TransactionScopeOption.RequiresNew, TimeSpan.FromDays(1)))
             {
-                var node1 = cypherEndpoint.CreateNode(new {name = "test node1"});
+                node1 = cypherEndpoint.CreateNode(new {name = "test node1"});
                 using (var trans2 = new TransactionScope(TransactionScopeOption.RequiresNew))
                 {
-                    var node2 = cypherEndpoint.CreateNode(new { name = "test node2" });
+                    node2 = cypherEndpoint.CreateNode(new { name = "test node2" });
                     trans2.Complete();
                 }
             }
 
             var node1Query = cypherEndpoint.BeginQuery(s => new {node1 = s.Node})
-                                     .Start(s => Start.Any(s.node1))
-                                     .Where(n => n.node1.Get<string>("name") == "test node1")
+                                     .Start(s => Start.At(s.node1, node1.Id))
                                      .Return(r => new {r.node1})
                                      .Fetch()
                                      .FirstOrDefault();
 
-            var node2Query = cypherEndpoint.BeginQuery(s => new {node1 = s.Node})
-                                     .Start(s => Start.Any(s.node1))
-                                     .Where(n => n.node1.Get<string>("name!") == "test node2")
-                                     .Return(r => new {r.node1})
+            var node2Query = cypherEndpoint.BeginQuery(s => new {node2 = s.Node})
+                                     .Start(s => Start.At(s.node2, node2.Id))
+                                     .Return(r => new {r.node2})
                                      .Fetch()
                                      .FirstOrDefault();
 
             Assert.IsNull(node1Query);
             Assert.IsNotNull(node2Query);
-
-            var cl = new TestDoSOmething<TestCypherClause>();
-    
-
         }
 
         public class TestDoSOmething<TTemplate>
