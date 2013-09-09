@@ -35,15 +35,15 @@ Exposes strongly typed, lambda expression based Graph Query API based on the Neo
     <dd></dd>
 </dl>
 ```C#
-    using (var trans1 = new TransactionScope(TransactionScopeOption.RequiresNew, TimeSpan.FromDays(1)))
+    using (var trans1 = new TransactionScope())
     {
         var node1 = cypherEndpoint.CreateNode(new {name = "test node1"});
         using (var trans2 = new TransactionScope(TransactionScopeOption.RequiresNew))
         {
             var node2 = cypherEndpoint.CreateNode(new { name = "test node2" });
-            trans2.Complete();
-        }
-    }
+            trans2.Complete(); 
+        } //Commit Inner transaction.
+    } //Rollback Outer transaction
     
     var node1Query = cypherEndpoint.BeginQuery(s => new {node1 = s.Node})
                              .Start(s => Start.Any(s.node1))
