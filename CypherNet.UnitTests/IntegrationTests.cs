@@ -1,9 +1,11 @@
 ﻿using System;
 using System.Linq;
+using System.Linq.Expressions;
 using System.Transactions;
 using CypherNet.Graph;
 using CypherNet.Queries;
 using CypherNet.Transaction;
+using Dynamic4Neo.Tests;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 
 namespace CypherNet.UnitTests
@@ -105,16 +107,17 @@ namespace CypherNet.UnitTests
         public void QueryWithJoins_NotInsideTransaction_ReturnsResults()
         {
             var clientFactory = new CypherClientFactory("http://localhost:7474/db/data/");
-            var endpoint = new CypherEndpoint(clientFactory);
+            var cypherEndpoint = new CypherEndpoint(clientFactory);
 
-            var nodes = endpoint.BeginQuery(p => new { mystart = p.Node, rel = p.Rel, end= p.Node })
+            var result = cypherEndpoint
+                    .BeginQuery(p => new { mystart = p.Node, rel = p.Rel, end= p.Node })
                     .Start(n => Start.At(n.mystart, 1873))
                     .Match(v => Pattern.Start(v.mystart).Outgoing(v.rel).To(v.end))
                     .Return(r => new { MyStart = r.mystart, Rel = r.rel, End = r.end })
                     .Fetch();
 
-            Assert.AreEqual(nodes.Count(), 1);
-            var first = nodes.First();
+            var first = result.First();
+            Assert.AreEqual(result.Count(), 1);
             Assert.AreEqual(first.MyStart.Id, 1873);
             Assert.AreEqual(first.End.Id, 1872);
             Assert.AreEqual(first.Rel.Id, 35905);
@@ -125,24 +128,25 @@ namespace CypherNet.UnitTests
         public void QueryWithJoinsOverMany_NotInsideTransaction_ReturnsMultipleResults()
         {
             var clientFactory = new CypherClientFactory("http://localhost:7474/db/data/");
-            var endpoint = new CypherEndpoint(clientFactory);
+            var cypherEndpoint = new CypherEndpoint(clientFactory);
 
-            var nodes = endpoint
-                    .BeginQuery(p => new { mystart = p.Node, rel = p.Rel, end = p.Node })
-                    .Match(v => Pattern.Start(v.mystart).Outgoing(v.rel).To(v.end))
-                    .Where(v => v.mystart.Get<string>("name!") == "mark" && v.end.Get<string>("title!") == "developer")
-                    .Return(r => new { MyStart = r.mystart, Rel = r.rel, End = r.end })
-                    .Fetch();
-
+            var nodes = cypherEndpoint
+                    .BeginQuery(p => new { person = p.Node, rel = p.Rel, role = p.Node }) // Define query variables
+                    .Start(vars => Start.Any(vars.person)) // Cypher START clause
+                    .Match(vars => Pattern.Start(vars.person).Outgoing(vars.rel).To(vars.role))  // Cypher MATCH clause
+                    .Where(vars => vars.person.Get<string>("name!") == "mark" && vars.role.Get<string>("title!") == "developer") // Cypher WHERE predicate
+                    .Return(vars => new { Person = vars.person, Rel = vars.rel, Role = vars.role }) // Cypher RETURN clause
+                    .Fetch();  // GO!
 
             Assert.IsTrue(nodes.Any());
+
             foreach (var node in nodes)
             {
-                dynamic start = node.MyStart;
-                dynamic end = node.End;
+                dynamic start = node.Person;  // Nodes & Relationships are dynamic types
+                dynamic end = node.Role;
                 Assert.AreEqual("mark", start.name);
                 Assert.AreEqual("developer", end.title);
-                Console.WriteLine(String.Format("{0} {1} {2}", start.name, node.Rel.Type, end.title));
+                Console.WriteLine(String.Format("{0} {1} {2}", start.name, node.Rel.Type, end.title)); // Prints "mark IS_A developer"
             }
         }
 
@@ -167,34 +171,47 @@ namespace CypherNet.UnitTests
         public void NestedTransactions_CommitInnerRollbackOuter_DoesNotCreateOuterNode()
         {
             var clientFactory = new CypherClientFactory("http://localhost:7474/db/data/");
-            var endpoint = new CypherEndpoint(clientFactory);
+            var cypherEndpoint = new CypherEndpoint(clientFactory);
+
             using (var trans1 = new TransactionScope(TransactionScopeOption.RequiresNew, TimeSpan.FromDays(1)))
             {
-
-                var node1 = endpoint.CreateNode(new {name = "test node1"});
+                var node1 = cypherEndpoint.CreateNode(new {name = "test node1"});
                 using (var trans2 = new TransactionScope(TransactionScopeOption.RequiresNew))
                 {
-                    var node2 = endpoint.CreateNode(new { name = "test node2" });
+                    var node2 = cypherEndpoint.CreateNode(new { name = "test node2" });
                     trans2.Complete();
                 }
             }
 
-            var node1Query = endpoint.BeginQuery(s => new {node1 = s.Node})
+            var node1Query = cypherEndpoint.BeginQuery(s => new {node1 = s.Node})
                                      .Start(s => Start.Any(s.node1))
                                      .Where(n => n.node1.Get<string>("name") == "test node1")
                                      .Return(r => new {r.node1})
                                      .Fetch()
                                      .FirstOrDefault();
-            var node2Query = endpoint.BeginQuery(s => new { node1 = s.Node })
-                         .Start(s => Start.Any(s.node1))
-                         .Where(n => n.node1.Get<string>("name!") == "test node2")
-                         .Return(r => new { r.node1 })
-                         .Fetch()
-                         .FirstOrDefault();
+
+            var node2Query = cypherEndpoint.BeginQuery(s => new {node1 = s.Node})
+                                     .Start(s => Start.Any(s.node1))
+                                     .Where(n => n.node1.Get<string>("name!") == "test node2")
+                                     .Return(r => new {r.node1})
+                                     .Fetch()
+                                     .FirstOrDefault();
 
             Assert.IsNull(node1Query);
             Assert.IsNotNull(node2Query);
 
+            var cl = new TestDoSOmething<TestCypherClause>();
+    
+
+        }
+
+        public class TestDoSOmething<TTemplate>
+        {
+            public void DoSomething<TInterface>(Expression<Action<TInterface>> func)
+                where TInterface : TTemplate, ICypherClientFactory
+            {
+                
+            }
         }
     }
 }
