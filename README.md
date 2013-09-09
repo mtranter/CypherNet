@@ -10,7 +10,6 @@ Exposes strongly typed, lambda expression based Graph Query API based on the Neo
     <dt>Usage</dt>
     <dd></dd>
 </dl>
-
 ```C#
   var nodes = cypherEndpoint
           .BeginQuery(p => new { person = p.Node, rel = p.Rel, role = p.Node }) // Define query variables
