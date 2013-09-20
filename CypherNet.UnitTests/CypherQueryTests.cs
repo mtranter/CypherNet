@@ -32,7 +32,7 @@ namespace CypherNet.UnitTests
                 .Return(v => new { v.actor, v.movie })
                 .Fetch();
 
-            VerifyCypher(cypher, results.FirstOrDefault(), "START movie=node(1) MATCH (movie)<-[:STARED_IN*1..5]-(actor) RETURN actor as actor, id(actor) as actor__Id, movie as movie, id(movie) as movie__Id");
+            VerifyCypher(cypher, results.FirstOrDefault(), "START movie=node(1) MATCH (movie)<-[:STARED_IN*1..5]-(actor) RETURN actor as actor, id(actor) as actor__Id, labels(actor) as actor__Labels, movie as movie, id(movie) as movie__Id, labels(movie) as movie__Labels");
         }
 
         [TestMethod]
@@ -49,7 +49,7 @@ namespace CypherNet.UnitTests
                 .Return(v => new { v.actor, v.movie })
                 .Fetch();
 
-            VerifyCypher(cypher, results.FirstOrDefault(), @"MATCH (movie:arthouse) SET movie.requiresSubtitles = ""yes"" RETURN actor as actor, id(actor) as actor__Id, movie as movie, id(movie) as movie__Id");
+            VerifyCypher(cypher, results.FirstOrDefault(), @"MATCH (movie:arthouse) SET movie.requiresSubtitles = ""yes"" RETURN actor as actor, id(actor) as actor__Id, labels(actor) as actor__Labels, movie as movie, id(movie) as movie__Id, labels(movie) as movie__Labels");
         }
 
         [TestMethod]
@@ -65,7 +65,7 @@ namespace CypherNet.UnitTests
                 .Create(v => Create.Relationship(v.actor, v.actedIn, "ACTED_IN", v.movie))
                 .Return(v => new { v.actedIn })
                 .Fetch();
-
+                                                           
             VerifyCypher(cypher, results.FirstOrDefault(), "START actor=node(1), movie=node(2) CREATE (actor)-[actedIn:ACTED_IN]->(movie) RETURN actedIn as actedIn, id(actedIn) as actedIn__Id, type(actedIn) as actedIn__Type");
         }
 
@@ -102,7 +102,7 @@ namespace CypherNet.UnitTests
                 .Return(v => new { v.actor, v.movie })
                 .Fetch();
 
-            VerifyCypher(cypher, results.FirstOrDefault(), "START movie=node(*) MATCH (movie)<-[:STARED_IN]-(actor) WHERE ((actor.name = 'Bob Dinero') OR (actor.role = 'Keyser Söze')) RETURN actor as actor, id(actor) as actor__Id, movie as movie, id(movie) as movie__Id");
+            VerifyCypher(cypher, results.FirstOrDefault(), "START movie=node(*) MATCH (movie)<-[:STARED_IN]-(actor) WHERE ((actor.name = 'Bob Dinero') OR (actor.role = 'Keyser Söze')) RETURN actor as actor, id(actor) as actor__Id, labels(actor) as actor__Labels, movie as movie, id(movie) as movie__Id, labels(movie) as movie__Labels");
         }
 
         [TestMethod]
@@ -118,7 +118,7 @@ namespace CypherNet.UnitTests
                 .Return(v => new { v.actor, v.director })
                 .Fetch();
 
-            VerifyCypher(cypher, results.FirstOrDefault(), "MATCH (actor:METHOD_ACTOR)-[:STARED_IN]->()-[directedBy:DIRECTED_BY]->(director) RETURN actor as actor, id(actor) as actor__Id, director as director, id(director) as director__Id");
+            VerifyCypher(cypher, results.FirstOrDefault(), "MATCH (actor:METHOD_ACTOR)-[:STARED_IN]->()-[directedBy:DIRECTED_BY]->(director) RETURN actor as actor, id(actor) as actor__Id, labels(actor) as actor__Labels, director as director, id(director) as director__Id, labels(director) as director__Labels");
         }
 
         [TestMethod]
@@ -137,7 +137,7 @@ namespace CypherNet.UnitTests
                 .Limit(1)
                 .Fetch();
 
-            VerifyCypher(cypher, results.FirstOrDefault(), "START actor=node(1) RETURN actor as actor, id(actor) as actor__Id ORDER BY actedIn.fgds, actedIn.name SKIP 2 LIMIT 1");
+            VerifyCypher(cypher, results.FirstOrDefault(), "START actor=node(1) RETURN actor as actor, id(actor) as actor__Id, labels(actor) as actor__Labels ORDER BY actedIn.fgds, actedIn.name SKIP 2 LIMIT 1");
         }
 
         void VerifyCypher<TResult>(Mock<ICypherClient> mock, TResult proto, string query)

@@ -14,7 +14,7 @@ namespace CypherNet.Transaction
         private readonly ICypherClientFactory _clientFactory;
         private readonly IWebSerializer _webSerializer;
         private static readonly string NodeVariableName = ReflectOn<CreateNodeResult>.Member(a => a.NewNode).Name;
-        private static readonly string CreateNodeClauseFormat = String.Format(@"CREATE ({0}{{0}} {{1}}) RETURN {0} as {{2}}, id({0}) as {{3}};", NodeVariableName);
+        private static readonly string CreateNodeClauseFormat = String.Format(@"CREATE ({0}{{0}} {{1}}) RETURN {0} as {{2}}, id({0}) as {{3}}, labels({0}) as {{4}};", NodeVariableName);
 
         internal CypherSession(ICypherClientFactory clientFactory)
             : this(clientFactory, new DefaultJsonSerializer())
@@ -44,20 +44,33 @@ namespace CypherNet.Transaction
             return CreateNode(properties, null);
         }
         
-        
         public Node CreateNode(object properties, string label)
         {
             var props = _webSerializer.Serialize(properties);
             var propNames = new EntityReturnColumns(NodeVariableName);
             var clause = String.Format(CreateNodeClauseFormat, String.IsNullOrEmpty(label) ? "" : ":" + label, props,
-                                       propNames.PropertiesPropertyName, propNames.IdPropertyName);
+                                       propNames.PropertiesPropertyName, propNames.IdPropertyName, propNames.LabelsPropertyName);
             var endpoint = _clientFactory.Create();
             var result = endpoint.ExecuteQuery<CreateNodeResult>(clause);
             return result.First().NewNode;
         }
 
-        #endregion
-        
+        public Node GetNode(long id)
+        {
+            throw new NotImplementedException();
+        }
+
+        public void DeleteNode(long nodeId)
+        {
+            throw new NotImplementedException();
+        }
+
+        public void UpdateNode(long nodeId, object properties)
+        {
+            throw new NotImplementedException();
+        }
+
+         #endregion
 
         internal class CreateNodeResult
         {

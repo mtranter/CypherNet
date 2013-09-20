@@ -48,6 +48,10 @@
                 {
                     retval += String.Format(", type({0}) as {1}", entityName, entityPropertyNames.TypePropertyName);
                 }
+                if (entityPropertyNames.RequiresLabelsProperty)
+                {
+                    retval += String.Format(", labels({0}) as {1}", entityName, entityPropertyNames.LabelsPropertyName);
+                }
                 return retval;
             }
 

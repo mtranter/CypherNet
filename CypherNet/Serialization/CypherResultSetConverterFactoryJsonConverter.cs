@@ -118,6 +118,14 @@ namespace CypherNet.Serialization
                                     _propertyCache.Add(typeProp, Array.IndexOf(columns, typeProp));
                                 }
                             }
+                            if (prop.PropertyType == typeof(Node))
+                            {
+                                var typeProp = prop.Name + "__Labels";
+                                if (columns.Contains(typeProp))
+                                {
+                                    _propertyCache.Add(typeProp, Array.IndexOf(columns, typeProp));
+                                }
+                            }
                         }
                     }
                 }
@@ -148,6 +156,13 @@ namespace CypherNet.Serialization
                                 AssertNecesaryColumnForType(entityPropertyNames.PropertiesPropertyName, typeof(IGraphEntity));
                                 var entityProperties = record[_propertyCache[entityPropertyNames.PropertiesPropertyName]].ToObject<Dictionary<string, object>>();
                                 itemproperties.Add("properties", entityProperties);
+
+                                if (entityPropertyNames.RequiresLabelsProperty)
+                                {
+                                    AssertNecesaryColumnForType(entityPropertyNames.LabelsPropertyName, typeof(Node));
+                                    var labels = record[_propertyCache[entityPropertyNames.LabelsPropertyName]].ToObject<string[]>();
+                                    itemproperties.Add("labels", labels);
+                                }
 
                                 if (entityPropertyNames.RequiresTypeProperty)
                                 {

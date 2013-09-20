@@ -1,4 +1,6 @@
-﻿namespace CypherNet.Graph
+﻿using System.Linq;
+
+namespace CypherNet.Graph
 {
     using System;
     using System.Collections.Generic;
@@ -6,16 +8,20 @@
 
     public class Node : GraphEntity<Node>
     {
-        internal Node(long id, object properties)
+        internal Node(long id, object properties, string[] labels)
             : base(id, properties)
         {
+            Labels = labels.ToList();
         }
 
         [DeserializeUsing]
-        internal Node(long id, IDictionary<string, object> properties)
+        internal Node(long id, IDictionary<string, object> properties, string[] labels)
             : base(id, properties)
         {
+            Labels = labels.ToList();
         }
+
+        public IList<string> Labels { get; private set; }
     }
 
 }

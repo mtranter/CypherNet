@@ -26,7 +26,7 @@ namespace CypherNet.UnitTests
 
             _personNode = endpoint.CreateNode(new { name = "mark", age = 33 }, "person");
             dynamic node = _personNode;
-
+            
             Assert.AreEqual(node.name, "mark");
             Assert.AreEqual(node.age, 33);
         }

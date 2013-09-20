@@ -26,9 +26,11 @@ namespace CypherNet.Serialization
         }
 
         public bool RequiresTypeProperty {get { return _cypherVariableProperty != null && _cypherVariableProperty.PropertyType == typeof (Relationship); }}
+        public bool RequiresLabelsProperty { get { return _cypherVariableProperty != null && _cypherVariableProperty.PropertyType == typeof(Node); } }
 
         public string PropertiesPropertyName { get { return _propertyName; } }
         public string IdPropertyName { get { return _propertyName + "__Id"; } }
         public string TypePropertyName { get { return _propertyName + "__Type"; } }
+        public string LabelsPropertyName { get { return _propertyName + "__Labels"; } }
     }
 }

@@ -6,7 +6,7 @@
 
     #endregion
 
-    internal class TestCypherClause
+    public class TestCypherClause
     {
         public Node actor { get; set; }
         public Node director { get; set; }

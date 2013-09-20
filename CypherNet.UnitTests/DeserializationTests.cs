@@ -27,11 +27,13 @@ namespace CypherNet.UnitTests
          ""columns"":[
             ""Actor"",
             ""Actor__Id"",
+            ""Actor__Labels"",
             ""ActedIn"",
             ""ActedIn__Id"",
             ""ActedIn__Type"",
             ""Movie"",
-            ""Movie__Id""
+            ""Movie__Id"",
+            ""Movie__Labels""
          ],
          ""data"":[
             [
@@ -40,6 +42,7 @@ namespace CypherNet.UnitTests
                   ""name"":""mark""
                },
                3745,
+                [""person""],
                {
 
                },
@@ -48,13 +51,15 @@ namespace CypherNet.UnitTests
                {
                   ""title"":""developer""
                },
-               3746
+               3746,
+               []
             ],[
                {
                   ""age"":21,
                   ""name"":""John""
                },
                3747,
+               [""person""],
                {
 
                },
@@ -63,7 +68,8 @@ namespace CypherNet.UnitTests
                {
                   ""title"":""leg""
                },
-               3748
+               3748,
+               []
             ]
          ]
       }
