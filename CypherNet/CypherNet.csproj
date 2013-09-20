@@ -50,9 +50,7 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="Configuration\ILabelStrategy.cs" />
-    <Compile Include="Configuration\LabelStrategy.cs" />
-    <Compile Include="Configuration\ScalarTypes.cs" />
+    <Compile Include="Configuration\Fluently.cs" />
     <Compile Include="Dynamic\CachedDictionaryPropertiesProvider.cs" />
     <Compile Include="Dynamic\DynamicEntity.cs" />
     <Compile Include="Dynamic\IDynamicMetaData.cs" />

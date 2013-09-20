@@ -2,6 +2,7 @@
 using System.Linq;
 using System.Linq.Expressions;
 using System.Transactions;
+using CypherNet.Configuration;
 using CypherNet.Graph;
 using CypherNet.Http;
 using CypherNet.Queries;
@@ -20,7 +21,7 @@ namespace CypherNet.UnitTests
         [TestMethod]
         public void CreateNode_WithLabel_ReturnsNewNode()
         {
-            var clientFactory = new DefaultCypherSessionFactory("http://localhost:7474/db/data/", new WebClient(new DefaultJsonSerializer()));
+            var clientFactory = Fluently.Configure("http://localhost:7474/db/data/").CreateSessionFactory();
             var endpoint = clientFactory.Create();
 
             _personNode = endpoint.CreateNode(new { name = "mark", age = 33 }, "person");
@@ -33,7 +34,7 @@ namespace CypherNet.UnitTests
         [TestMethod]
         public void CreateNode_WithoutLabel_ReturnsNewNode()
         {
-            var clientFactory = new DefaultCypherSessionFactory("http://localhost:7474/db/data/", new WebClient(new DefaultJsonSerializer()));
+            var clientFactory = Fluently.Configure("http://localhost:7474/db/data/").CreateSessionFactory();
             var endpoint = clientFactory.Create();
 
             _positionNode = endpoint.CreateNode(new { position = "developer" });
@@ -51,7 +52,7 @@ namespace CypherNet.UnitTests
         [TestMethod]
         public void CreateRelationship_ReturnsResults()
         {
-            var clientFactory = new DefaultCypherSessionFactory("http://localhost:7474/db/data/", new WebClient(new DefaultJsonSerializer()));
+            var clientFactory = Fluently.Configure("http://localhost:7474/db/data/").CreateSessionFactory();
             var endpoint = clientFactory.Create();
 
             var path = endpoint
@@ -71,7 +72,7 @@ namespace CypherNet.UnitTests
         [TestMethod]
         public void CreateNodeWithinTransaction_Rollback_DoesNotCreateNode()
         {
-            var clientFactory = new DefaultCypherSessionFactory("http://localhost:7474/db/data/", new WebClient(new DefaultJsonSerializer()));
+            var clientFactory = Fluently.Configure("http://localhost:7474/db/data/").CreateSessionFactory();
             Node node = null;
 
             using (var trans = new TransactionScope())
@@ -93,7 +94,7 @@ namespace CypherNet.UnitTests
         [TestMethod]
         public void QueryGraph_SimpleQueryNotInsideTransaction_ReturnsResults()
         {
-            var clientFactory = new DefaultCypherSessionFactory("http://localhost:7474/db/data/", new WebClient(new DefaultJsonSerializer()));
+            var clientFactory = Fluently.Configure("http://localhost:7474/db/data/").CreateSessionFactory();
             var endpoint = clientFactory.Create();
 
             var nodes = endpoint.BeginQuery(p => new { node = p.Node })
@@ -108,7 +109,7 @@ namespace CypherNet.UnitTests
         [TestMethod]
         public void QueryWithJoins_NotInsideTransaction_ReturnsResults()
         {
-            var clientFactory = new DefaultCypherSessionFactory("http://localhost:7474/db/data/", new WebClient(new DefaultJsonSerializer()));
+            var clientFactory = Fluently.Configure("http://localhost:7474/db/data/").CreateSessionFactory();
             var cypherEndpoint = clientFactory.Create();
 
             var result = cypherEndpoint
@@ -129,7 +130,7 @@ namespace CypherNet.UnitTests
         [TestMethod]
         public void QueryWithJoinsOverMany_NotInsideTransaction_ReturnsMultipleResults()
         {
-            var clientFactory = new DefaultCypherSessionFactory("http://localhost:7474/db/data/", new WebClient(new DefaultJsonSerializer()));
+            var clientFactory = Fluently.Configure("http://localhost:7474/db/data/").CreateSessionFactory();
             var cypherEndpoint = clientFactory.Create();
 
             var nodes = cypherEndpoint
@@ -157,7 +158,7 @@ namespace CypherNet.UnitTests
         {
             using (var trans = new TransactionScope(TransactionScopeOption.RequiresNew, TimeSpan.FromDays(1)))
             {
-                var clientFactory = new DefaultCypherSessionFactory("http://localhost:7474/db/data/", new WebClient(new DefaultJsonSerializer()));
+                var clientFactory = Fluently.Configure("http://localhost:7474/db/data/").CreateSessionFactory();
                 var cypherEndpoint = clientFactory.Create();
                 var nodes = cypherEndpoint.BeginQuery(p => new { node = p.Node })
                         .Start(n => Start.Any(n.node))
@@ -172,7 +173,7 @@ namespace CypherNet.UnitTests
         [TestMethod]
         public void NestedTransactions_CommitInnerRollbackOuter_DoesNotCreateOuterNode()
         {
-            var clientFactory = new DefaultCypherSessionFactory("http://localhost:7474/db/data/", new WebClient(new DefaultJsonSerializer()));
+            var clientFactory = Fluently.Configure("http://localhost:7474/db/data/").CreateSessionFactory();
             var cypherEndpoint = clientFactory.Create();
             Node node1, node2;
             using (var trans1 = new TransactionScope(TransactionScopeOption.RequiresNew, TimeSpan.FromDays(1)))
