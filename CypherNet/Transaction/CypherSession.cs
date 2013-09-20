@@ -57,7 +57,12 @@ namespace CypherNet.Transaction
 
         public Node GetNode(long id)
         {
-            throw new NotImplementedException();
+            var query = BeginQuery(n => new {newNode = n.Node})
+                .Start(v => Start.At(v.newNode, id))
+                .Return(v => new {v.newNode})
+                .Fetch();
+            var firstRow = query.FirstOrDefault();
+            return firstRow == null ? null : firstRow.newNode;
         }
 
         public void DeleteNode(long nodeId)

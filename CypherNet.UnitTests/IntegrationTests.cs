@@ -19,6 +19,19 @@ namespace CypherNet.UnitTests
         private static Node _personNode, _positionNode;
 
         [TestMethod]
+        public void CreateNode_ReturnsNewNode()
+        {
+            var clientFactory = Fluently.Configure("http://localhost:7474/db/data/").CreateSessionFactory();
+            var endpoint = clientFactory.Create();
+
+            _personNode = endpoint.CreateNode(new { name = "mark", age = 33 }, "person");
+            var twin = endpoint.GetNode(_personNode.Id);
+
+            Assert.AreEqual(twin.Id, _personNode.Id);
+           
+        }
+
+        [TestMethod]
         public void CreateNode_WithLabel_ReturnsNewNode()
         {
             var clientFactory = Fluently.Configure("http://localhost:7474/db/data/").CreateSessionFactory();
