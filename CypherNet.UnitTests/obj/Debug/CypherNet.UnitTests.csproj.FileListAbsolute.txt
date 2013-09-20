@@ -1,7 +1,6 @@
 D:\Cypher.Net\CypherNet.UnitTests\bin\Debug\CypherNet.UnitTests.dll
 D:\Cypher.Net\CypherNet.UnitTests\bin\Debug\CypherNet.UnitTests.pdb
 D:\Cypher.Net\CypherNet.UnitTests\bin\Debug\CypherNet.dll
-D:\Cypher.Net\CypherNet.UnitTests\bin\Debug\Moq.dll
 D:\Cypher.Net\CypherNet.UnitTests\bin\Debug\Newtonsoft.Json.dll
 D:\Cypher.Net\CypherNet.UnitTests\bin\Debug\CypherNet.pdb
 D:\Cypher.Net\CypherNet.UnitTests\bin\Debug\Moq.pdb

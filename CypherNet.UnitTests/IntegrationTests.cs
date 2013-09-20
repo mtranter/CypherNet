@@ -3,7 +3,9 @@ using System.Linq;
 using System.Linq.Expressions;
 using System.Transactions;
 using CypherNet.Graph;
+using CypherNet.Http;
 using CypherNet.Queries;
+using CypherNet.Serialization;
 using CypherNet.Transaction;
 using Dynamic4Neo.Tests;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
@@ -18,8 +20,8 @@ namespace CypherNet.UnitTests
         [TestMethod]
         public void CreateNode_WithLabel_ReturnsNewNode()
         {
-            var clientFactory = new CypherClientFactory("http://localhost:7474/db/data/");
-            var endpoint = new CypherEndpoint(clientFactory);
+            var clientFactory = new DefaultCypherSessionFactory("http://localhost:7474/db/data/", new WebClient(new DefaultJsonSerializer()));
+            var endpoint = clientFactory.Create();
 
             _personNode = endpoint.CreateNode(new { name = "mark", age = 33 }, "person");
             dynamic node = _personNode;
@@ -31,8 +33,8 @@ namespace CypherNet.UnitTests
         [TestMethod]
         public void CreateNode_WithoutLabel_ReturnsNewNode()
         {
-            var clientFactory = new CypherClientFactory("http://localhost:7474/db/data/");
-            var endpoint = new CypherEndpoint(clientFactory);
+            var clientFactory = new DefaultCypherSessionFactory("http://localhost:7474/db/data/", new WebClient(new DefaultJsonSerializer()));
+            var endpoint = clientFactory.Create();
 
             _positionNode = endpoint.CreateNode(new { position = "developer" });
 
@@ -49,8 +51,8 @@ namespace CypherNet.UnitTests
         [TestMethod]
         public void CreateRelationship_ReturnsResults()
         {
-            var clientFactory = new CypherClientFactory("http://localhost:7474/db/data/");
-            var endpoint = new CypherEndpoint(clientFactory);
+            var clientFactory = new DefaultCypherSessionFactory("http://localhost:7474/db/data/", new WebClient(new DefaultJsonSerializer()));
+            var endpoint = clientFactory.Create();
 
             var path = endpoint
                         .BeginQuery(s => new { person = s.Node, worksAs = s.Rel, position = s.Node })
@@ -69,16 +71,16 @@ namespace CypherNet.UnitTests
         [TestMethod]
         public void CreateNodeWithinTransaction_Rollback_DoesNotCreateNode()
         {
-            var clientFactory = new CypherClientFactory("http://localhost:7474/db/data/");
+            var clientFactory = new DefaultCypherSessionFactory("http://localhost:7474/db/data/", new WebClient(new DefaultJsonSerializer()));
             Node node = null;
 
             using (var trans = new TransactionScope())
             {
-                var endpoint = new CypherEndpoint(clientFactory);
+                var endpoint = clientFactory.Create();
                 node = endpoint.CreateNode(new { name = "mark", age = 33 });
             }
 
-            var readEndpoint = new CypherEndpoint(clientFactory);
+            var readEndpoint = clientFactory.Create();
             var newnode = readEndpoint.BeginQuery(s => new {n = s.Node})
                         .Start(v => Start.At(v.n, node.Id))
                         .Return(r => new {NewNode = r.n})
@@ -91,8 +93,8 @@ namespace CypherNet.UnitTests
         [TestMethod]
         public void QueryGraph_SimpleQueryNotInsideTransaction_ReturnsResults()
         {
-            var clientFactory = new CypherClientFactory("http://localhost:7474/db/data/");
-            var endpoint = new CypherEndpoint(clientFactory);
+            var clientFactory = new DefaultCypherSessionFactory("http://localhost:7474/db/data/", new WebClient(new DefaultJsonSerializer()));
+            var endpoint = clientFactory.Create();
 
             var nodes = endpoint.BeginQuery(p => new { node = p.Node })
                     .Start(n => Start.At(n.node, _personNode.Id))
@@ -106,8 +108,8 @@ namespace CypherNet.UnitTests
         [TestMethod]
         public void QueryWithJoins_NotInsideTransaction_ReturnsResults()
         {
-            var clientFactory = new CypherClientFactory("http://localhost:7474/db/data/");
-            var cypherEndpoint = new CypherEndpoint(clientFactory);
+            var clientFactory = new DefaultCypherSessionFactory("http://localhost:7474/db/data/", new WebClient(new DefaultJsonSerializer()));
+            var cypherEndpoint = clientFactory.Create();
 
             var result = cypherEndpoint
                     .BeginQuery(p => new { mystart = p.Node, rel = p.Rel, end= p.Node })
@@ -127,8 +129,8 @@ namespace CypherNet.UnitTests
         [TestMethod]
         public void QueryWithJoinsOverMany_NotInsideTransaction_ReturnsMultipleResults()
         {
-            var clientFactory = new CypherClientFactory("http://localhost:7474/db/data/");
-            var cypherEndpoint = new CypherEndpoint(clientFactory);
+            var clientFactory = new DefaultCypherSessionFactory("http://localhost:7474/db/data/", new WebClient(new DefaultJsonSerializer()));
+            var cypherEndpoint = clientFactory.Create();
 
             var nodes = cypherEndpoint
                     .BeginQuery(p => new { person = p.Node, rel = p.Rel, role = p.Node }) // Define query variables
@@ -155,9 +157,9 @@ namespace CypherNet.UnitTests
         {
             using (var trans = new TransactionScope(TransactionScopeOption.RequiresNew, TimeSpan.FromDays(1)))
             {
-                var clientFactory = new CypherClientFactory("http://localhost:7474/db/data/");
-                var endpoint = new CypherEndpoint(clientFactory);
-                var nodes = endpoint.BeginQuery(p => new {node = p.Node})
+                var clientFactory = new DefaultCypherSessionFactory("http://localhost:7474/db/data/", new WebClient(new DefaultJsonSerializer()));
+                var cypherEndpoint = clientFactory.Create();
+                var nodes = cypherEndpoint.BeginQuery(p => new { node = p.Node })
                         .Start(n => Start.Any(n.node))
                         .Where(n => n.node.Id == _personNode.Id)
                         .Return(r => new {Node = r.node })
@@ -170,8 +172,8 @@ namespace CypherNet.UnitTests
         [TestMethod]
         public void NestedTransactions_CommitInnerRollbackOuter_DoesNotCreateOuterNode()
         {
-            var clientFactory = new CypherClientFactory("http://localhost:7474/db/data/");
-            var cypherEndpoint = new CypherEndpoint(clientFactory);
+            var clientFactory = new DefaultCypherSessionFactory("http://localhost:7474/db/data/", new WebClient(new DefaultJsonSerializer()));
+            var cypherEndpoint = clientFactory.Create();
             Node node1, node2;
             using (var trans1 = new TransactionScope(TransactionScopeOption.RequiresNew, TimeSpan.FromDays(1)))
             {
@@ -199,9 +201,9 @@ namespace CypherNet.UnitTests
             Assert.IsNotNull(node2Query);
         }
 
-        public class TestDoSOmething<TTemplate>
+        internal class TestDoSOmething<TTemplate>
         {
-            public void DoSomething<TInterface>(Expression<Action<TInterface>> func)
+            internal void DoSomething<TInterface>(Expression<Action<TInterface>> func)
                 where TInterface : TTemplate, ICypherClientFactory
             {
                 

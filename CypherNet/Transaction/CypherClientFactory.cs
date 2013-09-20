@@ -8,44 +8,28 @@ namespace CypherNet.Transaction
     using Http;
     using Serialization;
 
-    public interface ICypherClientFactory
+    internal interface ICypherClientFactory
     {
         ICypherClient Create();
-        ICypherClient Create(string sourceUri);
-        ICypherClient Create(string sourceUri, IWebSerializer webSerializer);
-        ICypherClient Create(string sourceUri, IWebClient webClient);
     }
 
     internal class CypherClientFactory : ICypherClientFactory
     {
         private readonly string _baseUri;
+        private readonly IWebClient _webClient;
 
         private static readonly Dictionary<string, ICypherClient> ActiveClients =
             new Dictionary<string, ICypherClient>();
 
         private static readonly object Lock = new object();
 
-        public CypherClientFactory(string baseUri)
+        public CypherClientFactory(string baseUri, IWebClient webClient)
         {
             _baseUri = baseUri;
+            _webClient = webClient;
         }
 
         public ICypherClient Create()
-        {
-            return Create(_baseUri, new DefaultJsonSerializer());
-        }
-        
-        public ICypherClient Create(string sourceUri)
-        {
-            return Create(sourceUri, new DefaultJsonSerializer());
-        }
-
-        public ICypherClient Create(string sourceUri, IWebSerializer webSerializer)
-        {
-            return Create(sourceUri, new WebClient(webSerializer));
-        }
-
-        public ICypherClient Create(string sourceUri, IWebClient webClient)
         {
             if (Transaction.Current != null)
             {
@@ -59,7 +43,7 @@ namespace CypherNet.Transaction
                     }
                     else
                     {
-                        client = new TransactionalCypherClient(sourceUri, webClient);
+                        client = new TransactionalCypherClient(_baseUri, _webClient);
                         var notifier = new ResourceManager((ICypherUnitOfWork) client);
 
                         notifier.Complete += (o, e) =>
@@ -77,7 +61,7 @@ namespace CypherNet.Transaction
                 }
             }
 
-            return new NonTransactionalCypherClient(sourceUri, webClient);
+            return new NonTransactionalCypherClient(_baseUri, _webClient);
         }
 
         class ResourceManager : IEnlistmentNotification

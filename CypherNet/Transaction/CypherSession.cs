@@ -1,32 +1,33 @@
-﻿using CypherNet.Graph;
-using CypherNet.Serialization;
-using StaticReflection;
+﻿
 
 namespace CypherNet.Transaction
 {
     using System;
     using Queries;
     using System.Linq;
+    using Graph;
+    using Serialization;
+    using StaticReflection;
 
-    public class CypherEndpoint : ICypherEndpoint
+    public class CypherSession : ICypherSession
     {
         private readonly ICypherClientFactory _clientFactory;
         private readonly IWebSerializer _webSerializer;
         private static readonly string NodeVariableName = ReflectOn<CreateNodeResult>.Member(a => a.NewNode).Name;
         private static readonly string CreateNodeClauseFormat = String.Format(@"CREATE ({0}{{0}} {{1}}) RETURN {0} as {{2}}, id({0}) as {{3}};", NodeVariableName);
 
-        internal CypherEndpoint(ICypherClientFactory clientFactory)
+        internal CypherSession(ICypherClientFactory clientFactory)
             : this(clientFactory, new DefaultJsonSerializer())
         {
         }
 
-        internal CypherEndpoint(ICypherClientFactory clientFactory, IWebSerializer webSerializer)
+        internal CypherSession(ICypherClientFactory clientFactory, IWebSerializer webSerializer)
         {
             _clientFactory = clientFactory;
             _webSerializer = webSerializer;
         }
 
-        #region ICypherEndpoint Members
+        #region ICypherSession Members
 
         public ICypherQueryStart<TVariables> BeginQuery<TVariables>()
         {
