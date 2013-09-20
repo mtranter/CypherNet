@@ -11,7 +11,7 @@ Exposes strongly typed Graph Query API based on the Neo4j [Cypher Query Language
     <dd></dd>
 </dl>
 ```C#
-var nodes = cypherEndpoint
+var nodes = cypherSession
         .BeginQuery(p => new { person = p.Node, rel = p.Rel, role = p.Node }) // Define query variables
         .Start(vars => Start.Any(vars.person)) // Cypher START clause
         .Match(vars => Pattern.Start(vars.person).Outgoing(vars.rel).To(vars.role))  // Cypher MATCH clause
@@ -45,21 +45,21 @@ foreach (var node in nodes)
 Node node1, node2;
 using (var trans1 = new TransactionScope(TransactionScopeOption.RequiresNew, TimeSpan.FromDays(1)))
 {
-	node1 = cypherEndpoint.CreateNode(new {name = "test node1"});
+	node1 = cypherSession.CreateNode(new {name = "test node1"});
 	using (var trans2 = new TransactionScope(TransactionScopeOption.RequiresNew))
 	{
-		node2 = cypherEndpoint.CreateNode(new { name = "test node2" });
+		node2 = cypherSession.CreateNode(new { name = "test node2" });
 		trans2.Complete();
 	}
 }
 
-var node1Query = cypherEndpoint.BeginQuery(s => new {node1 = s.Node})
+var node1Query = cypherSession.BeginQuery(s => new {node1 = s.Node})
 						 .Start(s => Start.At(s.node1, node1.Id))
 						 .Return(r => new {r.node1})
 						 .Fetch()
 						 .FirstOrDefault();
 
-var node2Query = cypherEndpoint.BeginQuery(s => new {node2 = s.Node})
+var node2Query = cypherSession.BeginQuery(s => new {node2 = s.Node})
 						 .Start(s => Start.At(s.node2, node2.Id))
 						 .Return(r => new {r.node2})
 						 .Fetch()
