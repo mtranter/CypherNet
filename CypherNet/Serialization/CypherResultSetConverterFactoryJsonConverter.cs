@@ -1,5 +1,4 @@
-﻿
-namespace CypherNet.Serialization
+﻿namespace CypherNet.Serialization
 {
     #region
 
@@ -7,11 +6,11 @@ namespace CypherNet.Serialization
     using System.Collections.Generic;
     using System.Linq;
     using System.Reflection;
-    using CypherNet.Graph;
-    using CypherNet.Queries;
+    using Graph;
     using Newtonsoft.Json;
     using Newtonsoft.Json.Converters;
     using Newtonsoft.Json.Linq;
+    using Queries;
 
     #endregion
 
@@ -63,7 +62,7 @@ namespace CypherNet.Serialization
             public override object ReadJson(JsonReader reader, Type objectType, object existingValue,
                                             JsonSerializer serializer)
             {
-                bool isEmptyInArray = false;
+                var isEmptyInArray = false;
                 do
                 {
                     if (reader.TokenType == JsonToken.StartArray)
@@ -89,7 +88,6 @@ namespace CypherNet.Serialization
                             return new CypherResultSet<TCypherResponse>(Deserialize(reader, serializer).ToArray());
                         }
                     }
-
                 } while (reader.Read());
 
                 return null;
@@ -97,13 +95,12 @@ namespace CypherNet.Serialization
 
             private void LoadPropertyCache(string[] columns)
             {
-
                 foreach (var prop in Properties)
                 {
                     if (columns.Contains(prop.Name))
                     {
                         _propertyCache.Add(prop.Name, Array.IndexOf(columns, prop.Name));
-                        if (typeof(IGraphEntity).IsAssignableFrom(prop.PropertyType))
+                        if (typeof (IGraphEntity).IsAssignableFrom(prop.PropertyType))
                         {
                             var idProp = prop.Name + "__Id";
                             if (columns.Contains(idProp))
@@ -118,7 +115,7 @@ namespace CypherNet.Serialization
                                     _propertyCache.Add(typeProp, Array.IndexOf(columns, typeProp));
                                 }
                             }
-                            if (prop.PropertyType == typeof(Node))
+                            if (prop.PropertyType == typeof (Node))
                             {
                                 var typeProp = prop.Name + "__Labels";
                                 if (columns.Contains(typeProp))
@@ -143,38 +140,44 @@ namespace CypherNet.Serialization
                         foreach (var property in Properties)
                         {
                             var itemproperties = new Dictionary<string, object>();
-                            
-                            if(typeof(IGraphEntity).IsAssignableFrom(property.PropertyType))
-                            {
 
+                            if (typeof (IGraphEntity).IsAssignableFrom(property.PropertyType))
+                            {
                                 var entityPropertyNames = new EntityReturnColumns(property);
 
-                                AssertNecesaryColumnForType(entityPropertyNames.IdPropertyName, typeof(IGraphEntity));
+                                AssertNecesaryColumnForType(entityPropertyNames.IdPropertyName, typeof (IGraphEntity));
                                 var nodeId = record[_propertyCache[entityPropertyNames.IdPropertyName]].ToObject<long>();
                                 itemproperties.Add("id", nodeId);
 
-                                AssertNecesaryColumnForType(entityPropertyNames.PropertiesPropertyName, typeof(IGraphEntity));
-                                var entityProperties = record[_propertyCache[entityPropertyNames.PropertiesPropertyName]].ToObject<Dictionary<string, object>>();
+                                AssertNecesaryColumnForType(entityPropertyNames.PropertiesPropertyName,
+                                                            typeof (IGraphEntity));
+                                var entityProperties =
+                                    record[_propertyCache[entityPropertyNames.PropertiesPropertyName]]
+                                        .ToObject<Dictionary<string, object>>();
                                 itemproperties.Add("properties", entityProperties);
 
                                 if (entityPropertyNames.RequiresLabelsProperty)
                                 {
-                                    AssertNecesaryColumnForType(entityPropertyNames.LabelsPropertyName, typeof(Node));
-                                    var labels = record[_propertyCache[entityPropertyNames.LabelsPropertyName]].ToObject<string[]>();
+                                    AssertNecesaryColumnForType(entityPropertyNames.LabelsPropertyName, typeof (Node));
+                                    var labels =
+                                        record[_propertyCache[entityPropertyNames.LabelsPropertyName]]
+                                            .ToObject<string[]>();
                                     itemproperties.Add("labels", labels);
                                 }
 
                                 if (entityPropertyNames.RequiresTypeProperty)
                                 {
-                                    AssertNecesaryColumnForType(entityPropertyNames.TypePropertyName, typeof(Relationship));
-                                    var relType = record[_propertyCache[entityPropertyNames.TypePropertyName]].ToObject<string>();
+                                    AssertNecesaryColumnForType(entityPropertyNames.TypePropertyName,
+                                                                typeof (Relationship));
+                                    var relType =
+                                        record[_propertyCache[entityPropertyNames.TypePropertyName]].ToObject<string>();
                                     itemproperties.Add("type", relType);
                                 }
 
                                 var entity = HydrateWithCtr(itemproperties, property.PropertyType);
                                 items.Add(property.Name, entity);
                             }
-                        else
+                            else
                             {
                                 var restEntity = record[_propertyCache[property.Name]];
                                 itemproperties.Add(property.Name, restEntity.ToObject(property.PropertyType));
@@ -190,27 +193,27 @@ namespace CypherNet.Serialization
             {
                 var types = values.Select(k => k.Value.GetType()).ToArray();
                 var ctor = returnType.GetConstructor(BindingFlags.NonPublic | BindingFlags.Instance, null, types, null);
-                return  ctor.Invoke(values.Select(k => k.Value).ToArray());
+                return ctor.Invoke(values.Select(k => k.Value).ToArray());
             }
 
 
             private TReturn HydrateWithCtr<TReturn>(IEnumerable<KeyValuePair<string, object>> values)
             {
                 var types = Properties.Select(p => p.PropertyType).ToArray();
-                var ctor = typeof(TReturn).GetConstructor(BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Instance, null, types, null);
-                return (TReturn)ctor.Invoke(values.Select(k => k.Value).ToArray());
+                var ctor =
+                    typeof (TReturn).GetConstructor(
+                                                    BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Instance,
+                                                    null, types, null);
+                return (TReturn) ctor.Invoke(values.Select(k => k.Value).ToArray());
             }
 
             private void AssertNecesaryColumnForType(string columnName, Type type)
             {
-                if(!_propertyCache.Any(kvp => kvp.Key == columnName))
+                if (!_propertyCache.Any(kvp => kvp.Key == columnName))
                 {
                     throw new CypherColumnNotPresentException(columnName);
                 }
             }
         }
     }
-
-
 }
-    

@@ -1,13 +1,11 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-
-namespace CypherNet.Queries
+﻿namespace CypherNet.Queries
 {
+    #region
+
     using System.Linq.Expressions;
     using System.Reflection;
+
+    #endregion
 
     public static class CypherSetClauseBuilder
     {
@@ -26,7 +24,7 @@ namespace CypherNet.Queries
             }
 
             var declareAssignMethod = body.Method;
-            
+
             var setFormat =
                 declareAssignMethod.GetCustomAttribute<ParseToCypherAttribute>().Format;
             var @params = MethodExpressionArgumentEvaluator.EvaluateArguments(body);

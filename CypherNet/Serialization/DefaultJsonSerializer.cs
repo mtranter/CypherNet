@@ -1,6 +1,4 @@
-﻿
-
-namespace CypherNet.Serialization
+﻿namespace CypherNet.Serialization
 {
     #region
 

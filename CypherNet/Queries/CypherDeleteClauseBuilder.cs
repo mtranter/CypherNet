@@ -11,9 +11,9 @@
 
     #endregion
 
-    internal class CypherReturnsClauseBuilder
+    internal class CypherDeleteClauseBuilder
     {
-        internal static string BuildReturnClause(Expression expression)
+        internal static string BuildDeleteClause(Expression expression)
         {
             var lambda = expression as LambdaExpression;
             if (lambda == null)
@@ -29,12 +29,10 @@
             var prop = body as MemberExpression;
             if (prop != null)
             {
-                var entityPropertyNames = new EntityReturnColumns((PropertyInfo)prop.Member);
-
-                return BuildStatement(prop.Member.Name, entityPropertyNames);
+                return prop.Member.Name;
             }
 
-            throw new InvalidCypherReturnsExpressionException();
+            throw new InvalidCypherDeleteExpressionException();
         }
 
         private static string ParseExpressionToTerm(Expression node, MemberInfo memberInfo)
@@ -51,9 +49,7 @@
             if (member != null)
             {
                 var entityName = member.Member.Name;
-                var entityPropertyNames = new EntityReturnColumns((PropertyInfo) memberInfo);
-
-                return BuildStatement(entityName, entityPropertyNames);
+                return entityName;
             }
 
             var method = node as MethodCallExpression;
@@ -81,27 +77,12 @@
                 }
             }
 
-            throw new InvalidCypherReturnsExpressionException();
+            throw new InvalidCypherDeleteExpressionException();
         }
 
-        private static string BuildStatement(string entityName, EntityReturnColumns entityPropertyNames)
-        {
-            var retval = String.Format("{0} as {1}, id({0}) as {2}", entityName,
-                                       entityPropertyNames.PropertiesPropertyName,
-                                       entityPropertyNames.IdPropertyName);
-            if (entityPropertyNames.RequiresTypeProperty)
-            {
-                retval += String.Format(", type({0}) as {1}", entityName, entityPropertyNames.TypePropertyName);
-            }
-            if (entityPropertyNames.RequiresLabelsProperty)
-            {
-                retval += String.Format(", labels({0}) as {1}", entityName, entityPropertyNames.LabelsPropertyName);
-            }
-            return retval;
-        }
     }
 
-    public class InvalidCypherReturnsExpressionException : Exception
+    public class InvalidCypherDeleteExpressionException : Exception
     {
     }
 }

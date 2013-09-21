@@ -1,21 +1,19 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Globalization;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using CypherNet.Graph;
-using CypherNet.Queries;
-using CypherNet.Serialization;
-using Microsoft.VisualStudio.TestTools.UnitTesting;
-using Newtonsoft.Json.Linq;
-
-namespace CypherNet.UnitTests
+﻿namespace CypherNet.UnitTests
 {
+    #region
+
+    using System;
+    using System.Linq;
+    using Graph;
+    using Microsoft.VisualStudio.TestTools.UnitTesting;
+    using Queries;
+    using Serialization;
+
+    #endregion
+
     [TestClass]
     public class SerializationTests
     {
-
         [TestMethod]
         public void DerializeJson_EntitiesOnly_ReturnsCollectionOfEntities()
         {
@@ -85,16 +83,18 @@ namespace CypherNet.UnitTests
             var deserializer = new DefaultJsonSerializer();
 
             var retval = deserializer.Deserialize<CypherResponse<DeserializationTestClass>>(json);
-            Assert.AreEqual(retval.Results.Count(),2);
+            Assert.AreEqual(retval.Results.Count(), 2);
             dynamic actor = retval.Results.Select(r => r.Actor).First();
-            Assert.AreEqual(actor.age,33);
+            Assert.AreEqual(actor.age, 33);
             Assert.AreEqual(actor.name, "mark");
         }
 
         [TestMethod]
         public void SerializeCypherRequest__IsValid()
         {
-            var request = CypherQueryRequest.Create(@"START x=node(1), y=node(2) CREATE x-[r:OWNS {""name"":""mark""}]->y<-[r2:IS_OWNED_BY {""age"": 33}]");
+            var request =
+                CypherQueryRequest.Create(
+                                          @"START x=node(1), y=node(2) CREATE x-[r:OWNS {""name"":""mark""}]->y<-[r2:IS_OWNED_BY {""age"": 33}]");
             var serializer = new DefaultJsonSerializer();
             var result = serializer.Serialize(request);
             Console.WriteLine(result);

@@ -1,11 +1,15 @@
-﻿using CypherNet.Http;
-
-namespace CypherNet.Transaction
+﻿namespace CypherNet.Transaction
 {
-    class DefaultCypherSessionFactory : ICypherSessionFactory
+    #region
+
+    using Http;
+
+    #endregion
+
+    internal class DefaultCypherSessionFactory : ICypherSessionFactory
     {
-        private readonly string _sourceUri;
         private readonly IWebClient _client;
+        private readonly string _sourceUri;
 
         public DefaultCypherSessionFactory(string sourceUri, IWebClient client)
         {

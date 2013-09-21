@@ -8,28 +8,28 @@
 
     public static class Pattern
     {
-        [ParseToCypherAttribute("()")]
+        [ParseToCypher("()")]
         public static IDefineCypherRelationship Start()
         {
             throw new ExpressionTreeOnlyUsageException();
         }
 
-        [ParseToCypherAttribute("({0})")]
+        [ParseToCypher("({0})")]
         public static IDefineCypherRelationship Start(
-            [ArgumentEvaluator(typeof(MemberNameArgumentEvaluator))] Node nodeReference)
+            [ArgumentEvaluator(typeof (MemberNameArgumentEvaluator))] Node nodeReference)
         {
             throw new ExpressionTreeOnlyUsageException();
         }
 
-        [ParseToCypherAttribute("(:{0})")]
+        [ParseToCypher("(:{0})")]
         public static IDefineCypherRelationship Start(string label)
         {
             throw new ExpressionTreeOnlyUsageException();
         }
 
-        [ParseToCypherAttribute("({0}:{1})")]
+        [ParseToCypher("({0}:{1})")]
         public static IDefineCypherRelationship Start(
-            [ArgumentEvaluator(typeof(MemberNameArgumentEvaluator))] Node nodeReference, string label)
+            [ArgumentEvaluator(typeof (MemberNameArgumentEvaluator))] Node nodeReference, string label)
         {
             throw new ExpressionTreeOnlyUsageException();
         }

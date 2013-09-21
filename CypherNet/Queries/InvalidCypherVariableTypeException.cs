@@ -1,10 +1,4 @@
-﻿#region
-
-
-
-#endregion
-
-namespace CypherNet.Queries
+﻿namespace CypherNet.Queries
 {
     #region
 
@@ -26,7 +20,7 @@ namespace CypherNet.Queries
 
         private static string BuildMessage(Type type)
         {
-            var validTypeNames = String.Join(", ", new[] { typeof(IGraphEntity) }.Select(t => t.Name));
+            var validTypeNames = String.Join(", ", new[] {typeof (IGraphEntity)}.Select(t => t.Name));
             return String.Format(ErrorMessageFormat, validTypeNames);
         }
     }

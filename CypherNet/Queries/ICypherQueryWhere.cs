@@ -7,7 +7,8 @@
 
     #endregion
 
-    public interface ICypherQueryWhere<TVariables> : ICypherQueryReturns<TVariables>, ICypherQuerySetable<TVariables>, ICypherQueryCreate<TVariables>
+    public interface ICypherQueryWhere<TVariables> : ICypherQueryReturns<TVariables>, ICypherQuerySetable<TVariables>,
+                                                     ICypherQueryCreate<TVariables>
     {
         ICypherQueryReturns<TVariables> Where();
         ICypherQueryReturns<TVariables> Where(Expression<Func<TVariables, bool>> predicate);

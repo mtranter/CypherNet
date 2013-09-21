@@ -1,13 +1,26 @@
 ﻿namespace CypherNet.Queries
 {
+    #region
+
     using System.Collections.Generic;
-    using System.Linq;
     using System.Text.RegularExpressions;
     using Newtonsoft.Json;
 
+    #endregion
+
     internal class CypherQueryRequest
     {
-        const string JsonRegex = @"{(\s*""\w+""\s*:\s*""?[\w\s]+""?\s*)(\s*,\s*(\s*""\w+""\s*:\s*""?[\w\s]+""?\s*))*\}";
+        private const string JsonRegex =
+            @"{(\s*""\w+""\s*:\s*""?[\w\s]+""?\s*)(\s*,\s*(\s*""\w+""\s*:\s*""?[\w\s]+""?\s*))*\}";
+
+        private readonly List<CypherQueryStatement> _statements = new List<CypherQueryStatement>();
+
+        [JsonProperty(PropertyName = "statements")]
+        internal IEnumerable<CypherQueryStatement> Statements
+        {
+            get { return _statements; }
+        }
+
         public static CypherQueryRequest Create(string statement)
         {
             var match = Regex.Match(statement, JsonRegex);
@@ -27,17 +40,9 @@
             return request;
         }
 
-        private readonly List<CypherQueryStatement> _statements = new List<CypherQueryStatement>();
-
-        internal void AddStatement(string statement, params KeyValuePair<string,string>[] namedParameters)
+        internal void AddStatement(string statement, params KeyValuePair<string, string>[] namedParameters)
         {
             _statements.Add(new CypherQueryStatement(statement, namedParameters));
-        }
-
-        [JsonProperty(PropertyName="statements")]
-        internal IEnumerable<CypherQueryStatement> Statements
-        {
-            get { return _statements; }
         }
 
         internal static CypherQueryRequest Empty()

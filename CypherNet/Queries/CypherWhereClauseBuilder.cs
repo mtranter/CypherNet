@@ -1,6 +1,4 @@
-﻿
-
-namespace CypherNet.Queries
+﻿namespace CypherNet.Queries
 {
     #region
 
@@ -52,7 +50,7 @@ namespace CypherNet.Queries
                     _queryBuilder.Append(string.Format(cypherFunctionAttribute.Format, @params));
                     return m;
                 }
-                
+
                 throw new NotSupportedException(string.Format("The method '{0}' is not supported", m.Method.Name));
             }
 
@@ -127,13 +125,14 @@ namespace CypherNet.Queries
                     _queryBuilder.Append(node.Member.Name);
                     return node;
                 }
-                else if (new[] { NodeIdMember, RelIdMember }.Any(m => m == node.Member) && node.Expression.NodeType == ExpressionType.MemberAccess)
+                else if (new[] {NodeIdMember, RelIdMember}.Any(m => m == node.Member) &&
+                         node.Expression.NodeType == ExpressionType.MemberAccess)
                 {
                     var parent = node.Expression as MemberExpression;
                     _queryBuilder.AppendFormat("id({0})", parent.Member.Name);
                     return node;
                 }
-               
+
                 throw new NotSupportedException(string.Format("The member '{0}' is not supported", node.Member.Name));
             }
         }

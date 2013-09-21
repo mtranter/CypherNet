@@ -1,7 +1,11 @@
 ﻿namespace CypherNet.Graph
 {
+    #region
+
     using System.Collections.Generic;
     using Dynamic;
+
+    #endregion
 
     public abstract class GraphEntity<TEntity> : DynamicEntity<TEntity>, IGraphEntity
         where TEntity : DynamicEntity<TEntity>
@@ -12,7 +16,7 @@
             Id = id;
         }
 
-        internal GraphEntity(long id, IDictionary<string,object> properties)
+        internal GraphEntity(long id, IDictionary<string, object> properties)
             : base(properties)
         {
             Id = id;

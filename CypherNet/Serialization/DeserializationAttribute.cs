@@ -1,11 +1,10 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-
-namespace CypherNet.Serialization
+﻿namespace CypherNet.Serialization
 {
+    #region
+
+    using System;
+
+    #endregion
 
     [AttributeUsage(AttributeTargets.Constructor)]
     internal class DeserializeUsingAttribute : Attribute

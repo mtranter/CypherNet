@@ -1,12 +1,13 @@
-﻿
-
-namespace CypherNet.Transaction
+﻿namespace CypherNet.Transaction
 {
+    #region
+
     using System;
     using System.Collections.Generic;
     using System.Transactions;
     using Http;
-    using Serialization;
+
+    #endregion
 
     internal interface ICypherClientFactory
     {
@@ -15,13 +16,12 @@ namespace CypherNet.Transaction
 
     internal class CypherClientFactory : ICypherClientFactory
     {
-        private readonly string _baseUri;
-        private readonly IWebClient _webClient;
-
         private static readonly Dictionary<string, ICypherClient> ActiveClients =
             new Dictionary<string, ICypherClient>();
 
         private static readonly object Lock = new object();
+        private readonly string _baseUri;
+        private readonly IWebClient _webClient;
 
         public CypherClientFactory(string baseUri, IWebClient webClient)
         {
@@ -47,12 +47,12 @@ namespace CypherNet.Transaction
                         var notifier = new ResourceManager((ICypherUnitOfWork) client);
 
                         notifier.Complete += (o, e) =>
-                            {
-                                lock (Lock)
-                                {
-                                    ActiveClients.Remove(key);
-                                }
-                            };
+                                                 {
+                                                     lock (Lock)
+                                                     {
+                                                         ActiveClients.Remove(key);
+                                                     }
+                                                 };
 
                         ActiveClients.Add(key, client);
                         Transaction.Current.EnlistVolatile(notifier, EnlistmentOptions.EnlistDuringPrepareRequired);
@@ -64,7 +64,7 @@ namespace CypherNet.Transaction
             return new NonTransactionalCypherClient(_baseUri, _webClient);
         }
 
-        class ResourceManager : IEnlistmentNotification
+        private class ResourceManager : IEnlistmentNotification
         {
             private readonly ICypherUnitOfWork _unitOfWork;
 

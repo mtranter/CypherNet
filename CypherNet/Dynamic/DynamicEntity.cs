@@ -1,7 +1,4 @@
-﻿
-using StaticReflection;
-
-namespace CypherNet.Dynamic
+﻿namespace CypherNet.Dynamic
 {
     #region
 
@@ -11,13 +8,13 @@ namespace CypherNet.Dynamic
     using System.Linq;
     using System.Linq.Expressions;
     using System.Reflection;
+    using StaticReflection;
 
     #endregion
 
     public abstract class DynamicEntity<TEntity> : IDynamicMetaObjectProvider, IDynamicMetaData
         where TEntity : DynamicEntity<TEntity>
     {
-
         // ReSharper disable StaticFieldInGenericType
 
         private static readonly MethodInfo SetMethodInfo =
@@ -35,7 +32,7 @@ namespace CypherNet.Dynamic
         // ReSharper restore StaticFieldInGenericType
 
         private readonly IDictionary<string, object> _storage;
-        
+
         protected internal DynamicEntity()
         {
             _storage = new Dictionary<string, object>();

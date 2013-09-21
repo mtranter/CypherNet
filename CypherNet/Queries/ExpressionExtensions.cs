@@ -1,12 +1,11 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-
-namespace CypherNet.Queries
+﻿namespace CypherNet.Queries
 {
+    #region
+
+    using System;
     using System.Linq.Expressions;
+
+    #endregion
 
     public static class ExpressionExtensions
     {
@@ -25,7 +24,7 @@ namespace CypherNet.Queries
             switch (Type.GetTypeCode(value.GetType()))
             {
                 case TypeCode.Boolean:
-                    val = (((bool)value) ? "true" : "false");
+                    val = (((bool) value) ? "true" : "false");
                     break;
                 case TypeCode.String:
                     val = string.Format("'{0}'", value);

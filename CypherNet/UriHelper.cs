@@ -2,7 +2,6 @@
 {
     public class UriHelper
     {
-
         public static string Combine(params string[] values)
         {
             var retval = values[0];

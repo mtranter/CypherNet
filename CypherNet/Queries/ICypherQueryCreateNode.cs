@@ -1,6 +1,10 @@
 ﻿namespace CypherNet.Queries
 {
+    #region
+
     using Graph;
+
+    #endregion
 
     public interface ICypherQueryCreateNode
     {

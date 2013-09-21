@@ -1,16 +1,9 @@
-﻿#region
-
-
-
-#endregion
-
-namespace CypherNet.Queries
+﻿namespace CypherNet.Queries
 {
     #region
 
     using System;
     using Graph;
-    
 
     #endregion
 

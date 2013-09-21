@@ -1,13 +1,4 @@
-﻿#region
-
-
-
-#endregion
-
-using System.Text;
-using CypherNet.Dynamic;
-
-namespace CypherNet.Queries
+﻿namespace CypherNet.Queries
 {
     #region
 
@@ -15,6 +6,8 @@ namespace CypherNet.Queries
     using System.Linq;
     using System.Linq.Expressions;
     using System.Reflection;
+    using System.Text;
+    using Dynamic;
 
     #endregion
 
@@ -74,7 +67,7 @@ namespace CypherNet.Queries
 
     internal class JsonArgumentEvaluator : ValueArgumentEvaluator
     {
-        private static readonly Type[] WrappedTypes = new[] { typeof(string), typeof(char) };
+        private static readonly Type[] WrappedTypes = new[] {typeof (string), typeof (char)};
 
         public override object Evaluate(Expression argument, ParameterInfo paramInfo)
         {
@@ -89,7 +82,7 @@ namespace CypherNet.Queries
             {
                 json.AppendFormat(@"""{0}"": {1}, ", kvp.Key, StringWrapperArgumentEvaluator.WrapValue(kvp.Value));
             }
-            json.Remove(json.Length - 2,2);
+            json.Remove(json.Length - 2, 2);
             json.Append("}");
             return json.ToString();
         }

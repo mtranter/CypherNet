@@ -1,9 +1,12 @@
-﻿using CypherNet.Queries;
-
-namespace CypherNet.Transaction
+﻿namespace CypherNet.Transaction
 {
-    using System;
+    #region
+
+    using System.Collections.Generic;
     using Http;
+    using Queries;
+
+    #endregion
 
     internal class NonTransactionalCypherClient : ICypherClient
     {
@@ -18,7 +21,7 @@ namespace CypherNet.Transaction
 
         #region IRawCypherClient Members
 
-        public System.Collections.Generic.IEnumerable<TOut> ExecuteQuery<TOut>(string cypherQuery)
+        public IEnumerable<TOut> ExecuteQuery<TOut>(string cypherQuery)
         {
             var request = CypherQueryRequest.Create(cypherQuery);
             var responseTask = _webClient.PostAsync<CypherResponse<TOut>>(_baseUri, request);
