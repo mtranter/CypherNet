@@ -60,6 +60,23 @@
         }
 
         [TestMethod]
+        public void UpdateNode_RollbackTransaction_DoesNotUpdatesNode()
+        {
+            var clientFactory = Fluently.Configure("http://localhost:7474/db/data/").CreateSessionFactory();
+            var endpoint = clientFactory.Create();
+
+            dynamic node = endpoint.CreateNode(new { name = "mark", age = 33 }, "person");
+            node.name = "john";
+            using (var ts = new TransactionScope())
+            {
+                endpoint.Save(node);
+            }
+            dynamic twin = endpoint.GetNode(node.Id);
+
+            Assert.AreNotEqual(twin.name, "john");
+        }
+
+        [TestMethod]
         public void CreateNode_WithLabel_ReturnsNewNode()
         {
             var clientFactory = Fluently.Configure("http://localhost:7474/db/data/").CreateSessionFactory();
