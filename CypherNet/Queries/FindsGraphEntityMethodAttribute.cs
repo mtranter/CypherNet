@@ -1,5 +1,4 @@
-﻿
-namespace CypherNet.Queries
+﻿namespace CypherNet.Queries
 {
     #region
 

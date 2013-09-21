@@ -1,10 +1,11 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-
-namespace CypherNet.Queries
+﻿namespace CypherNet.Queries
 {
+    #region
+
+    using System;
+
+    #endregion
+
     public class ExpressionTreeOnlyUsageException : Exception
     {
     }

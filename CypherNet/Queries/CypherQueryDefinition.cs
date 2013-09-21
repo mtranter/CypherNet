@@ -1,10 +1,13 @@
 ﻿namespace CypherNet.Queries
 {
+    #region
+
     using System;
     using System.Collections.Generic;
     using System.Linq;
     using System.Linq.Expressions;
 
+    #endregion
 
     internal class CypherQueryDefinition<TIn, TOut>
     {
@@ -23,13 +26,24 @@
 
         internal Expression<Func<TIn, TOut>> ReturnClause { get; set; }
 
+        internal Expression<Func<TIn, TOut>> DeleteClause { get; set; }
+
         internal Expression<Func<TIn, ICreateCypherRelationship>> CreateRelationpClause { get; set; }
 
-        internal IEnumerable<Expression<Func<TIn, dynamic>>> OrderByClauses { get { return _orderByClauses.AsEnumerable(); } }
+        internal IEnumerable<Expression<Func<TIn, dynamic>>> OrderByClauses
+        {
+            get { return _orderByClauses.AsEnumerable(); }
+        }
 
-        internal IEnumerable<Expression<Action<TIn>>> SetterClauses { get { return _setterClauses.AsEnumerable(); } }
+        internal IEnumerable<Expression<Action<TIn>>> SetterClauses
+        {
+            get { return _setterClauses.AsEnumerable(); }
+        }
 
-        internal IEnumerable<Expression<Func<TIn, IDefineCypherRelationship>>> MatchClauses { get { return _matchClauses.AsEnumerable(); } }
+        internal IEnumerable<Expression<Func<TIn, IDefineCypherRelationship>>> MatchClauses
+        {
+            get { return _matchClauses.AsEnumerable(); }
+        }
 
         internal int? Skip { get; set; }
         internal int? Limit { get; set; }
@@ -49,24 +63,63 @@
             _setterClauses.Add(match);
         }
 
+        internal CypherQueryDefinition<TIn,TOutNew> Copy<TOutNew>()
+        {
+            var query = new CypherQueryDefinition<TIn, TOutNew>();
+            foreach (var match in _matchClauses)
+            {
+                query._matchClauses.Add(match);
+            }
+            foreach (var setter in _setterClauses)
+            {
+                query._setterClauses.Add(setter);
+            }
+            foreach (var orderBy in _orderByClauses)
+            {
+                query._orderByClauses.Add(orderBy);
+            }
+            query.StartClause = this.StartClause;
+            query.WherePredicate = this.WherePredicate;
+            query.CreateRelationpClause = this.CreateRelationpClause;
+            query.Limit = this.Limit;
+            query.Skip = this.Skip;
+            return query;
+        }
+
         internal string BuildStatement()
         {
-            if (ReturnClause == null)
-            {
-                throw new ArgumentNullException("ReturnClause");
-            }
+            //if (ReturnClause == null && DeleteClause == null)
+            //{
+            //    throw new Exception("Either a ReturnClause or a DeleteClause must be supplied");
+            //}
 
             var start = StartClause == null ? null : "START " + CypherStartClauseBuilder.BuildStartClause(StartClause);
-            var match = MatchClauses.Any() ? "MATCH " + String.Join(", ", MatchClauses.Select(CypherMatchClauseBuilder.BuildMatchClause)) : null;
-            var createRel = CreateRelationpClause == null ? null : "CREATE " + CypherCreateRelationshipClauseBuilder.BuildCreateClause(CreateRelationpClause);
-            var where = WherePredicate == null ? null : "WHERE " + CypherWhereClauseBuilder.BuildWhereClause(WherePredicate);
-            var setClause = SetterClauses.Any() ? "SET " + String.Join(" SET ", SetterClauses.Select(CypherSetClauseBuilder.BuildSetClause)) : null;
-            var orderBy = OrderByClauses.Any() ? "ORDER BY " + String.Join(", ", OrderByClauses.Select(CypherOrderByClauseBuilder.BuildOrderByClause)) : null;
+            var match = MatchClauses.Any()
+                            ? "MATCH " +
+                              String.Join(", ", MatchClauses.Select(CypherMatchClauseBuilder.BuildMatchClause))
+                            : null;
+            var createRel = CreateRelationpClause == null
+                                ? null
+                                : "CREATE " +
+                                  CypherCreateRelationshipClauseBuilder.BuildCreateClause(CreateRelationpClause);
+            var where = WherePredicate == null
+                            ? null
+                            : "WHERE " + CypherWhereClauseBuilder.BuildWhereClause(WherePredicate);
+            var setClause = SetterClauses.Any()
+                                ? "SET " +
+                                  String.Join(" SET ", SetterClauses.Select(CypherSetClauseBuilder.BuildSetClause))
+                                : null;
+            var orderBy = OrderByClauses.Any()
+                              ? "ORDER BY " +
+                                String.Join(", ", OrderByClauses.Select(CypherOrderByClauseBuilder.BuildOrderByClause))
+                              : null;
 
-            var @return = "RETURN " + CypherReturnsClauseBuilder.BuildReturnClause(ReturnClause);
+            var @return = ReturnClause == null ? null : "RETURN " + CypherReturnsClauseBuilder.BuildReturnClause(ReturnClause);
+            var @delete = DeleteClause == null ? null : "DELETE " + CypherDeleteClauseBuilder.BuildDeleteClause(DeleteClause);
             var skip = Skip == null ? null : String.Format("SKIP {0}", Skip);
             var limit = Limit == null ? null : String.Format("LIMIT {0}", Limit);
-            return String.Join(" ", new[] { start, createRel, match, where, setClause, @return, orderBy, skip, limit }.Where(s => s != null));
+            return String.Join(" ",
+                               new[] {start, createRel, match, where, setClause, @return, @delete, orderBy, skip, limit}.Where(s => s != null));
         }
     }
 }

@@ -1,15 +1,20 @@
 ﻿namespace CypherNet.Transaction
 {
+    #region
+
     using System;
+    using System.Collections.Generic;
     using System.Linq;
     using Http;
     using Queries;
 
+    #endregion
+
     internal class TransactionalCypherClient : ICypherClient, ICypherUnitOfWork
     {
+        private readonly IWebClient _webClient;
         private bool _isInitialized;
         private string _transactionUri;
-        private readonly IWebClient _webClient;
 
         internal TransactionalCypherClient(string baseUri, IWebClient webClient)
         {
@@ -19,7 +24,7 @@
 
         #region IRawCypherClient Members
 
-        public System.Collections.Generic.IEnumerable<TOut> ExecuteQuery<TOut>(string cypherQuery)
+        public IEnumerable<TOut> ExecuteQuery<TOut>(string cypherQuery)
         {
             var request = CypherQueryRequest.Create(cypherQuery);
             var responseTask = _webClient.PostAsync<CypherResponse<TOut>>(_transactionUri, request);
@@ -53,7 +58,9 @@
             var resultTask = _webClient.PostAsync<CypherResponse<object>>(commitUri, emptyRequest);
             var result = resultTask.Result;
             if (result.Errors.Any())
+            {
                 throw new Exception("Errors returned from Neo Server: " + String.Join(",", result.Errors));
+            }
         }
 
         public void Rollback()
@@ -61,7 +68,9 @@
             var resultTask = _webClient.DeleteAsync<CypherResponse<object>>(_transactionUri);
             var result = resultTask.Result;
             if (result.Errors.Any())
+            {
                 throw new Exception("Errors returned from Neo Server: " + String.Join(",", result.Errors));
+            }
         }
 
         public bool KeepAlive()
@@ -70,9 +79,10 @@
             var resultTask = _webClient.PostAsync<CypherResponse<object>>(_transactionUri, emptyRequest);
             var result = resultTask.Result;
             if (result.Errors.Any())
+            {
                 throw new Exception("Errors returned from Neo Server: " + String.Join(",", result.Errors));
+            }
             return true;
         }
-
     }
 }

@@ -1,27 +1,30 @@
-﻿
-
-namespace CypherNet.Queries
+﻿namespace CypherNet.Queries
 {
+    #region
+
     using System.Linq;
     using Dynamic;
     using Graph;
 
-    static class GraphEntityExtensions
+    #endregion
+
+    internal static class GraphEntityExtensions
     {
-        [ParseToCypherAttribute("{0}.{1}")]
-        public static TProp Get<TProp>([ArgumentEvaluator(typeof(MemberNameArgumentEvaluator))] this IGraphEntity entity, string propName)
+        [ParseToCypher("{0}.{1}")]
+        public static TProp Get<TProp>(
+            [ArgumentEvaluator(typeof (MemberNameArgumentEvaluator))] this IGraphEntity entity, string propName)
         {
             var dynamicEntity = entity as IDynamicMetaData;
             var prop = dynamicEntity.GetAllValues().First(kvp => kvp.Key == propName).Value;
-            return (TProp)prop;
+            return (TProp) prop;
         }
 
-        [ParseToCypherAttribute("{0}.{1} = {2}")]
-        public static TProp Set<TProp>([ArgumentEvaluator(typeof(MemberNameArgumentEvaluator))] this IGraphEntity entity, string propName, [ArgumentEvaluator(typeof(StringWrapperArgumentEvaluator))] TProp value)
+        [ParseToCypher("{0}.{1} = {2}")]
+        public static void Set<TProp>(
+            [ArgumentEvaluator(typeof (MemberNameArgumentEvaluator))] this IGraphEntity entity, string propName,
+            [ArgumentEvaluator(typeof (StringWrapperArgumentEvaluator))] TProp value)
         {
-            var dynamicEntity = entity as IDynamicMetaData;
-            var prop = dynamicEntity.GetAllValues().Where(kvp => kvp.Key == propName);
-            return (TProp)prop;
+            throw new ExpressionTreeOnlyUsageException();
         }
     }
 }

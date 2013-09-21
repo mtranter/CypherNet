@@ -1,6 +1,4 @@
-﻿using System.Net.Http;
-
-namespace CypherNet.Transaction
+﻿namespace CypherNet.Transaction
 {
     public interface ICypherUnitOfWork
     {

@@ -1,14 +1,13 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-
-namespace CypherNet.Serialization
+﻿namespace CypherNet.Serialization
 {
+    #region
+
+    using System.Linq;
     using Newtonsoft.Json.Linq;
 
-    static class JTokenExtensions
+    #endregion
+
+    internal static class JTokenExtensions
     {
         public static bool HasProperty<TToken>(this TToken token, string property)
             where TToken : JToken

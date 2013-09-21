@@ -1,14 +1,12 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-
-namespace CypherNet.Queries
+﻿namespace CypherNet.Queries
 {
+    #region
+
+    using System;
     using System.Linq.Expressions;
     using System.Reflection;
-    using Graph;
+
+    #endregion
 
     internal static class CypherOrderByClauseBuilder
     {
@@ -27,7 +25,6 @@ namespace CypherNet.Queries
 
         private static string ParseExpressionToTerm(Expression node)
         {
-
             if (node.NodeType == ExpressionType.Convert)
             {
                 return ParseExpressionToTerm(((UnaryExpression) node).Operand);
@@ -37,14 +34,12 @@ namespace CypherNet.Queries
             // new { prop = param.GraphEntity.Prop<T>("prop") }
             if (method != null)
             {
-
                 var cypherFunctionAttribute = method.Method.GetCustomAttribute<ParseToCypherAttribute>();
                 if (cypherFunctionAttribute != null)
                 {
                     var @params = MethodExpressionArgumentEvaluator.EvaluateArguments(method);
                     return string.Format(cypherFunctionAttribute.Format, @params);
                 }
-
             }
 
             throw new InvalidOrderByClauseException();
@@ -55,4 +50,3 @@ namespace CypherNet.Queries
     {
     }
 }
-

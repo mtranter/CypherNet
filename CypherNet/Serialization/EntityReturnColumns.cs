@@ -1,15 +1,13 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-
-namespace CypherNet.Serialization
+﻿namespace CypherNet.Serialization
 {
+    #region
+
     using System.Reflection;
     using Graph;
 
-    class EntityReturnColumns
+    #endregion
+
+    internal class EntityReturnColumns
     {
         private readonly PropertyInfo _cypherVariableProperty;
         private readonly string _propertyName;
@@ -25,12 +23,34 @@ namespace CypherNet.Serialization
             _propertyName = propertyName;
         }
 
-        public bool RequiresTypeProperty {get { return _cypherVariableProperty != null && _cypherVariableProperty.PropertyType == typeof (Relationship); }}
-        public bool RequiresLabelsProperty { get { return _cypherVariableProperty != null && _cypherVariableProperty.PropertyType == typeof(Node); } }
+        public bool RequiresTypeProperty
+        {
+            get { return _cypherVariableProperty != null && _cypherVariableProperty.PropertyType == typeof (Relationship); }
+        }
 
-        public string PropertiesPropertyName { get { return _propertyName; } }
-        public string IdPropertyName { get { return _propertyName + "__Id"; } }
-        public string TypePropertyName { get { return _propertyName + "__Type"; } }
-        public string LabelsPropertyName { get { return _propertyName + "__Labels"; } }
+        public bool RequiresLabelsProperty
+        {
+            get { return _cypherVariableProperty != null && _cypherVariableProperty.PropertyType == typeof (Node); }
+        }
+
+        public string PropertiesPropertyName
+        {
+            get { return _propertyName; }
+        }
+
+        public string IdPropertyName
+        {
+            get { return _propertyName + "__Id"; }
+        }
+
+        public string TypePropertyName
+        {
+            get { return _propertyName + "__Type"; }
+        }
+
+        public string LabelsPropertyName
+        {
+            get { return _propertyName + "__Labels"; }
+        }
     }
 }

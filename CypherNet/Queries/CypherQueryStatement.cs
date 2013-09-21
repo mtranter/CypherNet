@@ -1,10 +1,13 @@
-﻿using System.Linq;
-using Newtonsoft.Json.Linq;
-
-namespace CypherNet.Queries
+﻿namespace CypherNet.Queries
 {
+    #region
+
     using System.Collections.Generic;
+    using System.Linq;
     using Newtonsoft.Json;
+    using Newtonsoft.Json.Linq;
+
+    #endregion
 
     internal class CypherQueryStatement
     {
@@ -18,10 +21,10 @@ namespace CypherNet.Queries
         public string Statement { get; private set; }
 
         [JsonIgnore]
-        public IEnumerable<KeyValuePair<string,string>> Parameters { get; private set; }
+        public IEnumerable<KeyValuePair<string, string>> Parameters { get; private set; }
 
         [JsonProperty(PropertyName = "parameters")]
-        private IDictionary<string,JObject> ParametersDictionary
+        private IDictionary<string, JObject> ParametersDictionary
         {
             get { return Parameters.ToDictionary(k => k.Key, v => JObject.Parse(v.Value)); }
         }

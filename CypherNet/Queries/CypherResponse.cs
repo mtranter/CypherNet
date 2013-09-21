@@ -1,13 +1,12 @@
-﻿using System.Collections;
-using CypherNet.Serialization;
-using Newtonsoft.Json;
-
-namespace CypherNet.Queries
+﻿namespace CypherNet.Queries
 {
     #region
 
     using System;
+    using System.Collections;
     using System.Collections.Generic;
+    using Newtonsoft.Json;
+    using Serialization;
 
     #endregion
 
@@ -18,30 +17,29 @@ namespace CypherNet.Queries
 
     internal class CypherResponse<TResult> : ICypherResponse
     {
-
         [JsonProperty(PropertyName = "commit", NullValueHandling = NullValueHandling.Ignore)]
         internal string Commit { get; set; }
-        
+
         [JsonProperty(PropertyName = "results")]
         internal CypherResultSet<TResult> Results { get; set; }
-            
+
         [JsonProperty(PropertyName = "errors")]
         internal string[] Errors { get; private set; }
 
         [JsonProperty(PropertyName = "transaction", NullValueHandling = NullValueHandling.Ignore)]
         internal TransactionDetails Transaction { get; private set; }
-        
-        internal class TransactionDetails
-        {
-            [JsonProperty(PropertyName = "expires")]
-            [JsonConverter(typeof(IsoDateConverter))]
-            public DateTime Expires { get; private set; }
-        }
 
         [JsonIgnore]
         public Type ResponseType
         {
-            get { return typeof(TResult); }
+            get { return typeof (TResult); }
+        }
+
+        internal class TransactionDetails
+        {
+            [JsonProperty(PropertyName = "expires")]
+            [JsonConverter(typeof (IsoDateConverter))]
+            public DateTime Expires { get; private set; }
         }
     }
 

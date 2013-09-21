@@ -1,7 +1,11 @@
 ﻿namespace CypherNet.Graph
 {
+    #region
+
     using System.Collections.Generic;
     using Serialization;
+
+    #endregion
 
     public class Relationship : GraphEntity<Relationship>
     {
@@ -12,7 +16,7 @@
         }
 
         [DeserializeUsing]
-        internal Relationship(long id, IDictionary<string, object> properties,  string type)
+        internal Relationship(long id, IDictionary<string, object> properties, string type)
             : base(id, properties)
         {
             Type = type;

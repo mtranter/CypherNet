@@ -4,7 +4,7 @@
 
     using System;
     using System.Collections.Generic;
-    using CypherNet.Graph;
+    using Graph;
     using Newtonsoft.Json;
     using Newtonsoft.Json.Converters;
 

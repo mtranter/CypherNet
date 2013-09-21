@@ -1,20 +1,13 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-
-namespace CypherNet.UnitTests
+﻿namespace CypherNet.UnitTests
 {
-    using System.Transactions;
+    #region
+
     using Microsoft.VisualStudio.TestTools.UnitTesting;
-    using Moq;
-    using Transaction;
+
+    #endregion
 
     [TestClass]
     public class TransactionTests
     {
-
     }
 }
-

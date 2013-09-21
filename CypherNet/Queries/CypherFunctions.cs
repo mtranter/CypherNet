@@ -4,7 +4,6 @@
 
     using System;
     using Graph;
-    
 
     #endregion
 
@@ -19,7 +18,7 @@
 
         [ParseToCypher("has({0}.{1})")]
         public static bool Has(
-            [ArgumentEvaluator(typeof(MemberNameArgumentEvaluator))] IGraphEntity relationshipReference,
+            [ArgumentEvaluator(typeof (MemberNameArgumentEvaluator))] IGraphEntity relationshipReference,
             string property)
         {
             throw new NotImplementedException();
@@ -27,7 +26,7 @@
 
         [ParseToCypher("id({0})")]
         public static long Id(
-            [ArgumentEvaluator(typeof(MemberNameArgumentEvaluator))] IGraphEntity relationshipReference)
+            [ArgumentEvaluator(typeof (MemberNameArgumentEvaluator))] IGraphEntity relationshipReference)
         {
             throw new NotImplementedException();
         }

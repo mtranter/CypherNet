@@ -1,9 +1,13 @@
-﻿using System;
-using System.Linq.Expressions;
-using System.Reflection;
-
-namespace CypherNet.Queries
+﻿namespace CypherNet.Queries
 {
+    #region
+
+    using System;
+    using System.Linq.Expressions;
+    using System.Reflection;
+
+    #endregion
+
     internal class CypherCreateRelationshipClauseBuilder
     {
         internal static string BuildCreateClause(Expression exp)
@@ -21,7 +25,7 @@ namespace CypherNet.Queries
         {
             if (expression is MethodCallExpression)
             {
-                return VisitMethod((MethodCallExpression)expression, currentClause);
+                return VisitMethod((MethodCallExpression) expression, currentClause);
             }
             if (expression == null)
             {

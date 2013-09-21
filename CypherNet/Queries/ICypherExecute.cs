@@ -1,15 +1,14 @@
-﻿using System;
-using System.Linq.Expressions;
-
-namespace CypherNet.Queries
+﻿namespace CypherNet.Queries
 {
     #region
 
+    using System;
     using System.Collections.Generic;
+    using System.Linq.Expressions;
 
     #endregion
 
-    public interface ICypherFetchable<out TResult> : ICypherExecuteable
+    public interface ICypherFetchable<out TResult>
     {
         IEnumerable<TResult> Fetch();
     }
@@ -19,7 +18,7 @@ namespace CypherNet.Queries
         void Execute();
     }
 
-    public interface ICypherOrderBy<TParams, out TResult> :  ICypherSkip<TParams, TResult>
+    public interface ICypherOrderBy<TParams, out TResult> : ICypherSkip<TParams, TResult>
     {
         ICypherSkip<TParams, TResult> OrderBy(params Expression<Func<TParams, dynamic>>[] orderBy);
     }

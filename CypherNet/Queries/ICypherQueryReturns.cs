@@ -7,14 +7,19 @@
 
     #endregion
 
-    public interface ICypherQueryReturns<TVariables> : ICypherQueryCreate<TVariables>
+    public interface ICypherQueryReturns<TVariables> : ICypherQueryCreate<TVariables>, ICypherQueryDelete<TVariables>
     {
-        ICypherOrderBy<TVariables,TOut> Return<TOut>(Expression<Func<TVariables, TOut>> func);
+        ICypherOrderBy<TVariables, TOut> Return<TOut>(Expression<Func<TVariables, TOut>> func);
+    }
+
+    public interface ICypherQueryReturnOrExecute<TVariables> : ICypherExecuteable
+    {
+        ICypherOrderBy<TVariables, TOut> Return<TOut>(Expression<Func<TVariables, TOut>> func);
     }
 
     public interface ICypherQueryDelete<TVariables>
     {
-        ICypherFetchable<TOut> Delete<TOut>(Expression<Func<TVariables, TOut>> func);
+        ICypherExecuteable Delete<TOut>(Expression<Func<TVariables, TOut>> func);
     }
 
     public interface ICypherQueryReturnOnly<TVariables>

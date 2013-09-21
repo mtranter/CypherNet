@@ -1,18 +1,26 @@
-﻿
-namespace CypherNet
+﻿namespace CypherNet
 {
+    #region
+
     using System;
+    using System.Linq.Expressions;
     using Graph;
     using Queries;
+
+    #endregion
 
     public interface ICypherSession
     {
         ICypherQueryStart<TVariables> BeginQuery<TVariables>();
-        ICypherQueryStart<TVariables> BeginQuery<TVariables>(System.Linq.Expressions.Expression<Func<ICypherPrototype,TVariables>> variablePrototype);
+
+        ICypherQueryStart<TVariables> BeginQuery<TVariables>(
+            Expression<Func<ICypherPrototype, TVariables>> variablePrototype);
+
         Node CreateNode(object properties);
         Node CreateNode(object properties, string label);
         Node GetNode(long id);
-        void DeleteNode(long nodeId);
-        void UpdateNode(long nodeId, object properties);
+        void Delete(Node node);
+        void Delete(long nodeId);
+        void Save(Node node);
     }
 }

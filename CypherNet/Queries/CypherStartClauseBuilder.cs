@@ -1,10 +1,4 @@
-﻿#region
-
-
-
-#endregion
-
-namespace CypherNet.Queries
+﻿namespace CypherNet.Queries
 {
     #region
 
@@ -18,7 +12,9 @@ namespace CypherNet.Queries
 
     internal class CypherStartClauseBuilder
     {
-        private static readonly IEnumerable<MethodInfo> AllowedMethods = typeof (Start).GetMethods(BindingFlags.Static | BindingFlags.Public).Union(typeof(IBeginRelationshipDefinition).GetMethods());
+        private static readonly IEnumerable<MethodInfo> AllowedMethods =
+            typeof (Start).GetMethods(BindingFlags.Static | BindingFlags.Public)
+                          .Union(typeof (IBeginRelationshipDefinition).GetMethods());
 
         internal static string BuildStartClause(Expression exp)
         {
@@ -54,7 +50,7 @@ namespace CypherNet.Queries
                 declareAssignMethod.GetCustomAttribute<ParseToCypherAttribute>().Format;
             var @params = MethodExpressionArgumentEvaluator.EvaluateArguments(body);
             var thisAssignment = string.Format(findMethodFormat, @params);
-            return String.Join(", ", new[]{currentExpression, thisAssignment}.Where(s => !String.IsNullOrEmpty(s)));
+            return String.Join(", ", new[] {currentExpression, thisAssignment}.Where(s => !String.IsNullOrEmpty(s)));
         }
     }
 

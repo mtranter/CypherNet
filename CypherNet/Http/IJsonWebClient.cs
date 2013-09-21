@@ -1,13 +1,13 @@
-﻿
-using System.Net.Http.Headers;
-
-namespace CypherNet.Http
+﻿namespace CypherNet.Http
 {
-    using System;
-    using System.Net;
+    #region
+
     using System.Net.Http;
+    using System.Net.Http.Headers;
     using System.Threading.Tasks;
     using Serialization;
+
+    #endregion
 
     public interface IWebClient
     {
@@ -53,11 +53,10 @@ namespace CypherNet.Http
 
         #endregion
 
-
         private async Task<TResult> Execute<TResult>(string url, HttpMethod method)
         {
             var msg = new HttpRequestMessage(method, url);
-    
+
             using (var client = new HttpClient())
             {
                 var result = await client.SendAsync(msg);
@@ -69,7 +68,7 @@ namespace CypherNet.Http
         private async Task<TResult> Execute<TResult>(string url, object body, HttpMethod method)
         {
             var msg = new HttpRequestMessage(method, url);
-      
+
             if (body != null)
             {
                 var jsonBody = _serializer.Serialize(body);
@@ -86,4 +85,3 @@ namespace CypherNet.Http
         }
     }
 }
-

@@ -1,20 +1,30 @@
-﻿
-
-namespace CypherNet.Transaction
+﻿namespace CypherNet.Transaction
 {
+    #region
+
     using System;
-    using Queries;
+    using System.Collections.Generic;
     using System.Linq;
+    using System.Linq.Expressions;
+    using System.Reflection;
+    using Dynamic;
     using Graph;
+    using Queries;
     using Serialization;
     using StaticReflection;
 
+    #endregion
+
     public class CypherSession : ICypherSession
     {
+        private static readonly string NodeVariableName = ReflectOn<CreateNodeResult>.Member(a => a.NewNode).Name;
+
+        private static readonly string CreateNodeClauseFormat =
+            String.Format(@"CREATE ({0}{{0}} {{1}}) RETURN {0} as {{2}}, id({0}) as {{3}}, labels({0}) as {{4}};",
+                          NodeVariableName);
+
         private readonly ICypherClientFactory _clientFactory;
         private readonly IWebSerializer _webSerializer;
-        private static readonly string NodeVariableName = ReflectOn<CreateNodeResult>.Member(a => a.NewNode).Name;
-        private static readonly string CreateNodeClauseFormat = String.Format(@"CREATE ({0}{{0}} {{1}}) RETURN {0} as {{2}}, id({0}) as {{3}}, labels({0}) as {{4}};", NodeVariableName);
 
         internal CypherSession(ICypherClientFactory clientFactory)
             : this(clientFactory, new DefaultJsonSerializer())
@@ -34,22 +44,24 @@ namespace CypherNet.Transaction
             return new FluentCypherQueryBuilder<TVariables>(_clientFactory);
         }
 
-        public ICypherQueryStart<TVariables> BeginQuery<TVariables>(System.Linq.Expressions.Expression<Func<ICypherPrototype,TVariables>> variablePrototype)
+        public ICypherQueryStart<TVariables> BeginQuery<TVariables>(
+            Expression<Func<ICypherPrototype, TVariables>> variablePrototype)
         {
             return new FluentCypherQueryBuilder<TVariables>(_clientFactory);
         }
 
-        public Graph.Node CreateNode(object properties)
+        public Node CreateNode(object properties)
         {
             return CreateNode(properties, null);
         }
-        
+
         public Node CreateNode(object properties, string label)
         {
             var props = _webSerializer.Serialize(properties);
             var propNames = new EntityReturnColumns(NodeVariableName);
             var clause = String.Format(CreateNodeClauseFormat, String.IsNullOrEmpty(label) ? "" : ":" + label, props,
-                                       propNames.PropertiesPropertyName, propNames.IdPropertyName, propNames.LabelsPropertyName);
+                                       propNames.PropertiesPropertyName, propNames.IdPropertyName,
+                                       propNames.LabelsPropertyName);
             var endpoint = _clientFactory.Create();
             var result = endpoint.ExecuteQuery<CreateNodeResult>(clause);
             return result.First().NewNode;
@@ -65,17 +77,48 @@ namespace CypherNet.Transaction
             return firstRow == null ? null : firstRow.newNode;
         }
 
-        public void DeleteNode(long nodeId)
+        public void Delete(long nodeId)
         {
-            throw new NotImplementedException();
+            BeginQuery(n => new {newNode = n.Node})
+                .Start(v => Start.At(v.newNode, nodeId))
+                .Update(v => v.newNode.Set("sfds","fds"))
+                
+                .Execute();
         }
 
-        public void UpdateNode(long nodeId, object properties)
+        public void Delete(Node node)
         {
-            throw new NotImplementedException();
+            Delete(node.Id);
         }
 
-         #endregion
+        private static readonly MethodInfo SetMethodInfo = typeof (GraphEntityExtensions).GetMethod("Set", BindingFlags.Public | BindingFlags.Static);
+
+        private static readonly PropertyInfo NewNodeProperty =
+            (PropertyInfo) ReflectOn<CreateNodeResult>.Member(c => c.NewNode).MemberInfo;
+
+        public void Save(Node node)
+        {
+            var props = node as IDynamicMetaData;
+            var vals = props.GetAllValues();
+            var setActions = new List<Expression<Action<CreateNodeResult>>>();
+            foreach (var val in vals)
+            {
+                var param = Expression.Parameter(typeof (CreateNodeResult));
+                var propType = val.Value.GetType();
+                var method = SetMethodInfo.MakeGenericMethod(new[] {propType});
+                var member = Expression.Property(param, NewNodeProperty);
+                var call = Expression.Call(method, member, Expression.Constant(val.Key), Expression.Constant(val.Value));
+                var lambda = Expression.Lambda<Action<CreateNodeResult>>(call, param);
+                setActions.Add(lambda);
+            }
+
+            BeginQuery<CreateNodeResult>().Start(v => Start.At(v.NewNode, node.Id))
+                                          .Update(setActions.ToArray())
+                                          .Execute();
+
+        }
+
+        #endregion
 
         internal class CreateNodeResult
         {
@@ -87,4 +130,5 @@ namespace CypherNet.Transaction
             public Node NewNode { get; private set; }
         }
     }
+
 }

@@ -1,5 +1,4 @@
-﻿
-namespace CypherNet.Graph
+﻿namespace CypherNet.Graph
 {
     public interface IGraphEntity
     {

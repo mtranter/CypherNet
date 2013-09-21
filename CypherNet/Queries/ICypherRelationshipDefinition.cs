@@ -3,61 +3,60 @@
     #region
 
     using Graph;
-    
 
     #endregion
 
     [CypherGraphEntityName("rels")]
     public interface IDefineCypherToNode
     {
-        [ParseToCypherAttribute("()")]
+        [ParseToCypher("()")]
         IDefineCypherRelationship To();
 
-        [ParseToCypherAttribute("({0})")]
+        [ParseToCypher("({0})")]
         IDefineCypherRelationship To(
             [ArgumentEvaluator(typeof (MemberNameArgumentEvaluator))] Node nodeReference);
 
-        [ParseToCypherAttribute("(:{0})")]
+        [ParseToCypher("(:{0})")]
         IDefineCypherRelationship To(string label);
 
-        [ParseToCypherAttribute("({0}:{1})")]
+        [ParseToCypher("({0}:{1})")]
         IDefineCypherRelationship To(
-            [ArgumentEvaluator(typeof(MemberNameArgumentEvaluator))] Node nodeReference, string label);
+            [ArgumentEvaluator(typeof (MemberNameArgumentEvaluator))] Node nodeReference, string label);
     }
 
     [CypherGraphEntityName("rels")]
     public interface IDefineCypherFromNode
     {
-        [ParseToCypherAttribute("()")]
+        [ParseToCypher("()")]
         IDefineCypherRelationship From();
 
-        [ParseToCypherAttribute("({0})")]
+        [ParseToCypher("({0})")]
         IDefineCypherRelationship From(
-            [ArgumentEvaluator(typeof(MemberNameArgumentEvaluator))] Node nodeReference);
-        
-        [ParseToCypherAttribute("(:{0})")]
+            [ArgumentEvaluator(typeof (MemberNameArgumentEvaluator))] Node nodeReference);
+
+        [ParseToCypher("(:{0})")]
         IDefineCypherRelationship From(string label);
 
-        [ParseToCypherAttribute("({0}:{1})")]
+        [ParseToCypher("({0}:{1})")]
         IDefineCypherRelationship From(
-            [ArgumentEvaluator(typeof(MemberNameArgumentEvaluator))] Node nodeReference, string label);
+            [ArgumentEvaluator(typeof (MemberNameArgumentEvaluator))] Node nodeReference, string label);
     }
 
     [CypherGraphEntityName("rels")]
     public interface IDefineCypherWithNode
     {
-        [ParseToCypherAttribute("()")]
+        [ParseToCypher("()")]
         IDefineCypherRelationship With();
 
-        [ParseToCypherAttribute("({0})")]
+        [ParseToCypher("({0})")]
         IDefineCypherRelationship With(
-            [ArgumentEvaluator(typeof(MemberNameArgumentEvaluator))] Node nodeReference);
+            [ArgumentEvaluator(typeof (MemberNameArgumentEvaluator))] Node nodeReference);
 
-        [ParseToCypherAttribute("(:{0})")]
+        [ParseToCypher("(:{0})")]
         IDefineCypherRelationship With(string label);
 
-        [ParseToCypherAttribute("({0}:{1})")]
+        [ParseToCypher("({0}:{1})")]
         IDefineCypherRelationship With(
-            [ArgumentEvaluator(typeof(MemberNameArgumentEvaluator))] Node nodeReference, string label);
+            [ArgumentEvaluator(typeof (MemberNameArgumentEvaluator))] Node nodeReference, string label);
     }
 }

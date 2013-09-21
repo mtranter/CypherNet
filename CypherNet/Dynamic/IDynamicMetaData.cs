@@ -1,10 +1,4 @@
-﻿#region
-
-
-
-#endregion
-
-namespace CypherNet.Dynamic
+﻿namespace CypherNet.Dynamic
 {
     #region
 
@@ -18,4 +12,5 @@ namespace CypherNet.Dynamic
         bool HasProperty(string propertyName);
         IEnumerable<KeyValuePair<string, object>> GetAllValues();
     }
+
 }

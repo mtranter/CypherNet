@@ -1,10 +1,13 @@
-﻿
-using CypherNet.Http;
-using CypherNet.Serialization;
-using CypherNet.Transaction;
-
-namespace CypherNet.Configuration
+﻿namespace CypherNet.Configuration
 {
+    #region
+
+    using Http;
+    using Serialization;
+    using Transaction;
+
+    #endregion
+
     public class Fluently
     {
         public static ISessionConfiguration Configure(string endpointUri)
@@ -13,7 +16,7 @@ namespace CypherNet.Configuration
         }
     }
 
-    class SessionConfiguration : ISessionConfiguration
+    internal class SessionConfiguration : ISessionConfiguration
     {
         private readonly string _endpointUri;
 

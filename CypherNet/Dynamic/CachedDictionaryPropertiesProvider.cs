@@ -1,5 +1,4 @@
-﻿
-namespace CypherNet.Dynamic
+﻿namespace CypherNet.Dynamic
 {
     #region
 

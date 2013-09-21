@@ -1,10 +1,12 @@
-﻿using System.Linq;
-
-namespace CypherNet.Graph
+﻿namespace CypherNet.Graph
 {
-    using System;
+    #region
+
     using System.Collections.Generic;
+    using System.Linq;
     using Serialization;
+
+    #endregion
 
     public class Node : GraphEntity<Node>
     {
@@ -23,5 +25,4 @@ namespace CypherNet.Graph
 
         public IList<string> Labels { get; private set; }
     }
-
 }
