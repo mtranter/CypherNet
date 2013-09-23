@@ -8,6 +8,7 @@
 
     #endregion
 
+    // Internal modifier makes this extension inaccessible, I propose making it publicly accessible
     internal static class GraphEntityExtensions
     {
         [ParseToCypher("{0}.{1}")]
