@@ -12,7 +12,7 @@ Exposes strongly typed Graph Query API based on the Neo4j [Cypher Query Language
 </dl>
 ```C#
 var sessionFactory = Fluently.Configure("http://localhost:7474/db/data/").CreateSessionFactory();
-var cypherSession = clientFactory.Create();
+var cypherSession = sessionFactory.Create();
 
 var nodes = cypherSession
     .BeginQuery(p => new {person = p.Node, rel = p.Rel, role = p.Node}) // Define query variables
@@ -47,7 +47,7 @@ foreach (var node in nodes)
 </dl>
 ```C#
 var sessionFactory = Fluently.Configure("http://localhost:7474/db/data/").CreateSessionFactory();
-var cypherSession = clientFactory.Create();
+var cypherSession = sessionFactory.Create();
 
 Node node1, node2;
 using (var trans1 = new TransactionScope(TransactionScopeOption.RequiresNew))
