@@ -22,7 +22,8 @@
         [TestMethod]
         public void CreateNode_ReturnsNewNode()
         {
-            var clientFactory = Fluently.Configure("http://localhost:7474/db/data/").CreateSessionFactory();
+            var clientFactory = Fluently.Configure("http://localhost:7474/db/data/")
+                .CreateSessionFactory();
             var endpoint = clientFactory.Create();
 
             _personNode = endpoint.CreateNode(new {name = "mark", age = 33}, "person");
@@ -180,6 +181,13 @@
                 // Cypher WHERE predicate
                 .Return(vars => new {Person = vars.person, Rel = vars.rel, Role = vars.role}) // Cypher RETURN clause
                 .Fetch(); // GO!
+
+            /* Executes Cypher: 
+             * START person:node(*) 
+             * MATCH (person)-[rel]->(role) 
+             * WHERE person.name! = 'mark' AND role.title! = 'developer' 
+             * RETURN person as Person, rel as Rel, role as ROle
+            */
 
             Assert.IsTrue(nodes.Any());
 

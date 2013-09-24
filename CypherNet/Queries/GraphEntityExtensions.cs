@@ -8,15 +8,13 @@
 
     #endregion
 
-    internal static class GraphEntityExtensions
+    public static class GraphEntityExtensions
     {
         [ParseToCypher("{0}.{1}")]
         public static TProp Get<TProp>(
             [ArgumentEvaluator(typeof (MemberNameArgumentEvaluator))] this IGraphEntity entity, string propName)
         {
-            var dynamicEntity = entity as IDynamicMetaData;
-            var prop = dynamicEntity.GetAllValues().First(kvp => kvp.Key == propName).Value;
-            return (TProp) prop;
+            throw new ExpressionTreeOnlyUsageException();
         }
 
         [ParseToCypher("{0}.{1} = {2}")]
