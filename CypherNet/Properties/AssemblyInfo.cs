@@ -11,9 +11,9 @@ using System.Runtime.InteropServices;
 // associated with an assembly.
 
 [assembly: AssemblyTitle("CypherNet")]
-[assembly: AssemblyDescription("")]
+[assembly: AssemblyDescription("A .Net API for the Neo4j HTTP Transactional Endpoint.")]
 [assembly: AssemblyConfiguration("")]
-[assembly: AssemblyCompany("")]
+[assembly: AssemblyCompany("mtranter")]
 [assembly: AssemblyProduct("CypherNet")]
 [assembly: AssemblyCopyright("Copyright ©  2013")]
 [assembly: AssemblyTrademark("")]
@@ -40,7 +40,7 @@ using System.Runtime.InteropServices;
 // by using the '*' as shown below:
 // [assembly: AssemblyVersion("1.0.*")]
 
-[assembly: AssemblyVersion("1.0.0.0")]
-[assembly: AssemblyFileVersion("1.0.0.0")]
+[assembly: AssemblyVersion("0.9.1.1")]
+[assembly: AssemblyFileVersion("0.9.1.1")]
 [assembly: InternalsVisibleTo("CypherNet.UnitTests")]
 [assembly: InternalsVisibleTo("DynamicProxyGenAssembly2")]
