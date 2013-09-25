@@ -19,7 +19,9 @@
 
         internal static string BuildWhereClause(Expression exp)
         {
+            exp = ExpressionEvaluator.PartialEval(exp);
             var lambda = exp as LambdaExpression;
+            
             if (lambda == null)
             {
                 throw new InvalidCypherWhereExpressionException();
@@ -34,12 +36,10 @@
 
             internal string Translate(Expression expression)
             {
-                expression = ExpressionEvaluator.PartialEval(expression);
                 _queryBuilder = new StringBuilder();
                 Visit(expression);
                 return _queryBuilder.ToString();
             }
-
 
             protected override Expression VisitMethodCall(MethodCallExpression m)
             {

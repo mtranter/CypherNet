@@ -153,7 +153,7 @@
             var results = query
                 .Start(ctx => ctx.StartAtAny(ctx.Vars.movie))
                 .Match(ctx => ctx.Node(ctx.Vars.movie).Incoming("STARED_IN").From(ctx.Vars.actor))
-                .Where(v => v.actor.Get<string>("name") == "Bob Dinero" || v.actor.Get<string>("role") == "Keyser Söze")
+                .Where(v => v.actor.Get("name") == "Bob Dinero" || v.actor.Get<string>("role") == "Keyser Söze")
                 .Return(v => new {v.actor, v.movie})
                 .Fetch();
 
@@ -170,8 +170,7 @@
             factory.Setup(f => f.Create()).Returns(cypher.Object);
             var query = new FluentCypherQueryBuilder<TestCypherClause>(factory.Object);
             var results = query
-                .Match(
-                       ctx =>
+                .Match(ctx =>
                        ctx.NodeLabelled(ctx.Vars.actor, "METHOD_ACTOR")
                               .Outgoing("STARED_IN")
                               .To()
