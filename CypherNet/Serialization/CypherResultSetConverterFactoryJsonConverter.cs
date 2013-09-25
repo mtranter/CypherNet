@@ -16,6 +16,13 @@
 
     internal class CypherResultSetConverterFactoryJsonConverter : JsonConverter
     {
+        private readonly IEntityCache _entityCache;
+
+        internal CypherResultSetConverterFactoryJsonConverter(IEntityCache entityCache)
+        {
+            _entityCache = entityCache;
+        }
+
         public override void WriteJson(JsonWriter writer, object value, JsonSerializer serializer)
         {
             throw new NotImplementedException();
@@ -37,17 +44,23 @@
         {
             var baseType = type.GetGenericArguments()[0];
             var converterType = typeof (TransactionalResponseConverter<>).MakeGenericType(baseType);
-            return (JsonConverter) Activator.CreateInstance(converterType);
+            return (JsonConverter) Activator.CreateInstance(converterType, _entityCache);
         }
 
         private class TransactionalResponseConverter<TCypherResponse> :
             CustomCreationConverter<CypherResultSet<TCypherResponse>>
         {
+            private readonly IEntityCache _cache;
             private const string ColumnsJsonProperty = "columns";
             private const string DataJsonProperty = "data";
             private static readonly PropertyInfo[] Properties = typeof (TCypherResponse).GetProperties();
             private readonly IDictionary<string, int> _propertyCache = new Dictionary<string, int>();
             private string[] _columns;
+
+            public TransactionalResponseConverter(IEntityCache cache)
+            {
+                _cache = cache;
+            }
 
             public override bool CanWrite
             {
@@ -59,9 +72,7 @@
                 throw new NotImplementedException();
             }
 
-            public override object ReadJson(JsonReader reader, Type objectType, object existingValue,
-                                            JsonSerializer serializer)
-            {
+            public override object ReadJson(JsonReader reader, Type objectType, object existingValue, JsonSerializer serializer){
                 var isEmptyInArray = false;
                 do
                 {
@@ -143,39 +154,43 @@
 
                             if (typeof (IGraphEntity).IsAssignableFrom(property.PropertyType))
                             {
+                                IGraphEntity graphEntity = null;
                                 var entityPropertyNames = new EntityReturnColumns(property);
 
                                 AssertNecesaryColumnForType(entityPropertyNames.IdPropertyName, typeof (IGraphEntity));
                                 var nodeId = record[_propertyCache[entityPropertyNames.IdPropertyName]].ToObject<long>();
-                                itemproperties.Add("id", nodeId);
-
-                                AssertNecesaryColumnForType(entityPropertyNames.PropertiesPropertyName,
-                                                            typeof (IGraphEntity));
-                                var entityProperties =
-                                    record[_propertyCache[entityPropertyNames.PropertiesPropertyName]]
-                                        .ToObject<Dictionary<string, object>>();
-                                itemproperties.Add("properties", entityProperties);
-
-                                if (entityPropertyNames.RequiresLabelsProperty)
+                                if (_cache.Contains(nodeId))
                                 {
-                                    AssertNecesaryColumnForType(entityPropertyNames.LabelsPropertyName, typeof (Node));
-                                    var labels =
-                                        record[_propertyCache[entityPropertyNames.LabelsPropertyName]]
-                                            .ToObject<string[]>();
-                                    itemproperties.Add("labels", labels);
+                                    graphEntity = _cache.GetEntity(nodeId);
                                 }
-
-                                if (entityPropertyNames.RequiresTypeProperty)
+                                else
                                 {
-                                    AssertNecesaryColumnForType(entityPropertyNames.TypePropertyName,
-                                                                typeof (Relationship));
-                                    var relType =
-                                        record[_propertyCache[entityPropertyNames.TypePropertyName]].ToObject<string>();
-                                    itemproperties.Add("type", relType);
-                                }
 
-                                var entity = HydrateWithCtr(itemproperties, property.PropertyType);
-                                items.Add(property.Name, entity);
+                                    itemproperties.Add("id", nodeId);
+
+                                    AssertNecesaryColumnForType(entityPropertyNames.PropertiesPropertyName, typeof(IGraphEntity));
+                                    var entityProperties = record[_propertyCache[entityPropertyNames.PropertiesPropertyName]].ToObject<Dictionary<string, object>>();
+                                    itemproperties.Add("properties", entityProperties);
+
+                                    if (entityPropertyNames.RequiresLabelsProperty)
+                                    {
+                                        AssertNecesaryColumnForType(entityPropertyNames.LabelsPropertyName, typeof(Node));
+                                        var labels = record[_propertyCache[entityPropertyNames.LabelsPropertyName]].ToObject<string[]>();
+                                        itemproperties.Add("labels", labels);
+                                    }
+
+                                    if (entityPropertyNames.RequiresTypeProperty)
+                                    {
+                                        AssertNecesaryColumnForType(entityPropertyNames.TypePropertyName,
+                                                                    typeof(Relationship));
+                                        var relType = record[_propertyCache[entityPropertyNames.TypePropertyName]].ToObject<string>();
+                                        itemproperties.Add("type", relType);
+                                    }
+
+                                    graphEntity = (IGraphEntity)HydrateWithCtr(itemproperties, property.PropertyType);
+                                    _cache.CacheEntity(graphEntity);
+                                }
+                                items.Add(property.Name, graphEntity);
                             }
                             else
                             {

@@ -60,6 +60,7 @@
             var factory = new Mock<ICypherClientFactory>();
             factory.Setup(f => f.Create()).Returns(cypher.Object);
             var query = new FluentCypherQueryBuilder<TestCypherClause>(factory.Object);
+           
             query
                 .Start(v => Start.At(v.movie, 1))
                 .Match(v => Pattern.Start(v.movie).Incoming("STARED_IN", 1, 5).From(v.actor))
@@ -67,8 +68,7 @@
                 .Delete(v => v.actor)
                 .Execute();
 
-            VerifyCypher(cypher,
-                         "START movie=node(1) MATCH (movie)<-[:STARED_IN*1..5]-(actor) DELETE actor");
+            VerifyCypher(cypher, "START movie=node(1) MATCH (movie)<-[:STARED_IN*1..5]-(actor) DELETE actor");
         }
 
         [TestMethod]

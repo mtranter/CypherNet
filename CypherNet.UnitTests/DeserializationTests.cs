@@ -80,7 +80,7 @@
    ]
 }";
 
-            var deserializer = new DefaultJsonSerializer();
+            var deserializer = new DefaultJsonSerializer(new DictionaryEntityCache());
 
             var retval = deserializer.Deserialize<CypherResponse<DeserializationTestClass>>(json);
             Assert.AreEqual(retval.Results.Count(), 2);
@@ -95,7 +95,7 @@
             var request =
                 CypherQueryRequest.Create(
                                           @"START x=node(1), y=node(2) CREATE x-[r:OWNS {""name"":""mark""}]->y<-[r2:IS_OWNED_BY {""age"": 33}]");
-            var serializer = new DefaultJsonSerializer();
+            var serializer = new DefaultJsonSerializer(new DictionaryEntityCache());
             var result = serializer.Serialize(request);
             Console.WriteLine(result);
         }

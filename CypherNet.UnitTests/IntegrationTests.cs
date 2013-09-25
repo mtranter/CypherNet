@@ -27,8 +27,8 @@
 
             _personNode = endpoint.CreateNode(new {name = "mark", age = 33}, "person");
             var twin = endpoint.GetNode(_personNode.Id);
-
             Assert.AreEqual(twin.Id, _personNode.Id);
+            Assert.IsTrue(object.ReferenceEquals(_personNode, twin));
         }
 
 
@@ -37,7 +37,6 @@
         {
             var clientFactory = Fluently.Configure("http://localhost:7474/db/data/").CreateSessionFactory();
             var endpoint = clientFactory.Create();
-
             var node  = endpoint.CreateNode(new { name = "mark", age = 33 }, "person");
             endpoint.Delete(node);
             var twin = endpoint.GetNode(node.Id);

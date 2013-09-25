@@ -11,16 +11,16 @@
 
     public interface ICypherSession
     {
-        ICypherQueryStart<TVariables> BeginQuery<TVariables>();
-
-        ICypherQueryStart<TVariables> BeginQuery<TVariables>(
-            Expression<Func<ICypherPrototype, TVariables>> variablePrototype);
+        Node GetNode(long id);
 
         Node CreateNode(object properties);
         Node CreateNode(object properties, string label);
-        Node GetNode(long id);
+        
         void Delete(Node node);
         void Delete(long nodeId);
         void Save(Node node);
+
+        ICypherQueryStart<TVariables> BeginQuery<TVariables>();
+        ICypherQueryStart<TVariables> BeginQuery<TVariables>(Expression<Func<ICypherPrototype, TVariables>> variablePrototype);
     }
 }

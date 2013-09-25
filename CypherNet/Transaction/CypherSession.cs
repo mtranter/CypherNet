@@ -25,17 +25,15 @@
 
         private readonly ICypherClientFactory _clientFactory;
         private readonly IWebSerializer _webSerializer;
+        private readonly IEntityCache _entityCache;
 
         internal CypherSession(ICypherClientFactory clientFactory)
-            : this(clientFactory, new DefaultJsonSerializer())
-        {
-        }
-
-        internal CypherSession(ICypherClientFactory clientFactory, IWebSerializer webSerializer)
         {
             _clientFactory = clientFactory;
-            _webSerializer = webSerializer;
+            _entityCache = new DictionaryEntityCache();
+            _webSerializer = new DefaultJsonSerializer(_entityCache);
         }
+
 
         #region ICypherSession Members
 
@@ -64,26 +62,35 @@
                                        propNames.LabelsPropertyName);
             var endpoint = _clientFactory.Create();
             var result = endpoint.ExecuteQuery<CreateNodeResult>(clause);
-            return result.First().NewNode;
+            var node = result.First().NewNode;
+            _entityCache.CacheEntity(node);
+            return node;
         }
 
         public Node GetNode(long id)
         {
-            var query = BeginQuery(n => new {newNode = n.Node})
-                .Start(v => Start.At(v.newNode, id))
-                .Return(v => new {v.newNode})
-                .Fetch();
-            var firstRow = query.FirstOrDefault();
-            return firstRow == null ? null : firstRow.newNode;
+            if (_entityCache.Contains(id))
+            {
+                return _entityCache.GetEntity(id) as Node;
+            }
+            else
+            {
+                var query = BeginQuery(n => new {newNode = n.Node})
+                    .Start(v => Start.At(v.newNode, id))
+                    .Return(v => new {v.newNode})
+                    .Fetch();
+                var firstRow = query.FirstOrDefault();
+                return firstRow == null ? null : firstRow.newNode;
+            }
         }
 
         public void Delete(long nodeId)
         {
             BeginQuery(n => new {newNode = n.Node})
                 .Start(v => Start.At(v.newNode, nodeId))
-                .Update(v => v.newNode.Set("sfds","fds"))
-                
+                .Delete(v => v.newNode)
                 .Execute();
+            _entityCache.Remove(nodeId);
         }
 
         public void Delete(Node node)
