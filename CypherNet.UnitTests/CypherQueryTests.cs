@@ -220,10 +220,5 @@
                         c =>
                         c.ExecuteCommand(query));
         }
-
-        private void DoIt<TResult, TInput>(TInput proto, Expression<Func<TResult>> inputFunc)
-            where TResult : TInput, ICypherClientFactory
-        {
-        }
     }
 }
