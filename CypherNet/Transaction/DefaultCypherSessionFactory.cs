@@ -1,4 +1,6 @@
-﻿namespace CypherNet.Transaction
+﻿using CypherNet.Serialization;
+
+namespace CypherNet.Transaction
 {
     #region
 
@@ -11,20 +13,19 @@
         private readonly IWebClient _client;
         private readonly string _sourceUri;
 
-        public DefaultCypherSessionFactory(string sourceUri, IWebClient client)
+        public DefaultCypherSessionFactory(string sourceUri)
         {
             _sourceUri = sourceUri;
-            _client = client;
         }
 
         public ICypherSession Create()
         {
-            return new CypherSession(new CypherClientFactory(_sourceUri, _client));
+            return new CypherSession(_sourceUri);
         }
 
         public ICypherSession Create(string sourceUri)
         {
-            return new CypherSession(new CypherClientFactory(sourceUri, _client));
+            return new CypherSession(sourceUri);
         }
     }
 }
