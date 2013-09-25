@@ -6,11 +6,4 @@
         void Rollback();
         bool KeepAlive();
     }
-
-    public enum EndpointState
-    {
-        Uninitialised,
-        Active,
-        Complete
-    }
 }
