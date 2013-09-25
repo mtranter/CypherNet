@@ -77,7 +77,7 @@ namespace CypherNet.Transaction
             else
             {
                 var query = BeginQuery(n => new {newNode = n.Node})
-                    .Start(v => Start.At(v.newNode, id))
+                    .Start(v => v.StartAtId(v.Vars.newNode, id))
                     .Return(v => new {v.newNode})
                     .Fetch();
                 var firstRow = query.FirstOrDefault();
@@ -88,7 +88,7 @@ namespace CypherNet.Transaction
         public void Delete(long nodeId)
         {
             BeginQuery(n => new {newNode = n.Node})
-                .Start(v => Start.At(v.newNode, nodeId))
+                .Start(v => v.StartAtId(v.Vars.newNode, nodeId))
                 .Delete(v => v.newNode)
                 .Execute();
             _entityCache.Remove(nodeId);
@@ -120,7 +120,7 @@ namespace CypherNet.Transaction
                 setActions.Add(lambda);
             }
 
-            BeginQuery<CreateNodeResult>().Start(v => Start.At(v.NewNode, node.Id))
+            BeginQuery<CreateNodeResult>().Start(v => v.StartAtId(v.Vars.NewNode, node.Id))
                                           .Update(setActions.ToArray())
                                           .Execute();
 

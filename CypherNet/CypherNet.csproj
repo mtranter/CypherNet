@@ -58,7 +58,8 @@
     <Compile Include="Graph\IGraphEntity.cs" />
     <Compile Include="Graph\Node.cs" />
     <Compile Include="Graph\Relationship.cs" />
-    <Compile Include="Http\IJsonWebClient.cs" />
+    <Compile Include="Http\IWebClient.cs" />
+    <Compile Include="Http\WebClient.cs" />
     <Compile Include="ICypherSession.cs" />
     <Compile Include="IEntityCache.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
@@ -84,7 +85,7 @@
     <Compile Include="Queries\ExpressionTreeOnlyUsageException.cs" />
     <Compile Include="Queries\FindsGraphEntityMethodAttribute.cs" />
     <Compile Include="Queries\GraphEntityExtensions.cs" />
-    <Compile Include="Queries\IBeginRelationshipDefinition.cs" />
+    <Compile Include="Queries\IMatchQueryContext.cs" />
     <Compile Include="Queries\ICreateCypherRelationship.cs" />
     <Compile Include="Queries\ICypherEntityReference.cs" />
     <Compile Include="Queries\ICypherExecute.cs" />
@@ -103,8 +104,10 @@
     <Compile Include="Queries\IDefineCypherWithNode.cs" />
     <Compile Include="Queries\InvalidCypherVariableTypeException.cs" />
     <Compile Include="Queries\IParameterExpressionEvaluator.cs" />
+    <Compile Include="Queries\IQueryContext.cs" />
     <Compile Include="Queries\IRelationshipDefiniton.cs" />
-    <Compile Include="Queries\IStartDefinition.cs" />
+    <Compile Include="Queries\ICypherPrototype.cs" />
+    <Compile Include="Queries\IStartQueryContext.cs" />
     <Compile Include="Serialization\CypherColumnNotPresentException.cs" />
     <Compile Include="Serialization\CypherResultSetConverterFactoryJsonConverter.cs" />
     <Compile Include="Serialization\DefaultJsonSerializer.cs" />

@@ -100,7 +100,7 @@
 
             var testNode = endpoint.CreateNode(new { name = "mark", age = 33 }, "person");
             var results = endpoint.BeginQuery(s => new {node1 = s.Node, node2 = s.Node})
-                                 .Start(vars => Start.At(vars.node1, testNode.Id).At(vars.node2, testNode.Id))
+                                 .Start(ctx => ctx.StartAtId(ctx.Vars.node1, testNode.Id).StartAtId(ctx.Vars.node2, testNode.Id))
                                  .Return(vars => new {Node1 = vars.node1, Node2 = vars.node2})
                                  .Fetch();
 
@@ -121,7 +121,7 @@
 
             var newnode = endpoint
                 .BeginQuery(s => new {n = s.Node})
-                .Start(v => Start.At(v.n, _positionNode.Id))
+                .Start(ctx => ctx.StartAtId(ctx.Vars.n, _positionNode.Id))
                 .Return(r => new {NewNode = r.n})
                 .Fetch().Select(s => s.NewNode).FirstOrDefault();
 
@@ -137,7 +137,7 @@
 
             var path = endpoint
                 .BeginQuery(s => new {person = s.Node, worksAs = s.Rel, position = s.Node})
-                .Start(v => Start.At(v.person, _personNode.Id).At(v.position, _positionNode.Id))
+                .Start(ctx => ctx.StartAtId(ctx.Vars.person, _personNode.Id).StartAtId(ctx.Vars.position, _positionNode.Id))
                 .Create(v => Create.Relationship(v.person, v.worksAs, "WORKS_AS", v.position))
                 .Return(s => new {s.person, s.worksAs, s.position})
                 .Fetch().FirstOrDefault();
@@ -165,7 +165,7 @@
 
             var readEndpoint = clientFactory.Create();
             var newnode = readEndpoint.BeginQuery(s => new {n = s.Node})
-                                      .Start(v => Start.At(v.n, node.Id))
+                                      .Start(ctx => ctx.StartAtId(ctx.Vars.n, node.Id))
                                       .Return(r => new {NewNode = r.n})
                                       .Fetch().FirstOrDefault();
 
@@ -179,14 +179,13 @@
             var endpoint = clientFactory.Create();
 
             var nodes = endpoint.BeginQuery(p => new {node = p.Node})
-                                .Start(n => Start.At(n.node, _personNode.Id))
+                                .Start(ctx => ctx.StartAtId(ctx.Vars.node, _personNode.Id))
                                 .Return(r => new {Node = r.node})
                                 .Fetch();
 
             Assert.AreEqual(nodes.Count(), 1);
             Assert.AreEqual(nodes.First().Node.Id, _personNode.Id);
         }
-
 
         [TestMethod]
         public void QueryWithJoinsOverMany_NotInsideTransaction_ReturnsMultipleResults()
@@ -196,10 +195,9 @@
 
             var nodes = cypherEndpoint
                 .BeginQuery(p => new {person = p.Node, rel = p.Rel, role = p.Node}) // Define query variables
-                .Start(vars => Start.Any(vars.person)) // Cypher START clause
-                .Match(vars => Pattern.Start(vars.person).Outgoing(vars.rel).To(vars.role)) // Cypher MATCH clause
-                .Where(
-                       vars =>
+                .Start(ctx => ctx.StartAtAny(ctx.Vars.person)) // Cypher START clause
+                .Match(ctx => ctx.Node(ctx.Vars.person).Outgoing(ctx.Vars.rel).To(ctx.Vars.role)) // Cypher MATCH clause
+                .Where(vars =>
                        vars.person.Get<string>("name!") == "mark" && vars.role.Get<string>("title!") == "developer")
                 // Cypher WHERE predicate
                 .Return(vars => new {Person = vars.person, Rel = vars.rel, Role = vars.role}) // Cypher RETURN clause
@@ -233,7 +231,7 @@
                 var clientFactory = Fluently.Configure("http://localhost:7474/db/data/").CreateSessionFactory();
                 var cypherEndpoint = clientFactory.Create();
                 var nodes = cypherEndpoint.BeginQuery(p => new {node = p.Node})
-                                          .Start(n => Start.Any(n.node))
+                                          .Start(ctx => ctx.StartAtAny(ctx.Vars.node))
                                           .Where(n => n.node.Id == _personNode.Id)
                                           .Return(r => new {Node = r.node})
                                           .Fetch();
@@ -259,13 +257,13 @@
             }
 
             var node1Query = cypherEndpoint.BeginQuery(s => new {node1 = s.Node})
-                                           .Start(s => Start.At(s.node1, node1.Id))
+                                           .Start(ctx => ctx.StartAtId(ctx.Vars.node1, node1.Id))
                                            .Return(r => new {r.node1})
                                            .Fetch()
                                            .FirstOrDefault();
 
             var node2Query = cypherEndpoint.BeginQuery(s => new {node2 = s.Node})
-                                           .Start(s => Start.At(s.node2, node2.Id))
+                                           .Start(ctx => ctx.StartAtId(ctx.Vars.node2, node2.Id))
                                            .Return(r => new {r.node2})
                                            .Fetch()
                                            .FirstOrDefault();

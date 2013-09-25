@@ -25,9 +25,8 @@
             factory.Setup(f => f.Create()).Returns(cypher.Object);
             var query = new FluentCypherQueryBuilder<TestCypherClause>(factory.Object);
             var results = query
-                .Start(v => Start.At(v.movie, 1))
-                .Match(v => Pattern.Start(v.movie).Incoming("STARED_IN", 1, 5).From(v.actor))
-                
+                .Start(ctx => ctx.StartAtId(ctx.Vars.movie, 1))
+                .Match(ctx => ctx.Node(ctx.Vars.movie).Incoming("STARED_IN", 1, 5).From(ctx.Vars.actor))
                 .Return(v => new {v.actor, v.movie})
                 .Fetch();
 
@@ -44,7 +43,7 @@
             factory.Setup(f => f.Create()).Returns(cypher.Object);
             var query = new FluentCypherQueryBuilder<TestCypherClause>(factory.Object);
             var results = query
-                .Start(v => Start.At(v.movie, 1))
+                .Start(ctx => ctx.StartAtId(ctx.Vars.movie, 1))
                 .Return(v => v.movie)
                 .Fetch();
 
@@ -62,9 +61,8 @@
             var query = new FluentCypherQueryBuilder<TestCypherClause>(factory.Object);
            
             query
-                .Start(v => Start.At(v.movie, 1))
-                .Match(v => Pattern.Start(v.movie).Incoming("STARED_IN", 1, 5).From(v.actor))
-
+                .Start(ctx => ctx.StartAtId(ctx.Vars.movie, 1))
+                .Match(ctx => ctx.Node(ctx.Vars.movie).Incoming("STARED_IN", 1, 5).From(ctx.Vars.actor))
                 .Delete(v => v.actor)
                 .Execute();
 
@@ -80,8 +78,8 @@
             factory.Setup(f => f.Create()).Returns(cypher.Object);
             var query = new FluentCypherQueryBuilder<TestCypherClause>(factory.Object);
             query
-                .Start(v => Start.At(v.movie, 1))
-                .Match(v => Pattern.Start(v.movie).Incoming("STARED_IN", 1, 5).From(v.actor))
+                .Start(ctx => ctx.StartAtId(ctx.Vars.movie, 1))
+                .Match(ctx => ctx.Node(ctx.Vars.movie).Incoming("STARED_IN", 1, 5).From(ctx.Vars.actor))
                 .Delete(v => new { v.actor, v.movie })
                 .Execute();
 
@@ -98,9 +96,8 @@
             factory.Setup(f => f.Create()).Returns(cypher.Object);
             var query = new FluentCypherQueryBuilder<TestCypherClause>(factory.Object);
             var results = query
-                .Match(v => Pattern.Start(v.movie, "arthouse"))
+                .Match(ctx => ctx.NodeLabelled(ctx.Vars.movie, "arthouse"))
                 .Update(v => v.movie.Set("requiresSubtitles", "yes"))
-                
                 .Return(v => new {v.actor, v.movie})
                 .Fetch();
 
@@ -117,7 +114,7 @@
             factory.Setup(f => f.Create()).Returns(cypher.Object);
             var query = new FluentCypherQueryBuilder<TestCypherClause>(factory.Object);
             var results = query
-                .Start(v => Start.At(v.actor, 1).At(v.movie, 2))
+                .Start(ctx => ctx.StartAtId(ctx.Vars.actor, 1).StartAtId(ctx.Vars.movie, 2))
                 .Create(v => Create.Relationship(v.actor, v.actedIn, "ACTED_IN", v.movie))
                 .Return(v => new {v.actedIn})
                 .Fetch();
@@ -135,7 +132,7 @@
             factory.Setup(f => f.Create()).Returns(cypher.Object);
             var query = new FluentCypherQueryBuilder<TestCypherClause>(factory.Object);
             var results = query
-                .Start(v => Start.At(v.actor, 1).At(v.movie, 2))
+                .Start(ctx => ctx.StartAtId(ctx.Vars.actor, 1).StartAtId(ctx.Vars.movie, 2))
                 .Create(v => Create.Relationship(v.actor, v.actedIn, "ACTED_IN", new {name = "mark"}, v.movie))
                 .Return(v => new {v.actedIn})
                 .Fetch();
@@ -154,8 +151,8 @@
             var query = new FluentCypherQueryBuilder<TestCypherClause>(factory.Object);
 
             var results = query
-                .Start(v => Start.Any(v.movie))
-                .Match(v => Pattern.Start(v.movie).Incoming("STARED_IN").From(v.actor))
+                .Start(ctx => ctx.StartAtAny(ctx.Vars.movie))
+                .Match(ctx => ctx.Node(ctx.Vars.movie).Incoming("STARED_IN").From(ctx.Vars.actor))
                 .Where(v => v.actor.Get<string>("name") == "Bob Dinero" || v.actor.Get<string>("role") == "Keyser Söze")
                 .Return(v => new {v.actor, v.movie})
                 .Fetch();
@@ -174,12 +171,12 @@
             var query = new FluentCypherQueryBuilder<TestCypherClause>(factory.Object);
             var results = query
                 .Match(
-                       v =>
-                       Pattern.Start(v.actor, "METHOD_ACTOR")
+                       ctx =>
+                       ctx.NodeLabelled(ctx.Vars.actor, "METHOD_ACTOR")
                               .Outgoing("STARED_IN")
                               .To()
-                              .Outgoing(v.directedBy, "DIRECTED_BY")
-                              .To(v.director))
+                              .Outgoing(ctx.Vars.directedBy, "DIRECTED_BY")
+                              .To(ctx.Vars.director))
                 .Return(v => new {v.actor, v.director})
                 .Fetch();
 
@@ -196,7 +193,7 @@
             factory.Setup(f => f.Create()).Returns(cypher.Object);
             var query = new FluentCypherQueryBuilder<TestCypherClause>(factory.Object);
             var results = query
-                .Start(v => Start.At(v.actor, 1))
+                .Start(ctx => ctx.StartAtId(ctx.Vars.actor, 1))
                 .Return(v => new {v.actor})
                 .OrderBy(p => p.actedIn.Get<int>("fgds"), p => p.actedIn.Get<string>("name"))
                 .Skip(2)

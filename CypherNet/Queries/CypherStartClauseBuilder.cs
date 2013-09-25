@@ -12,9 +12,6 @@
 
     internal class CypherStartClauseBuilder
     {
-        private static readonly IEnumerable<MethodInfo> AllowedMethods =
-            typeof (Start).GetMethods(BindingFlags.Static | BindingFlags.Public)
-                          .Union(typeof (IBeginRelationshipDefinition).GetMethods());
 
         internal static string BuildStartClause(Expression exp)
         {
@@ -36,7 +33,7 @@
         private static string BuildStartClause(MethodCallExpression body, string currentExpression)
         {
             var declareAssignMethod = body.Method;
-            if (!AllowedMethods.Contains(declareAssignMethod))
+            if (declareAssignMethod.DeclaringType.GetGenericTypeDefinition() != typeof(IStartQueryContext<>))
             {
                 throw new InvalidCypherStartExpressionException();
             }
