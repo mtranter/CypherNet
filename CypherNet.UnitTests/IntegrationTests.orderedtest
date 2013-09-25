@@ -1,5 +1,5 @@
 ﻿<?xml version="1.0" encoding="UTF-8"?>
-<OrderedTest name="integrationtests" storage="c:\projects\git\cyphernet\cyphernet.unittests\integrationtests.orderedtest" id="63248de6-fe0d-4bf5-9011-d5367e7d03c9" xmlns="http://microsoft.com/schemas/VisualStudio/TeamTest/2010">
+<OrderedTest name="integrationtests" storage="d:\cypher.net\cyphernet.unittests\integrationtests.orderedtest" id="63248de6-fe0d-4bf5-9011-d5367e7d03c9" xmlns="http://microsoft.com/schemas/VisualStudio/TeamTest/2010">
   <TestLinks>
     <TestLink id="e5c8b3df-30a2-07f8-1313-a279f60def5f" name="CreateNode_WithLabel_ReturnsNewNode" storage="bin\debug\cyphernet.unittests.dll" type="Microsoft.VisualStudio.TestTools.TestTypes.Unit.UnitTestElement, Microsoft.VisualStudio.QualityTools.Tips.UnitTest.ObjectModel, Version=11.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a" />
     <TestLink id="68c96fd9-2439-cf69-f8f0-80f8deda4250" name="CreateNode_WithoutLabel_ReturnsNewNode" storage="bin\debug\cyphernet.unittests.dll" type="Microsoft.VisualStudio.TestTools.TestTypes.Unit.UnitTestElement, Microsoft.VisualStudio.QualityTools.Tips.UnitTest.ObjectModel, Version=11.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a" />
@@ -7,5 +7,6 @@
     <TestLink id="92a72807-5fe9-5392-db47-54f1bf9ff0ec" name="CreateNodeWithinTransaction_Rollback_DoesNotCreateNode" storage="bin\debug\cyphernet.unittests.dll" type="Microsoft.VisualStudio.TestTools.TestTypes.Unit.UnitTestElement, Microsoft.VisualStudio.QualityTools.Tips.UnitTest.ObjectModel, Version=11.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a" />
     <TestLink id="99370532-8907-bf29-fc5f-3deb8d5d95c5" name="QueryGraph_SimpleQueryInsideTransaction_ReturnsResults" storage="bin\debug\cyphernet.unittests.dll" type="Microsoft.VisualStudio.TestTools.TestTypes.Unit.UnitTestElement, Microsoft.VisualStudio.QualityTools.Tips.UnitTest.ObjectModel, Version=11.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a" />
     <TestLink id="53017aa6-9a01-107c-6d0b-2bbe0ff16ab3" name="QueryGraph_SimpleQueryNotInsideTransaction_ReturnsResults" storage="bin\debug\cyphernet.unittests.dll" type="Microsoft.VisualStudio.TestTools.TestTypes.Unit.UnitTestElement, Microsoft.VisualStudio.QualityTools.Tips.UnitTest.ObjectModel, Version=11.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a" />
+    <TestLink id="e926a86d-788f-f0a0-6909-7a854afbfd2c" name="QueryGraph_ReturnsMultipleInstanceOfANode_ReturnsIdenticallyEqualNodes" storage="bin\debug\cyphernet.unittests.dll" type="Microsoft.VisualStudio.TestTools.TestTypes.Unit.UnitTestElement, Microsoft.VisualStudio.QualityTools.Tips.UnitTest.ObjectModel, Version=11.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a" />
   </TestLinks>
 </OrderedTest>

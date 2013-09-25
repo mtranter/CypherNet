@@ -91,6 +91,26 @@
             Assert.AreEqual(node.age, 33);
         }
 
+
+        [TestMethod]
+        public void QueryGraph_ReturnsMultipleInstancesOfANode_ReturnsIdenticallyEqualNodes()
+        {
+            var clientFactory = Fluently.Configure("http://localhost:7474/db/data/").CreateSessionFactory();
+            var endpoint = clientFactory.Create();
+
+            var testNode = endpoint.CreateNode(new { name = "mark", age = 33 }, "person");
+            var results = endpoint.BeginQuery(s => new {node1 = s.Node, node2 = s.Node})
+                                 .Start(vars => Start.At(vars.node1, testNode.Id).At(vars.node2, testNode.Id))
+                                 .Return(vars => new {Node1 = vars.node1, Node2 = vars.node2})
+                                 .Fetch();
+
+            foreach (var result in results)
+            {
+                Assert.AreSame(result.Node1, result.Node2);
+            }
+
+        }
+
         [TestMethod]
         public void CreateNode_WithoutLabel_ReturnsNewNode()
         {
