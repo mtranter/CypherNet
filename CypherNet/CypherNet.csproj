@@ -115,12 +115,14 @@
     <Compile Include="Serialization\EntityReturnColumns.cs" />
     <Compile Include="Serialization\IJsonSerializer.cs" />
     <Compile Include="Serialization\IsoDateConverter.cs" />
+    <Compile Include="ServiceRootResponse.cs" />
     <Compile Include="Transaction\CypherClientFactory.cs" />
     <Compile Include="Transaction\DefaultCypherSessionFactory.cs" />
     <Compile Include="ICypherSessionFactory.cs" />
     <Compile Include="Transaction\ICypherUnitOfWork.cs" />
     <Compile Include="ICypherClient.cs" />
     <Compile Include="Transaction\CypherSession.cs" />
+    <Compile Include="Transaction\NeoServerUnavalaibleExpcetion.cs" />
     <Compile Include="Transaction\NonTransactionalCypherClient.cs" />
     <Compile Include="Transaction\TransactionalCypherClient.cs" />
     <Compile Include="UriHelper.cs" />
