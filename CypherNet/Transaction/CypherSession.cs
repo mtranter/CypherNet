@@ -122,6 +122,20 @@ namespace CypherNet.Transaction
             return node;
         }
 
+
+        public Relationship CreateRelationship(Node node1, Node node2, string type, object relationshipProperties = null)
+        {
+            var query = BeginQuery(n => new {node1 = n.Node, node2 = n.Node, rel = n.Rel})
+                .Start(ctx => ctx
+                                  .StartAtId(ctx.Vars.node1, node1.Id)
+                                  .StartAtId(ctx.Vars.node2, node2.Id))
+                .Create(ctx => ctx.CreateRel(ctx.Vars.node1, ctx.Vars.rel, type, relationshipProperties, ctx.Vars.node2))
+                .Return(ctx => ctx.Vars.rel)
+                .Fetch();
+
+            return query.FirstOrDefault();
+        }
+
         public Node GetNode(long id)
         {
             if (_entityCache.Contains(id))

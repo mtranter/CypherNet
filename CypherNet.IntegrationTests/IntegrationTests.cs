@@ -28,6 +28,20 @@ namespace CypherNet.IntegrationTests
             Assert.IsTrue(object.ReferenceEquals(_personNode, twin));
         }
 
+        [TestMethod]
+        public void CreateRelationship_ReturnsRelationship()
+        {
+            var clientFactory = Fluently.Configure("http://localhost:7474/db/data/")
+                .CreateSessionFactory();
+            var endpoint = clientFactory.Create();
+
+            var newNode1 = endpoint.CreateNode(new { name = "mark", age = 33 }, "person");
+            var newNode2 = endpoint.CreateNode(new { role = "developer"}, "job");
+            var rel = endpoint.CreateRelationship(newNode1, newNode2, "WORKS_AS_A");
+            Assert.IsNotNull(rel);
+            Assert.AreEqual("WORKS_AS_A", rel.Type);
+        }
+
 
         [TestMethod]
         public void DeleteNode_DeletesNode()

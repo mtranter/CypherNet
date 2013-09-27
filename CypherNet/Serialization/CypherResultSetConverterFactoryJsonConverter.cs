@@ -155,7 +155,7 @@
                             if (typeof (IGraphEntity).IsAssignableFrom(property.PropertyType))
                             {
                                 IGraphEntity graphEntity = null;
-                                var entityPropertyNames = new EntityReturnColumns(property);
+                                var entityPropertyNames = new EntityReturnColumns(property.Name);
 
                                 AssertNecesaryColumnForType(entityPropertyNames.IdPropertyName, typeof (IGraphEntity));
                                 var nodeId = record[_propertyCache[entityPropertyNames.IdPropertyName]].ToObject<long>();
@@ -204,22 +204,22 @@
                 }
             }
 
-            private object HydrateWithCtr(IEnumerable<KeyValuePair<string, object>> values, Type returnType)
-            {
-                var types = values.Select(k => k.Value.GetType()).ToArray();
-                var ctor = returnType.GetConstructor(BindingFlags.NonPublic | BindingFlags.Instance, null, types, null);
-                return ctor.Invoke(values.Select(k => k.Value).ToArray());
-            }
-
 
             private TReturn HydrateWithCtr<TReturn>(IEnumerable<KeyValuePair<string, object>> values)
             {
                 var types = Properties.Select(p => p.PropertyType).ToArray();
                 var ctor =
-                    typeof (TReturn).GetConstructor(
+                    typeof(TReturn).GetConstructor(
                                                     BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Instance,
                                                     null, types, null);
-                return (TReturn) ctor.Invoke(values.Select(k => k.Value).ToArray());
+                return (TReturn)ctor.Invoke(values.Select(k => k.Value).ToArray());
+            }
+
+            private object HydrateWithCtr(IEnumerable<KeyValuePair<string, object>> values, Type returnType)
+            {
+                var types = values.Select(k => k.Value.GetType()).ToArray();
+                var ctor = returnType.GetConstructor(BindingFlags.NonPublic | BindingFlags.Instance, null, types, null);
+                return ctor.Invoke(values.Select(k => k.Value).ToArray());
             }
 
             private void AssertNecesaryColumnForType(string columnName, Type type)
