@@ -132,7 +132,7 @@ namespace CypherNet.Transaction
             {
                 var query = BeginQuery(n => new {newNode = n.Node})
                     .Start(v => v.StartAtId(v.Vars.newNode, id))
-                    .Return(v => new {v.newNode})
+                    .Return(ctx => new {ctx.Vars.newNode})
                     .Fetch();
                 var firstRow = query.FirstOrDefault();
                 return firstRow == null ? null : firstRow.newNode;
@@ -153,8 +153,9 @@ namespace CypherNet.Transaction
             Delete(node.Id);
         }
 
-        private static readonly MethodInfo SetMethodInfo = typeof (GraphEntityExtensions).GetMethod("Set", BindingFlags.Public | BindingFlags.Static);
-
+        private static readonly MethodInfo SetMethodInfo = typeof(IUpdateQueryContext<CreateNodeResult>).GetMethod("Set");
+        private static readonly PropertyInfo VarsProperty =
+                (PropertyInfo)ReflectOn<IUpdateQueryContext<CreateNodeResult>>.Member(c => c.Vars).MemberInfo;
         private static readonly PropertyInfo NewNodeProperty =
             (PropertyInfo) ReflectOn<CreateNodeResult>.Member(c => c.NewNode).MemberInfo;
 
@@ -162,15 +163,15 @@ namespace CypherNet.Transaction
         {
             var props = node as IDynamicMetaData;
             var vals = props.GetAllValues();
-            var setActions = new List<Expression<Action<CreateNodeResult>>>();
+            var setActions = new List<Expression<Func<IUpdateQueryContext<CreateNodeResult>, ISetResult>>>();
             foreach (var val in vals)
             {
-                var param = Expression.Parameter(typeof (CreateNodeResult));
+                var param = Expression.Parameter(typeof(IUpdateQueryContext<CreateNodeResult>));
                 var propType = val.Value.GetType();
-                var method = SetMethodInfo.MakeGenericMethod(new[] {propType});
-                var member = Expression.Property(param, NewNodeProperty);
-                var call = Expression.Call(method, member, Expression.Constant(val.Key), Expression.Constant(val.Value));
-                var lambda = Expression.Lambda<Action<CreateNodeResult>>(call, param);
+                var method = SetMethodInfo.MakeGenericMethod(new[] { typeof(Node), propType });
+                var member = Expression.Property(Expression.Property(param, VarsProperty), NewNodeProperty);
+                var call = Expression.Call(param, method, member, Expression.Constant(val.Key), Expression.Constant(val.Value));
+                var lambda = Expression.Lambda<Func<IUpdateQueryContext<CreateNodeResult>, ISetResult>>(call, param);
                 setActions.Add(lambda);
             }
 

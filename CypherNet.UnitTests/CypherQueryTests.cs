@@ -27,7 +27,7 @@
             var results = query
                 .Start(ctx => ctx.StartAtId(ctx.Vars.movie, 1))
                 .Match(ctx => ctx.Node(ctx.Vars.movie).Incoming("STARED_IN", 1, 5).From(ctx.Vars.actor))
-                .Return(v => new {v.actor, v.movie})
+                .Return(ctx => new { ctx.Vars.actor, ctx.Vars.movie })
                 .Fetch();
 
             VerifyCypher(cypher, results.FirstOrDefault(),
@@ -44,11 +44,30 @@
             var query = new FluentCypherQueryBuilder<TestCypherClause>(factory.Object);
             var results = query
                 .Start(ctx => ctx.StartAtId(ctx.Vars.movie, 1))
-                .Return(v => v.movie)
+                .Return(ctx => ctx.Vars.movie)
                 .Fetch();
 
             VerifyCypher(cypher, results.FirstOrDefault(),
                          "START movie=node(1) RETURN movie as movie, id(movie) as movie__Id, labels(movie) as movie__Labels");
+        }
+
+
+        [TestMethod]
+        public void BuildCypherQuery_ReturnsScalarValues_ExecutesCorrectQuery()
+        {
+            var cypher = new Mock<ICypherClient>();
+            cypher.Setup(c => c.ExecuteQuery<TestCypherClause>(It.IsAny<string>())).Returns(() => null);
+            var factory = new Mock<ICypherClientFactory>();
+            factory.Setup(f => f.Create()).Returns(cypher.Object);
+            var query = new FluentCypherQueryBuilder<TestCypherClause>(factory.Object);
+
+            var results = query
+                .Start(ctx => ctx.StartAtId(ctx.Vars.movie, 1))
+                .Return(ctx => new { ctx.Vars.movie, someVal = 1 })
+                .Fetch();
+
+            VerifyCypher(cypher, results.FirstOrDefault(),
+                         "START movie=node(1) RETURN movie as movie, id(movie) as movie__Id, labels(movie) as movie__Labels, 1 as someVal");
         }
 
         [TestMethod]
@@ -97,8 +116,8 @@
             var query = new FluentCypherQueryBuilder<TestCypherClause>(factory.Object);
             var results = query
                 .Match(ctx => ctx.NodeLabelled(ctx.Vars.movie, "arthouse"))
-                .Update(v => v.movie.Set("requiresSubtitles", "yes"))
-                .Return(v => new {v.actor, v.movie})
+                .Update(ctx => ctx.Set(ctx.Vars.movie, "requiresSubtitles", "yes"))
+                .Return(ctx => new {ctx.Vars.actor, ctx.Vars.movie})
                 .Fetch();
 
             VerifyCypher(cypher, results.FirstOrDefault(),
@@ -115,8 +134,8 @@
             var query = new FluentCypherQueryBuilder<TestCypherClause>(factory.Object);
             var results = query
                 .Start(ctx => ctx.StartAtId(ctx.Vars.actor, 1).StartAtId(ctx.Vars.movie, 2))
-                .Create(v => Create.Relationship(v.actor, v.actedIn, "ACTED_IN", v.movie))
-                .Return(v => new {v.actedIn})
+                .Create(ctx => ctx.CreateRel(ctx.Vars.actor, ctx.Vars.actedIn, "ACTED_IN", ctx.Vars.movie))
+                .Return(ctx => new { ctx.Vars.actedIn })
                 .Fetch();
 
             VerifyCypher(cypher, results.FirstOrDefault(),
@@ -133,8 +152,8 @@
             var query = new FluentCypherQueryBuilder<TestCypherClause>(factory.Object);
             var results = query
                 .Start(ctx => ctx.StartAtId(ctx.Vars.actor, 1).StartAtId(ctx.Vars.movie, 2))
-                .Create(v => Create.Relationship(v.actor, v.actedIn, "ACTED_IN", new {name = "mark"}, v.movie))
-                .Return(v => new {v.actedIn})
+                .Create(ctx => ctx.CreateRel(ctx.Vars.actor, ctx.Vars.actedIn, "ACTED_IN", new { name = "mark" }, ctx.Vars.movie))
+                .Return(ctx => new { ctx.Vars.actedIn })
                 .Fetch();
 
             VerifyCypher(cypher, results.FirstOrDefault(),
@@ -153,13 +172,15 @@
             var results = query
                 .Start(ctx => ctx.StartAtAny(ctx.Vars.movie))
                 .Match(ctx => ctx.Node(ctx.Vars.movie).Incoming("STARED_IN").From(ctx.Vars.actor))
-                .Where(v => v.actor.Get("name") == "Bob Dinero" || v.actor.Get<string>("role") == "Keyser Söze")
-                .Return(v => new {v.actor, v.movie})
+                .Where(ctx => ctx.Prop(ctx.Vars.actor, "name") == "Bob Dinero" || ctx.Prop(ctx.Vars.actor, "role") == "Keyser Söze")
+                .Return(ctx => new { ctx.Vars.actor, ctx.Vars.movie })
                 .Fetch();
 
             VerifyCypher(cypher, results.FirstOrDefault(),
                          "START movie=node(*) MATCH (movie)<-[:STARED_IN]-(actor) WHERE ((actor.name = 'Bob Dinero') OR (actor.role = 'Keyser Söze')) RETURN actor as actor, id(actor) as actor__Id, labels(actor) as actor__Labels, movie as movie, id(movie) as movie__Id, labels(movie) as movie__Labels");
         }
+
+
 
         [TestMethod]
         public void BuildCypherQuery_MatchByLabel_ExecutesCorrectQuery()
@@ -176,7 +197,7 @@
                               .To()
                               .Outgoing(ctx.Vars.directedBy, "DIRECTED_BY")
                               .To(ctx.Vars.director))
-                .Return(v => new {v.actor, v.director})
+                .Return(ctx => new { ctx.Vars.actor, ctx.Vars.director })
                 .Fetch();
 
             VerifyCypher(cypher, results.FirstOrDefault(),
@@ -193,7 +214,7 @@
             var query = new FluentCypherQueryBuilder<TestCypherClause>(factory.Object);
             var results = query
                 .Start(ctx => ctx.StartAtId(ctx.Vars.actor, 1))
-                .Return(v => new {v.actor})
+                .Return(ctx => new { ctx.Vars.actor })
                 .OrderBy(p => p.actedIn.Get<int>("fgds"), p => p.actedIn.Get<string>("name"))
                 .Skip(2)
                 .Limit(1)

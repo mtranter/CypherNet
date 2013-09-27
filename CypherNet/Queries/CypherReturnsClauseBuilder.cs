@@ -43,7 +43,7 @@
             var constantExp = node as ConstantExpression;
             if (constantExp != null)
             {
-                return constantExp.ToCypherString();
+                return constantExp.ToCypherString() + " as " + memberInfo.Name;
             }
 
             var member = node as MemberExpression;

@@ -9,6 +9,6 @@
 
     public interface ICypherQueryReturns<TVariables> : ICypherQueryCreate<TVariables>, ICypherQueryDelete<TVariables>
     {
-        ICypherOrderBy<TVariables, TOut> Return<TOut>(Expression<Func<TVariables, TOut>> func);
+        ICypherOrderBy<TVariables, TOut> Return<TOut>(Expression<Func<IReturnQueryContext<TVariables>, TOut>> func);
     }
 }

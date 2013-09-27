@@ -1,18 +1,14 @@
-﻿namespace CypherNet.UnitTests
-{
-    #region
+﻿
 
+namespace CypherNet.IntegrationTests
+{
     using System;
     using System.Linq;
-    using System.Linq.Expressions;
     using System.Transactions;
     using Configuration;
     using Graph;
     using Microsoft.VisualStudio.TestTools.UnitTesting;
     using Queries;
-    using Transaction;
-
-    #endregion
 
     [TestClass]
     public class IntegrationTests
@@ -54,6 +50,7 @@
             dynamic node =  endpoint.CreateNode(new { name = "mark", age = 33 }, "person");
             node.name = "john";
             endpoint.Save(node);
+            endpoint.Clear();
             dynamic twin = endpoint.GetNode(node.Id);
 
             Assert.AreEqual(twin.name, "john");
@@ -101,7 +98,7 @@
             var testNode = endpoint.CreateNode(new { name = "mark", age = 33 }, "person");
             var results = endpoint.BeginQuery(s => new {node1 = s.Node, node2 = s.Node})
                                  .Start(ctx => ctx.StartAtId(ctx.Vars.node1, testNode.Id).StartAtId(ctx.Vars.node2, testNode.Id))
-                                 .Return(vars => new {Node1 = vars.node1, Node2 = vars.node2})
+                                 .Return(ctx => new { Node1 = ctx.Vars.node1, Node2 = ctx.Vars.node2 })
                                  .Fetch();
 
             foreach (var result in results)
@@ -122,7 +119,7 @@
             var newnode = endpoint
                 .BeginQuery(s => new {n = s.Node})
                 .Start(ctx => ctx.StartAtId(ctx.Vars.n, _positionNode.Id))
-                .Return(r => new {NewNode = r.n})
+                .Return(ctx => new { NewNode = ctx.Vars.n })
                 .Fetch().Select(s => s.NewNode).FirstOrDefault();
 
             Assert.IsNotNull(newnode);
@@ -137,10 +134,13 @@
 
             var path = endpoint
                 .BeginQuery(s => new {person = s.Node, worksAs = s.Rel, position = s.Node})
-                .Start(ctx => ctx.StartAtId(ctx.Vars.person, _personNode.Id).StartAtId(ctx.Vars.position, _positionNode.Id))
-                .Create(v => Create.Relationship(v.person, v.worksAs, "WORKS_AS", v.position))
-                .Return(s => new {s.person, s.worksAs, s.position})
-                .Fetch().FirstOrDefault();
+                .Start(ctx => ctx
+                                .StartAtId(ctx.Vars.person, _personNode.Id)
+                                .StartAtId(ctx.Vars.position, _positionNode.Id))
+                .Create(ctx => ctx.CreateRel(ctx.Vars.person, ctx.Vars.worksAs, "WORKS_AS", ctx.Vars.position))
+                .Return(ctx => new { ctx.Vars.person, ctx.Vars.worksAs, ctx.Vars.position })
+                .Fetch()
+                .FirstOrDefault();
 
             Assert.IsNotNull(path);
             dynamic person = path.person;
@@ -166,7 +166,7 @@
             var readEndpoint = clientFactory.Create();
             var newnode = readEndpoint.BeginQuery(s => new {n = s.Node})
                                       .Start(ctx => ctx.StartAtId(ctx.Vars.n, node.Id))
-                                      .Return(r => new {NewNode = r.n})
+                                      .Return(ctx => new {NewNode = ctx.Vars.n})
                                       .Fetch().FirstOrDefault();
 
             Assert.IsNull(newnode);
@@ -180,7 +180,7 @@
 
             var nodes = endpoint.BeginQuery(p => new {node = p.Node})
                                 .Start(ctx => ctx.StartAtId(ctx.Vars.node, _personNode.Id))
-                                .Return(r => new {Node = r.node})
+                                .Return(ctx => new {Node = ctx.Vars.node})
                                 .Fetch();
 
             Assert.AreEqual(nodes.Count(), 1);
@@ -197,10 +197,10 @@
                 .BeginQuery(p => new {person = p.Node, rel = p.Rel, role = p.Node}) // Define query variables
                 .Start(ctx => ctx.StartAtAny(ctx.Vars.person)) // Cypher START clause
                 .Match(ctx => ctx.Node(ctx.Vars.person).Outgoing(ctx.Vars.rel).To(ctx.Vars.role)) // Cypher MATCH clause
-                .Where(vars =>
-                       vars.person.Get<string>("name!") == "mark" && vars.role.Get<string>("title!") == "developer")
+                .Where(ctx =>
+                       ctx.Prop<string>(ctx.Vars.person, "name!") == "mark" && ctx.Prop<string>(ctx.Vars.role, "title!") == "developer")
                 // Cypher WHERE predicate
-                .Return(vars => new {Person = vars.person, Rel = vars.rel, Role = vars.role}) // Cypher RETURN clause
+                .Return(ctx => new { Person = ctx.Vars.person, Rel = ctx.Vars.rel, Role = ctx.Vars.role }) // Cypher RETURN clause
                 .Fetch(); // GO!
 
             /* Executes Cypher: 
@@ -232,8 +232,8 @@
                 var cypherEndpoint = clientFactory.Create();
                 var nodes = cypherEndpoint.BeginQuery(p => new {node = p.Node})
                                           .Start(ctx => ctx.StartAtAny(ctx.Vars.node))
-                                          .Where(n => n.node.Id == _personNode.Id)
-                                          .Return(r => new {Node = r.node})
+                                          .Where(ctx => ctx.Vars.node.Id == _personNode.Id)
+                                          .Return(ctx => new {Node = ctx.Vars.node})
                                           .Fetch();
                 Assert.AreEqual(nodes.Count(), 1);
                 trans.Complete();
@@ -258,13 +258,13 @@
 
             var node1Query = cypherEndpoint.BeginQuery(s => new {node1 = s.Node})
                                            .Start(ctx => ctx.StartAtId(ctx.Vars.node1, node1.Id))
-                                           .Return(r => new {r.node1})
+                                           .Return(ctx => new {ctx.Vars.node1})
                                            .Fetch()
                                            .FirstOrDefault();
 
             var node2Query = cypherEndpoint.BeginQuery(s => new {node2 = s.Node})
                                            .Start(ctx => ctx.StartAtId(ctx.Vars.node2, node2.Id))
-                                           .Return(r => new {r.node2})
+                                           .Return(ctx => new { ctx.Vars.node2 })
                                            .Fetch()
                                            .FirstOrDefault();
 
@@ -272,12 +272,5 @@
             Assert.IsNotNull(node2Query);
         }
 
-        internal class TestDoSOmething<TTemplate>
-        {
-            internal void DoSomething<TInterface>(Expression<Action<TInterface>> func)
-                where TInterface : TTemplate, ICypherClientFactory
-            {
-            }
-        }
     }
 }

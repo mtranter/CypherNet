@@ -17,25 +17,25 @@
         private readonly List<Expression<Func<TIn, dynamic>>> _orderByClauses =
             new List<Expression<Func<TIn, dynamic>>>();
 
-        private readonly List<Expression<Action<TIn>>> _setterClauses =
-            new List<Expression<Action<TIn>>>();
+        private readonly List<Expression<Func<IUpdateQueryContext<TIn>, ISetResult>>> _setterClauses =
+            new List<Expression<Func<IUpdateQueryContext<TIn>, ISetResult>>>();
 
         internal Expression<Action<IStartQueryContext<TIn>>> StartClause { get; set; }
 
-        internal Expression<Func<TIn, bool>> WherePredicate { get; set; }
+        internal Expression<Func<IWhereQueryContext<TIn>, bool>> WherePredicate { get; set; }
 
-        internal Expression<Func<TIn, TOut>> ReturnClause { get; set; }
+        internal Expression<Func<IReturnQueryContext<TIn>, TOut>> ReturnClause { get; set; }
 
         internal Expression<Func<TIn, TOut>> DeleteClause { get; set; }
 
-        internal Expression<Func<TIn, ICreateCypherRelationship>> CreateRelationpClause { get; set; }
+        internal Expression<Func<ICreateRelationshipQueryContext<TIn>, ICreateCypherRelationship>> CreateRelationpClause { get; set; }
 
         internal IEnumerable<Expression<Func<TIn, dynamic>>> OrderByClauses
         {
             get { return _orderByClauses.AsEnumerable(); }
         }
 
-        internal IEnumerable<Expression<Action<TIn>>> SetterClauses
+        internal IEnumerable<Expression<Func<IUpdateQueryContext<TIn>, ISetResult>>> SetterClauses
         {
             get { return _setterClauses.AsEnumerable(); }
         }
@@ -58,7 +58,7 @@
             _orderByClauses.Add(match);
         }
 
-        internal void AddSetClause(Expression<Action<TIn>> match)
+        internal void AddSetClause(Expression<Func<IUpdateQueryContext<TIn>, ISetResult>> match)
         {
             _setterClauses.Add(match);
         }

@@ -17,11 +17,11 @@
     {
         private readonly ICypherClientFactory _clientFactory;
         private readonly string _cypherQuery = String.Empty;
-        private Expression<Func<TIn, ICreateCypherRelationship>> _createClause;
+        private Expression<Func<ICreateRelationshipQueryContext<TIn>, ICreateCypherRelationship>> _createClause;
         private Expression<Func<IMatchQueryContext<TIn>, IDefineCypherRelationship>>[] _matchClauses;
-        private Expression<Action<TIn>>[] _setters;
+        private Expression<Func<IUpdateQueryContext<TIn>, ISetResult>>[] _setters;
         private Expression<Action<IStartQueryContext<TIn>>> _startDef;
-        private Expression<Func<TIn, bool>> _wherePredicate;
+        private Expression<Func<IWhereQueryContext<TIn>, bool>> _wherePredicate;
 
         internal FluentCypherQueryBuilder(ICypherClientFactory clientFactory)
         {
@@ -33,31 +33,26 @@
             get { return _cypherQuery; }
         }
 
-        public ICypherQueryReturns<TIn> Create(Expression<Func<TIn, ICreateCypherRelationship>> createClause)
+        public ICypherQueryReturns<TIn> Create(Expression<Func<ICreateRelationshipQueryContext<TIn>, ICreateCypherRelationship>> createClause)
         {
             _createClause = createClause;
             return this;
         }
 
-        public ICypherQueryReturnOrExecute<TIn> Update(params Expression<Action<TIn>>[] setters)
+        public ICypherQueryReturnOrExecute<TIn> Update(params Expression<Func<IUpdateQueryContext<TIn>, ISetResult>>[] setters)
         {
             _setters = setters;
             var query = BuildCypherQueryDefinition<TIn>();
             return new CypherQueryExecute<TIn>(_clientFactory, query);
         }
 
-        public ICypherQueryReturns<TIn> Where(Expression<Func<TIn, bool>> predicate)
+        public ICypherQueryReturns<TIn> Where(Expression<Func<IWhereQueryContext<TIn>, bool>> predicate)
         {
             _wherePredicate = predicate;
             return this;
         }
 
-        public ICypherQueryReturns<TIn> Where()
-        {
-            return this;
-        }
-
-        public ICypherOrderBy<TIn, TOut> Return<TOut>(Expression<Func<TIn, TOut>> func)
+        public ICypherOrderBy<TIn, TOut> Return<TOut>(Expression<Func<IReturnQueryContext<TIn>, TOut>> func)
         {
             var query = BuildCypherQueryDefinition<TOut>();
             query.ReturnClause = func;
@@ -76,7 +71,7 @@
             {
                 query.AddMatchClause(m);
             }
-            foreach (var m in _setters ?? Enumerable.Empty<Expression<Action<TIn>>>())
+            foreach (var m in _setters ?? Enumerable.Empty<Expression<Func<IUpdateQueryContext<TIn>, ISetResult>>>())
             {
                 query.AddSetClause(m);
             }
@@ -108,7 +103,7 @@
             {
                 query.AddMatchClause(m);
             }
-            foreach (var m in _setters ?? Enumerable.Empty<Expression<Action<TIn>>>())
+            foreach (var m in _setters ?? Enumerable.Empty<Expression<Func<IUpdateQueryContext<TIn>, ISetResult>>>())
             {
                 query.AddSetClause(m);
             }
@@ -156,7 +151,7 @@
                 return client.ExecuteQuery<TOut>(cypherQuery);
             }
 
-            public ICypherOrderBy<TIn, TOut1> Return<TOut1>(Expression<Func<TIn, TOut1>> returnsClause)
+            public ICypherOrderBy<TIn, TOut1> Return<TOut1>(Expression<Func<IReturnQueryContext<TIn>, TOut1>> returnsClause)
             {
                 var query = _query.Copy<TOut1>();
                 query.ReturnClause = returnsClause;
