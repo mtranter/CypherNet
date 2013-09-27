@@ -76,7 +76,7 @@
                 if (cypherFunctionAttribute != null)
                 {
                     var @params = MethodExpressionArgumentEvaluator.EvaluateArguments(method);
-                    return string.Format(cypherFunctionAttribute.Format, @params[0]) + " as " +
+                    return string.Format(cypherFunctionAttribute.Format, @params) + " as " +
                            memberInfo.Name;
                 }
             }
