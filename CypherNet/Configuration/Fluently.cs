@@ -27,8 +27,7 @@
 
         public ICypherSessionFactory CreateSessionFactory()
         {
-            var webClient = new WebClient(new DefaultJsonSerializer());
-            return new DefaultCypherSessionFactory(_endpointUri, webClient);
+            return new DefaultCypherSessionFactory(_endpointUri);
         }
     }
 

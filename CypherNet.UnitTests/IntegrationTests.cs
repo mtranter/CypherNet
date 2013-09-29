@@ -28,8 +28,8 @@
 
             _personNode = endpoint.CreateNode(new {name = "mark", age = 33}, "person");
             var twin = endpoint.GetNode(_personNode.Id);
-
             Assert.AreEqual(twin.Id, _personNode.Id);
+            Assert.IsTrue(object.ReferenceEquals(_personNode, twin));
         }
 
 
@@ -38,7 +38,6 @@
         {
             var clientFactory = Fluently.Configure("http://localhost:7474/db/data/").CreateSessionFactory();
             var endpoint = clientFactory.Create();
-
             var node  = endpoint.CreateNode(new { name = "mark", age = 33 }, "person");
             endpoint.Delete(node);
             var twin = endpoint.GetNode(node.Id);
@@ -72,6 +71,8 @@
             {
                 endpoint.Save(node);
             }
+
+            endpoint.Clear();
             dynamic twin = endpoint.GetNode(node.Id);
 
             Assert.AreNotEqual(twin.name, "john");
@@ -88,6 +89,26 @@
 
             Assert.AreEqual(node.name, "mark");
             Assert.AreEqual(node.age, 33);
+        }
+
+
+        [TestMethod]
+        public void QueryGraph_ReturnsMultipleInstancesOfANode_ReturnsIdenticallyEqualNodes()
+        {
+            var clientFactory = Fluently.Configure("http://localhost:7474/db/data/").CreateSessionFactory();
+            var endpoint = clientFactory.Create();
+
+            var testNode = endpoint.CreateNode(new { name = "mark", age = 33 }, "person");
+            var results = endpoint.BeginQuery(s => new {node1 = s.Node, node2 = s.Node})
+                                 .Start(vars => Start.At(vars.node1, testNode.Id).At(vars.node2, testNode.Id))
+                                 .Return(vars => new {Node1 = vars.node1, Node2 = vars.node2})
+                                 .Fetch();
+
+            foreach (var result in results)
+            {
+                Assert.AreSame(result.Node1, result.Node2);
+            }
+
         }
 
         [TestMethod]
@@ -122,9 +143,11 @@
                 .Fetch().FirstOrDefault();
 
             Assert.IsNotNull(path);
+            dynamic person = path.person;
+            dynamic position = path.position;
             Assert.AreEqual("mark WORKS_AS developer",
-                            String.Format("{0} {1} {2}", path.person.Get<string>("name"), path.worksAs.Type,
-                                          path.position.Get<string>("position")));
+                            String.Format("{0} {1} {2}", person.name, path.worksAs.Type,
+                                          position.position));
         }
 
 

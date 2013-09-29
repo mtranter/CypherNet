@@ -13,10 +13,10 @@
     {
         private readonly JsonSerializer _serializer;
 
-        internal DefaultJsonSerializer()
+        internal DefaultJsonSerializer(IEntityCache cache)
         {
             _serializer = new JsonSerializer();
-            _serializer.Converters.Insert(0, new CypherResultSetConverterFactoryJsonConverter());
+            _serializer.Converters.Insert(0, new CypherResultSetConverterFactoryJsonConverter(cache));
         }
 
         #region IJsonSerializer Members

@@ -60,6 +60,7 @@
     <Compile Include="Graph\Relationship.cs" />
     <Compile Include="Http\IJsonWebClient.cs" />
     <Compile Include="ICypherSession.cs" />
+    <Compile Include="IEntityCache.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Queries\CypherDeleteClauseBuilder.cs" />
     <Compile Include="Queries\CypherCreateRelationshipClauseBuilder.cs" />
