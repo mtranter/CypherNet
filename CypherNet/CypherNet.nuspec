@@ -7,12 +7,10 @@
     <authors>$author$</authors>
     <owners>$author$</owners>
     <licenseUrl>http://opensource.org/licenses/MS-PL</licenseUrl>
-    <projectUrl>https://github.com/mtranter/CypherNet</projectUrl>
-    <iconUrl>https://raw.github.com/mtranter/CypherNet/develop/ico.png</iconUrl>
+    <projectUrl>https://github.com/mtranter/CypherNet</projectUrl>    
     <requireLicenseAcceptance>false</requireLicenseAcceptance>
     <description>$description$</description>
-    <releaseNotes>Initial Beta release</releaseNotes>
-    <copyright>Copyright 2013</copyright>
-    <tags>Neo4j GraphDb Cypher</tags>
+    <releaseNotes>Fix Nuget metadata - License and Project url</releaseNotes>
+    <copyright>Copyright 2013</copyright>    
   </metadata>
 </package>

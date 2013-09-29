@@ -11,36 +11,36 @@
 
     internal class CypherQueryDefinition<TIn, TOut>
     {
-        private readonly List<Expression<Func<TIn, IDefineCypherRelationship>>> _matchClauses =
-            new List<Expression<Func<TIn, IDefineCypherRelationship>>>();
+        private readonly List<Expression<Func<IMatchQueryContext<TIn>, IDefineCypherRelationship>>> _matchClauses =
+            new List<Expression<Func<IMatchQueryContext<TIn>, IDefineCypherRelationship>>>();
 
         private readonly List<Expression<Func<TIn, dynamic>>> _orderByClauses =
             new List<Expression<Func<TIn, dynamic>>>();
 
-        private readonly List<Expression<Action<TIn>>> _setterClauses =
-            new List<Expression<Action<TIn>>>();
+        private readonly List<Expression<Func<IUpdateQueryContext<TIn>, ISetResult>>> _setterClauses =
+            new List<Expression<Func<IUpdateQueryContext<TIn>, ISetResult>>>();
 
-        internal Expression<Action<TIn>> StartClause { get; set; }
+        internal Expression<Action<IStartQueryContext<TIn>>> StartClause { get; set; }
 
-        internal Expression<Func<TIn, bool>> WherePredicate { get; set; }
+        internal Expression<Func<IWhereQueryContext<TIn>, bool>> WherePredicate { get; set; }
 
-        internal Expression<Func<TIn, TOut>> ReturnClause { get; set; }
+        internal Expression<Func<IReturnQueryContext<TIn>, TOut>> ReturnClause { get; set; }
 
         internal Expression<Func<TIn, TOut>> DeleteClause { get; set; }
 
-        internal Expression<Func<TIn, ICreateCypherRelationship>> CreateRelationpClause { get; set; }
+        internal Expression<Func<ICreateRelationshipQueryContext<TIn>, ICreateCypherRelationship>> CreateRelationpClause { get; set; }
 
         internal IEnumerable<Expression<Func<TIn, dynamic>>> OrderByClauses
         {
             get { return _orderByClauses.AsEnumerable(); }
         }
 
-        internal IEnumerable<Expression<Action<TIn>>> SetterClauses
+        internal IEnumerable<Expression<Func<IUpdateQueryContext<TIn>, ISetResult>>> SetterClauses
         {
             get { return _setterClauses.AsEnumerable(); }
         }
 
-        internal IEnumerable<Expression<Func<TIn, IDefineCypherRelationship>>> MatchClauses
+        internal IEnumerable<Expression<Func<IMatchQueryContext<TIn>, IDefineCypherRelationship>>> MatchClauses
         {
             get { return _matchClauses.AsEnumerable(); }
         }
@@ -48,7 +48,7 @@
         internal int? Skip { get; set; }
         internal int? Limit { get; set; }
 
-        internal void AddMatchClause(Expression<Func<TIn, IDefineCypherRelationship>> match)
+        internal void AddMatchClause(Expression<Func<IMatchQueryContext<TIn>, IDefineCypherRelationship>> match)
         {
             _matchClauses.Add(match);
         }
@@ -58,7 +58,7 @@
             _orderByClauses.Add(match);
         }
 
-        internal void AddSetClause(Expression<Action<TIn>> match)
+        internal void AddSetClause(Expression<Func<IUpdateQueryContext<TIn>, ISetResult>> match)
         {
             _setterClauses.Add(match);
         }
@@ -88,10 +88,6 @@
 
         internal string BuildStatement()
         {
-            //if (ReturnClause == null && DeleteClause == null)
-            //{
-            //    throw new Exception("Either a ReturnClause or a DeleteClause must be supplied");
-            //}
 
             var start = StartClause == null ? null : "START " + CypherStartClauseBuilder.BuildStartClause(StartClause);
             var match = MatchClauses.Any()

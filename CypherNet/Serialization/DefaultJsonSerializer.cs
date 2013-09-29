@@ -33,12 +33,6 @@
             return _serializer.Deserialize<TItem>(new JsonTextReader(new StringReader(json)));
         }
 
-        public dynamic ToDynmamic(string stream)
-        {
-            dynamic data = JObject.Parse(stream);
-            return data.data;
-        }
-
         public object Deserialize(string json, Type type)
         {
             return _serializer.Deserialize(new JsonTextReader(new StringReader(json)), type);

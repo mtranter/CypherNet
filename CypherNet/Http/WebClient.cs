@@ -1,25 +1,10 @@
-﻿namespace CypherNet.Http
+﻿using System.Net.Http;
+using System.Net.Http.Headers;
+using System.Threading.Tasks;
+using CypherNet.Serialization;
+
+namespace CypherNet.Http
 {
-    #region
-
-    using System.Net.Http;
-    using System.Net.Http.Headers;
-    using System.Threading.Tasks;
-    using Serialization;
-
-    #endregion
-
-    public interface IWebClient
-    {
-        Task<TResult> GetAsync<TResult>(string url);
-
-        Task<TResult> PostAsync<TResult>(string url, object body);
-
-        Task<TResult> PutAsync<TResult>(string url, object body);
-
-        Task<TResult> DeleteAsync<TResult>(string url);
-    }
-
     public class WebClient : IWebClient
     {
         private readonly IWebSerializer _serializer;

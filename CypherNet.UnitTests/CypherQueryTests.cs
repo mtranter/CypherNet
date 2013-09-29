@@ -19,16 +19,13 @@
         [TestMethod]
         public void BuildCypherQuery_WithStartAndMatch_ExecutesCorrectQuery()
         {
-            var cypher = new Mock<ICypherClient>();
-            cypher.Setup(c => c.ExecuteQuery<TestCypherClause>(It.IsAny<string>())).Returns(() => null);
-            var factory = new Mock<ICypherClientFactory>();
-            factory.Setup(f => f.Create()).Returns(cypher.Object);
-            var query = new FluentCypherQueryBuilder<TestCypherClause>(factory.Object);
+            FluentCypherQueryBuilder<TestCypherClause> query;
+            var cypher = SetupMocks(out query);
+
             var results = query
-                .Start(v => Start.At(v.movie, 1))
-                .Match(v => Pattern.Start(v.movie).Incoming("STARED_IN", 1, 5).From(v.actor))
-                
-                .Return(v => new {v.actor, v.movie})
+                .Start(ctx => ctx.StartAtId(ctx.Vars.movie, 1))
+                .Match(ctx => ctx.Node(ctx.Vars.movie).Incoming("STARED_IN", 1, 5).From(ctx.Vars.actor))
+                .Return(ctx => new { ctx.Vars.actor, ctx.Vars.movie })
                 .Fetch();
 
             VerifyCypher(cypher, results.FirstOrDefault(),
@@ -38,33 +35,43 @@
         [TestMethod]
         public void BuildCypherQuery_WithSimpleReturn_ExecutesCorrectQuery()
         {
-            var cypher = new Mock<ICypherClient>();
-            cypher.Setup(c => c.ExecuteQuery<TestCypherClause>(It.IsAny<string>())).Returns(() => null);
-            var factory = new Mock<ICypherClientFactory>();
-            factory.Setup(f => f.Create()).Returns(cypher.Object);
-            var query = new FluentCypherQueryBuilder<TestCypherClause>(factory.Object);
+            FluentCypherQueryBuilder<TestCypherClause> query;
+            var cypher = SetupMocks(out query);
+
             var results = query
-                .Start(v => Start.At(v.movie, 1))
-                .Return(v => v.movie)
+                .Start(ctx => ctx.StartAtId(ctx.Vars.movie, 1))
+                .Return(ctx => ctx.Vars.movie)
                 .Fetch();
 
             VerifyCypher(cypher, results.FirstOrDefault(),
                          "START movie=node(1) RETURN movie as movie, id(movie) as movie__Id, labels(movie) as movie__Labels");
         }
 
+
+        [TestMethod]
+        public void BuildCypherQuery_ReturnsScalarValues_ExecutesCorrectQuery()
+        {
+            FluentCypherQueryBuilder<TestCypherClause> query;
+            var cypher = SetupMocks(out query);
+
+            var results = query
+                .Start(ctx => ctx.StartAtId(ctx.Vars.movie, 1))
+                .Return(ctx => new { ctx.Vars.movie, someVal = 1 })
+                .Fetch();
+
+            VerifyCypher(cypher, results.FirstOrDefault(),
+                         "START movie=node(1) RETURN movie as movie, id(movie) as movie__Id, labels(movie) as movie__Labels, 1 as someVal");
+        }
+
         [TestMethod]
         public void BuildCypherQuery_WithSimpleDelete_ExecutesCorrectQuery()
         {
-            var cypher = new Mock<ICypherClient>();
-            cypher.Setup(c => c.ExecuteQuery<TestCypherClause>(It.IsAny<string>())).Returns(() => null);
-            var factory = new Mock<ICypherClientFactory>();
-            factory.Setup(f => f.Create()).Returns(cypher.Object);
-            var query = new FluentCypherQueryBuilder<TestCypherClause>(factory.Object);
+            FluentCypherQueryBuilder<TestCypherClause> query;
+            var cypher = SetupMocks(out query);
            
             query
-                .Start(v => Start.At(v.movie, 1))
-                .Match(v => Pattern.Start(v.movie).Incoming("STARED_IN", 1, 5).From(v.actor))
-
+                .Start(ctx => ctx.StartAtId(ctx.Vars.movie, 1))
+                .Match(ctx => ctx.Node(ctx.Vars.movie).Incoming("STARED_IN", 1, 5).From(ctx.Vars.actor))
                 .Delete(v => v.actor)
                 .Execute();
 
@@ -74,34 +81,28 @@
         [TestMethod]
         public void BuildCypherQuery_WithComplexDelete_ExecutesCorrectQuery()
         {
-            var cypher = new Mock<ICypherClient>();
-            cypher.Setup(c => c.ExecuteQuery<TestCypherClause>(It.IsAny<string>())).Returns(() => null);
-            var factory = new Mock<ICypherClientFactory>();
-            factory.Setup(f => f.Create()).Returns(cypher.Object);
-            var query = new FluentCypherQueryBuilder<TestCypherClause>(factory.Object);
+            FluentCypherQueryBuilder<TestCypherClause> query;
+            var cypher = SetupMocks(out query);
+
             query
-                .Start(v => Start.At(v.movie, 1))
-                .Match(v => Pattern.Start(v.movie).Incoming("STARED_IN", 1, 5).From(v.actor))
+                .Start(ctx => ctx.StartAtId(ctx.Vars.movie, 1))
+                .Match(ctx => ctx.Node(ctx.Vars.movie).Incoming("STARED_IN", 1, 5).From(ctx.Vars.actor))
                 .Delete(v => new { v.actor, v.movie })
                 .Execute();
 
-            VerifyCypher(cypher,
-                         "START movie=node(1) MATCH (movie)<-[:STARED_IN*1..5]-(actor) DELETE actor, movie");
+            VerifyCypher(cypher, "START movie=node(1) MATCH (movie)<-[:STARED_IN*1..5]-(actor) DELETE actor, movie");
         }
 
         [TestMethod]
         public void BuildCypherQuery_UsingSetMethod_ExecutesCorrectQuery()
         {
-            var cypher = new Mock<ICypherClient>();
-            cypher.Setup(c => c.ExecuteQuery<TestCypherClause>(It.IsAny<string>())).Returns(() => null);
-            var factory = new Mock<ICypherClientFactory>();
-            factory.Setup(f => f.Create()).Returns(cypher.Object);
-            var query = new FluentCypherQueryBuilder<TestCypherClause>(factory.Object);
+            FluentCypherQueryBuilder<TestCypherClause> query;
+            var cypher = SetupMocks(out query);
+
             var results = query
-                .Match(v => Pattern.Start(v.movie, "arthouse"))
-                .Update(v => v.movie.Set("requiresSubtitles", "yes"))
-                
-                .Return(v => new {v.actor, v.movie})
+                .Match(ctx => ctx.NodeLabelled(ctx.Vars.movie, "arthouse"))
+                .Update(ctx => ctx.Set(ctx.Vars.movie, "requiresSubtitles", "yes"))
+                .Return(ctx => new {ctx.Vars.actor, ctx.Vars.movie})
                 .Fetch();
 
             VerifyCypher(cypher, results.FirstOrDefault(),
@@ -111,15 +112,13 @@
         [TestMethod]
         public void BuildCypherQuery_CreateRelationship_ExecutesCorrectQuery()
         {
-            var cypher = new Mock<ICypherClient>();
-            cypher.Setup(c => c.ExecuteQuery<TestCypherClause>(It.IsAny<string>())).Returns(() => null);
-            var factory = new Mock<ICypherClientFactory>();
-            factory.Setup(f => f.Create()).Returns(cypher.Object);
-            var query = new FluentCypherQueryBuilder<TestCypherClause>(factory.Object);
+            FluentCypherQueryBuilder<TestCypherClause> query;
+            var cypher = SetupMocks(out query);
+
             var results = query
-                .Start(v => Start.At(v.actor, 1).At(v.movie, 2))
-                .Create(v => Create.Relationship(v.actor, v.actedIn, "ACTED_IN", v.movie))
-                .Return(v => new {v.actedIn})
+                .Start(ctx => ctx.StartAtId(ctx.Vars.actor, 1).StartAtId(ctx.Vars.movie, 2))
+                .Create(ctx => ctx.CreateRel(ctx.Vars.actor, ctx.Vars.actedIn, "ACTED_IN", ctx.Vars.movie))
+                .Return(ctx => ctx.Vars.actedIn)
                 .Fetch();
 
             VerifyCypher(cypher, results.FirstOrDefault(),
@@ -127,17 +126,29 @@
         }
 
         [TestMethod]
+        public void BuildCypherQuery_ReturnScalarProperty_ExecutesCorrectQuery()
+        {
+            FluentCypherQueryBuilder<TestCypherClause> query;
+            var cypher = SetupMocks(out query);
+
+            var results = query
+                .Start(ctx => ctx.StartAtId(ctx.Vars.movie, 2))
+                .Return(ctx => new { movieName = ctx.Prop(ctx.Vars.movie, "movieName") })
+                .Fetch();
+
+            VerifyCypher(cypher, results.FirstOrDefault(),
+                         "START movie=node(2) RETURN movie.movieName as movieName");
+        }
+
+        [TestMethod]
         public void BuildCypherQuery_CreateRelationshipWithProperties_ExecutesCorrectQuery()
         {
-            var cypher = new Mock<ICypherClient>();
-            cypher.Setup(c => c.ExecuteQuery<TestCypherClause>(It.IsAny<string>())).Returns(() => null);
-            var factory = new Mock<ICypherClientFactory>();
-            factory.Setup(f => f.Create()).Returns(cypher.Object);
-            var query = new FluentCypherQueryBuilder<TestCypherClause>(factory.Object);
+            FluentCypherQueryBuilder<TestCypherClause> query;
+            var cypher = SetupMocks(out query);
             var results = query
-                .Start(v => Start.At(v.actor, 1).At(v.movie, 2))
-                .Create(v => Create.Relationship(v.actor, v.actedIn, "ACTED_IN", new {name = "mark"}, v.movie))
-                .Return(v => new {v.actedIn})
+                .Start(ctx => ctx.StartAtId(ctx.Vars.actor, 1).StartAtId(ctx.Vars.movie, 2))
+                .Create(ctx => ctx.CreateRel(ctx.Vars.actor, ctx.Vars.actedIn, "ACTED_IN", new { name = "mark" }, ctx.Vars.movie))
+                .Return(ctx => new { ctx.Vars.actedIn })
                 .Fetch();
 
             VerifyCypher(cypher, results.FirstOrDefault(),
@@ -147,17 +158,14 @@
         [TestMethod]
         public void BuildCypherQuery_WithStartMatchWhere_ExecutesCorrectQuery()
         {
-            var cypher = new Mock<ICypherClient>();
-            cypher.Setup(c => c.ExecuteQuery<TestCypherClause>(It.IsAny<string>())).Returns(() => null);
-            var factory = new Mock<ICypherClientFactory>();
-            factory.Setup(f => f.Create()).Returns(cypher.Object);
-            var query = new FluentCypherQueryBuilder<TestCypherClause>(factory.Object);
+            FluentCypherQueryBuilder<TestCypherClause> query;
+            var cypher = SetupMocks(out query);
 
             var results = query
-                .Start(v => Start.Any(v.movie))
-                .Match(v => Pattern.Start(v.movie).Incoming("STARED_IN").From(v.actor))
-                .Where(v => v.actor.Get<string>("name") == "Bob Dinero" || v.actor.Get<string>("role") == "Keyser Söze")
-                .Return(v => new {v.actor, v.movie})
+                .Start(ctx => ctx.StartAtAny(ctx.Vars.movie))
+                .Match(ctx => ctx.Node(ctx.Vars.movie).Incoming("STARED_IN").From(ctx.Vars.actor))
+                .Where(ctx => ctx.Prop(ctx.Vars.actor, "name") == "Bob Dinero" || ctx.Prop(ctx.Vars.actor, "role") == "Keyser Söze")
+                .Return(ctx => new { ctx.Vars.actor, ctx.Vars.movie })
                 .Fetch();
 
             VerifyCypher(cypher, results.FirstOrDefault(),
@@ -167,20 +175,16 @@
         [TestMethod]
         public void BuildCypherQuery_MatchByLabel_ExecutesCorrectQuery()
         {
-            var cypher = new Mock<ICypherClient>();
-            cypher.Setup(c => c.ExecuteQuery<TestCypherClause>(It.IsAny<string>())).Returns(() => null);
-            var factory = new Mock<ICypherClientFactory>();
-            factory.Setup(f => f.Create()).Returns(cypher.Object);
-            var query = new FluentCypherQueryBuilder<TestCypherClause>(factory.Object);
+            FluentCypherQueryBuilder<TestCypherClause> query;
+            var cypher = SetupMocks(out query);
             var results = query
-                .Match(
-                       v =>
-                       Pattern.Start(v.actor, "METHOD_ACTOR")
+                .Match(ctx =>
+                       ctx.NodeLabelled(ctx.Vars.actor, "METHOD_ACTOR")
                               .Outgoing("STARED_IN")
                               .To()
-                              .Outgoing(v.directedBy, "DIRECTED_BY")
-                              .To(v.director))
-                .Return(v => new {v.actor, v.director})
+                              .Outgoing(ctx.Vars.directedBy, "DIRECTED_BY")
+                              .To(ctx.Vars.director))
+                .Return(ctx => new { ctx.Vars.actor, ctx.Vars.director })
                 .Fetch();
 
             VerifyCypher(cypher, results.FirstOrDefault(),
@@ -190,14 +194,11 @@
         [TestMethod]
         public void BuildCypherQuery_StartAtNodeN_ExecutesCorrectQuery()
         {
-            var cypher = new Mock<ICypherClient>();
-            cypher.Setup(c => c.ExecuteQuery<TestCypherClause>(It.IsAny<string>())).Returns(() => null);
-            var factory = new Mock<ICypherClientFactory>();
-            factory.Setup(f => f.Create()).Returns(cypher.Object);
-            var query = new FluentCypherQueryBuilder<TestCypherClause>(factory.Object);
+            FluentCypherQueryBuilder<TestCypherClause> query;
+            var cypher = SetupMocks(out query);
             var results = query
-                .Start(v => Start.At(v.actor, 1))
-                .Return(v => new {v.actor})
+                .Start(ctx => ctx.StartAtId(ctx.Vars.actor, 1))
+                .Return(ctx => new { ctx.Vars.actor })
                 .OrderBy(p => p.actedIn.Get<int>("fgds"), p => p.actedIn.Get<string>("name"))
                 .Skip(2)
                 .Limit(1)
@@ -205,6 +206,16 @@
 
             VerifyCypher(cypher, results.FirstOrDefault(),
                          "START actor=node(1) RETURN actor as actor, id(actor) as actor__Id, labels(actor) as actor__Labels ORDER BY actedIn.fgds, actedIn.name SKIP 2 LIMIT 1");
+        }
+
+        private static Mock<ICypherClient> SetupMocks(out FluentCypherQueryBuilder<TestCypherClause> query)
+        {
+            var cypher = new Mock<ICypherClient>();
+            cypher.Setup(c => c.ExecuteQuery<TestCypherClause>(It.IsAny<string>())).Returns(() => null);
+            var factory = new Mock<ICypherClientFactory>();
+            factory.Setup(f => f.Create()).Returns(cypher.Object);
+            query = new FluentCypherQueryBuilder<TestCypherClause>(factory.Object);
+            return cypher;
         }
 
         private void VerifyCypher<TResult>(Mock<ICypherClient> mock, TResult proto, string query)
@@ -219,11 +230,6 @@
             mock.Verify(
                         c =>
                         c.ExecuteCommand(query));
-        }
-
-        private void DoIt<TResult, TInput>(TInput proto, Expression<Func<TResult>> inputFunc)
-            where TResult : TInput, ICypherClientFactory
-        {
         }
     }
 }

@@ -10,7 +10,6 @@
     public interface ICypherQueryWhere<TVariables> : ICypherQueryReturns<TVariables>, ICypherQuerySetable<TVariables>,
                                                      ICypherQueryCreate<TVariables>
     {
-        ICypherQueryReturns<TVariables> Where();
-        ICypherQueryReturns<TVariables> Where(Expression<Func<TVariables, bool>> predicate);
+        ICypherQueryReturns<TVariables> Where(Expression<Func<IWhereQueryContext<TVariables>, bool>> predicate);
     }
 }

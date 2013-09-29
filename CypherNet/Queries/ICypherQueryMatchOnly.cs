@@ -10,6 +10,6 @@
     public interface ICypherQueryMatchOnly<TVariables>
     {
         ICypherQueryWhere<TVariables> Match(
-            params Expression<Func<TVariables, IDefineCypherRelationship>>[] matchDef);
+            params Expression<Func<IMatchQueryContext<TVariables>, IDefineCypherRelationship>>[] matchDef);
     }
 }

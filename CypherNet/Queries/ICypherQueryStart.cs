@@ -9,6 +9,6 @@
 
     public interface ICypherQueryStart<TVariables> : ICypherQueryMatchOnly<TVariables>
     {
-        ICypherQueryMatch<TVariables> Start(Expression<Action<TVariables>> startDef);
+        ICypherQueryMatch<TVariables> Start(Expression<Action<IStartQueryContext<TVariables>>> startDef);
     }
 }

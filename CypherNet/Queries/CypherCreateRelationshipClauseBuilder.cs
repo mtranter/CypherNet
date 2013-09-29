@@ -27,7 +27,7 @@
             {
                 return VisitMethod((MethodCallExpression) expression, currentClause);
             }
-            if (expression == null)
+            if (expression.Type.IsGenericType && expression.Type.GetGenericTypeDefinition() == typeof(ICreateRelationshipQueryContext<>))
             {
                 return "";
             }

@@ -27,7 +27,7 @@
             {
                 return VisitMethod((MethodCallExpression) expression, currentClause);
             }
-            if (expression == null)
+            if (expression is ParameterExpression && ((ParameterExpression)expression).Type.GetGenericTypeDefinition() == typeof(IMatchQueryContext<>))
             {
                 return "";
             }

@@ -1,8 +1,10 @@
-﻿namespace CypherNet.Transaction
+﻿using System.Collections.Generic;
+
+namespace CypherNet
 {
     #region
 
-    using System.Collections.Generic;
+    
 
     #endregion
 

@@ -1,4 +1,4 @@
-﻿namespace CypherNet.Transaction
+﻿namespace CypherNet
 {
     public interface ICypherSessionFactory
     {
