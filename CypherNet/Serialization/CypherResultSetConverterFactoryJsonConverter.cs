@@ -53,7 +53,6 @@
             private readonly IEntityCache _cache;
             private const string ColumnsJsonProperty = "columns";
             private const string DataJsonProperty = "data";
-            private static readonly PropertyInfo[] Properties = typeof (TCypherResponse).GetProperties();
             private readonly IDictionary<string, int> _propertyCache = new Dictionary<string, int>();
             private string[] _columns;
 
@@ -91,7 +90,15 @@
                         {
                             reader.Read();
                             _columns = serializer.Deserialize<string[]>(reader);
-                            LoadPropertyCache(_columns);
+                            if (typeof (IGraphEntity).IsAssignableFrom(typeof (TCypherResponse)))
+                            {
+                                var propertyName = _columns.First(c => c.EndsWith("__Id")).Replace("__Id", "");
+                                AddToPropertyCache(propertyName, typeof (TCypherResponse));
+                            }
+                            else
+                            {
+                                LoadPropertyCache();
+                            }
                         }
                         else if (reader.Value.ToString().ToLower() == DataJsonProperty.ToLower())
                         {
@@ -104,38 +111,41 @@
                 return null;
             }
 
-            private void LoadPropertyCache(string[] columns)
+            private void LoadPropertyCache()
             {
-                foreach (var prop in Properties)
+                foreach (var prop in typeof(TCypherResponse).GetProperties().Where(prop => _columns.Contains(prop.Name)))
                 {
-                    if (columns.Contains(prop.Name))
+                    AddToPropertyCache(prop.Name, prop.PropertyType);
+                }
+            }
+
+            void AddToPropertyCache(string propertyName, Type type)
+            {
+                var entityPropertyNames = new EntityReturnColumns(propertyName);
+                _propertyCache.Add(propertyName, Array.IndexOf(_columns, propertyName));
+
+                if (!typeof(IGraphEntity).IsAssignableFrom(type))
+                {
+                    return;
+                }
+                if (_columns.Contains(entityPropertyNames.IdPropertyName))
+                {
+                    _propertyCache.Add(entityPropertyNames.IdPropertyName, Array.IndexOf(_columns, entityPropertyNames.IdPropertyName));
+                }
+                if (type == typeof(Relationship))
+                {
+                    if (_columns.Contains(entityPropertyNames.TypePropertyName))
                     {
-                        _propertyCache.Add(prop.Name, Array.IndexOf(columns, prop.Name));
-                        if (typeof (IGraphEntity).IsAssignableFrom(prop.PropertyType))
-                        {
-                            var idProp = prop.Name + "__Id";
-                            if (columns.Contains(idProp))
-                            {
-                                _propertyCache.Add(idProp, Array.IndexOf(columns, idProp));
-                            }
-                            if (prop.PropertyType == typeof (Relationship))
-                            {
-                                var typeProp = prop.Name + "__Type";
-                                if (columns.Contains(typeProp))
-                                {
-                                    _propertyCache.Add(typeProp, Array.IndexOf(columns, typeProp));
-                                }
-                            }
-                            if (prop.PropertyType == typeof (Node))
-                            {
-                                var typeProp = prop.Name + "__Labels";
-                                if (columns.Contains(typeProp))
-                                {
-                                    _propertyCache.Add(typeProp, Array.IndexOf(columns, typeProp));
-                                }
-                            }
-                        }
+                        _propertyCache.Add(entityPropertyNames.TypePropertyName, Array.IndexOf(_columns, entityPropertyNames.TypePropertyName));
                     }
+                }
+                if (type != typeof(Node))
+                {
+                    return;
+                }
+                if (_columns.Contains(entityPropertyNames.LabelsPropertyName))
+                {
+                    _propertyCache.Add(entityPropertyNames.LabelsPropertyName, Array.IndexOf(_columns, entityPropertyNames.LabelsPropertyName));
                 }
             }
 
@@ -148,66 +158,86 @@
                     {
                         var record = serializer.Deserialize<JToken[]>(reader);
                         var items = new Dictionary<string, object>();
-                        foreach (var property in Properties)
+                        if (typeof (IGraphEntity).IsAssignableFrom(typeof (TCypherResponse)))
                         {
-                            var itemproperties = new Dictionary<string, object>();
+                            var propertyName = _columns.First(c => c.EndsWith("__Id")).Replace("__Id", "");
+                            var graphEntity = LoadGraphEntity(propertyName, record, new Dictionary<string, object>(),
+                                                              typeof (TCypherResponse));
+                            reader.Read();
+                            yield return (TCypherResponse) graphEntity;
+                        }
+                        else
+                        {
 
-                            if (typeof (IGraphEntity).IsAssignableFrom(property.PropertyType))
+                            foreach (var property in typeof (TCypherResponse).GetProperties())
                             {
-                                IGraphEntity graphEntity = null;
-                                var entityPropertyNames = new EntityReturnColumns(property.Name);
-
-                                AssertNecesaryColumnForType(entityPropertyNames.IdPropertyName, typeof (IGraphEntity));
-                                var nodeId = record[_propertyCache[entityPropertyNames.IdPropertyName]].ToObject<long>();
-                                if (_cache.Contains(nodeId))
+                                var itemproperties = new Dictionary<string, object>();
+                                var propertyType = property.PropertyType;
+                                var propertyName = property.Name;
+                                if (typeof (IGraphEntity).IsAssignableFrom(propertyType))
                                 {
-                                    graphEntity = _cache.GetEntity(nodeId);
+                                    var graphEntity = LoadGraphEntity(propertyName, record, itemproperties, propertyType);
+                                    items.Add(propertyName, graphEntity);
                                 }
                                 else
                                 {
-
-                                    itemproperties.Add("id", nodeId);
-
-                                    AssertNecesaryColumnForType(entityPropertyNames.PropertiesPropertyName, typeof(IGraphEntity));
-                                    var entityProperties = record[_propertyCache[entityPropertyNames.PropertiesPropertyName]].ToObject<Dictionary<string, object>>();
-                                    itemproperties.Add("properties", entityProperties);
-
-                                    if (entityPropertyNames.RequiresLabelsProperty)
-                                    {
-                                        AssertNecesaryColumnForType(entityPropertyNames.LabelsPropertyName, typeof(Node));
-                                        var labels = record[_propertyCache[entityPropertyNames.LabelsPropertyName]].ToObject<string[]>();
-                                        itemproperties.Add("labels", labels);
-                                    }
-
-                                    if (entityPropertyNames.RequiresTypeProperty)
-                                    {
-                                        AssertNecesaryColumnForType(entityPropertyNames.TypePropertyName,
-                                                                    typeof(Relationship));
-                                        var relType = record[_propertyCache[entityPropertyNames.TypePropertyName]].ToObject<string>();
-                                        itemproperties.Add("type", relType);
-                                    }
-
-                                    graphEntity = (IGraphEntity)HydrateWithCtr(itemproperties, property.PropertyType);
-                                    _cache.CacheEntity(graphEntity);
+                                    var restEntity = record[_propertyCache[propertyName]];
+                                    itemproperties.Add(propertyName, restEntity.ToObject(propertyType));
                                 }
-                                items.Add(property.Name, graphEntity);
                             }
-                            else
-                            {
-                                var restEntity = record[_propertyCache[property.Name]];
-                                itemproperties.Add(property.Name, restEntity.ToObject(property.PropertyType));
-                            }
+
+                            reader.Read();
+                            yield return HydrateWithCtr<TCypherResponse>(items);
                         }
-                        reader.Read();
-                        yield return HydrateWithCtr<TCypherResponse>(items);
                     }
                 }
+            }
+
+            private IGraphEntity LoadGraphEntity(string propertyName, JToken[] record, Dictionary<string, object> itemproperties,
+                                                           Type propertyType)
+            {
+                IGraphEntity graphEntity = null;
+                var entityPropertyNames = new EntityReturnColumns(propertyName);
+
+                AssertNecesaryColumnForType(entityPropertyNames.IdPropertyName, typeof (IGraphEntity));
+                var entityId = record[_propertyCache[entityPropertyNames.IdPropertyName]].ToObject<long>();
+                if (_cache.Contains(entityId))
+                {
+                    graphEntity = _cache.GetEntity(entityId);
+                }
+                else
+                {
+                    itemproperties.Add("id", entityId);
+
+                    AssertNecesaryColumnForType(entityPropertyNames.PropertiesPropertyName, typeof (IGraphEntity));
+                    var entityProperties =
+                        record[_propertyCache[entityPropertyNames.PropertiesPropertyName]].ToObject<Dictionary<string, object>>();
+                    itemproperties.Add("properties", entityProperties);
+
+                    if (typeof (Node).IsAssignableFrom(propertyType))
+                    {
+                        AssertNecesaryColumnForType(entityPropertyNames.LabelsPropertyName, typeof (Node));
+                        var labels = record[_propertyCache[entityPropertyNames.LabelsPropertyName]].ToObject<string[]>();
+                        itemproperties.Add("labels", labels);
+                    }
+                    else
+                    {
+                        AssertNecesaryColumnForType(entityPropertyNames.TypePropertyName,
+                                                    typeof (Relationship));
+                        var relType = record[_propertyCache[entityPropertyNames.TypePropertyName]].ToObject<string>();
+                        itemproperties.Add("type", relType);
+                    }
+
+                    graphEntity = (IGraphEntity) HydrateWithCtr(itemproperties, propertyType);
+                    _cache.CacheEntity(graphEntity);
+                }
+                return graphEntity;
             }
 
 
             private TReturn HydrateWithCtr<TReturn>(IEnumerable<KeyValuePair<string, object>> values)
             {
-                var types = Properties.Select(p => p.PropertyType).ToArray();
+                var types = typeof(TCypherResponse).GetProperties().Select(p => p.PropertyType).ToArray();
                 var ctor =
                     typeof(TReturn).GetConstructor(
                                                     BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Instance,
