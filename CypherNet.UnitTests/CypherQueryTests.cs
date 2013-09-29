@@ -90,8 +90,7 @@
                 .Delete(v => new { v.actor, v.movie })
                 .Execute();
 
-            VerifyCypher(cypher,
-                         "START movie=node(1) MATCH (movie)<-[:STARED_IN*1..5]-(actor) DELETE actor, movie");
+            VerifyCypher(cypher, "START movie=node(1) MATCH (movie)<-[:STARED_IN*1..5]-(actor) DELETE actor, movie");
         }
 
         [TestMethod]
@@ -119,7 +118,7 @@
             var results = query
                 .Start(ctx => ctx.StartAtId(ctx.Vars.actor, 1).StartAtId(ctx.Vars.movie, 2))
                 .Create(ctx => ctx.CreateRel(ctx.Vars.actor, ctx.Vars.actedIn, "ACTED_IN", ctx.Vars.movie))
-                .Return(ctx => new { ctx.Vars.actedIn })
+                .Return(ctx => ctx.Vars.actedIn)
                 .Fetch();
 
             VerifyCypher(cypher, results.FirstOrDefault(),
