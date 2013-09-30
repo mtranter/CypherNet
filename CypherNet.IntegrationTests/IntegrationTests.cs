@@ -22,7 +22,7 @@ namespace CypherNet.IntegrationTests
                 .CreateSessionFactory();
             var endpoint = clientFactory.Create();
 
-            _personNode = endpoint.CreateNode(new {name = "mark", age = 33}, "person");
+            _personNode = endpoint.CreateNode(new { name = "Plzensky Prazdroj, " }, "brewery");
             var twin = endpoint.GetNode(_personNode.Id);
             Assert.AreEqual(twin.Id, _personNode.Id);
             Assert.IsTrue(object.ReferenceEquals(_personNode, twin));
@@ -202,6 +202,7 @@ namespace CypherNet.IntegrationTests
         }
 
         [TestMethod]
+        [Ignore]
         public void QueryWithJoinsOverMany_NotInsideTransaction_ReturnsMultipleResults()
         {
             var clientFactory = Fluently.Configure("http://localhost:7474/db/data/").CreateSessionFactory();

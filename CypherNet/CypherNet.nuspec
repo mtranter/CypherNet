@@ -10,7 +10,7 @@
     <projectUrl>https://github.com/mtranter/CypherNet</projectUrl>    
     <requireLicenseAcceptance>false</requireLicenseAcceptance>
     <description>$description$</description>
-    <releaseNotes>Fix Nuget metadata - License and Project url</releaseNotes>
+    <releaseNotes>Change Cypher Queries to use Lambdas of type Func&lt;IQueryContext&lt;TQueryVariables&gt;&gt;</releaseNotes>
     <copyright>Copyright 2013</copyright>    
   </metadata>
 </package>
