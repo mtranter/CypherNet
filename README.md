@@ -11,22 +11,24 @@ Exposes strongly typed Graph Query API based on the Neo4j [Cypher Query Language
     <dd></dd>
 </dl>
 ```C#
-var sessionFactory = Fluently.Configure("http://localhost:7474/db/data/").CreateSessionFactory();
-var cypherSession = sessionFactory.Create();
+var clientFactory = Fluently.Configure("http://localhost:7474/db/data/").CreateSessionFactory();
+var cypherEndpoint = clientFactory.Create();
 
-var nodes = cypherSession
+var nodes = cypherEndpoint
     .BeginQuery(p => new {person = p.Node, rel = p.Rel, role = p.Node}) // Define query variables
-    .Start(vars => Start.Any(vars.person)) // Cypher START clause
-    .Match(vars => Pattern.Start(vars.person).Outgoing(vars.rel).To(vars.role)) // Cypher MATCH clause
-    .Where(vars => vars.person.Get<string>("name!") == "mark" && vars.role.Get<string>("title!") == "developer") // Cypher WHERE predicate
-    .Return(vars => new {Person = vars.person, Rel = vars.rel, Role = vars.role}) // Cypher RETURN clause
+    .Start(ctx => ctx.StartAtAny(ctx.Vars.person)) // Cypher START clause
+    .Match(ctx => ctx.Node(ctx.Vars.person).Outgoing(ctx.Vars.rel).To(ctx.Vars.role)) // Cypher MATCH clause
+    .Where(ctx =>
+           ctx.Prop<string>(ctx.Vars.person, "name!") == "mark" && ctx.Prop<string>(ctx.Vars.role, "title!") == "developer")
+    // Cypher WHERE predicate
+    .Return(ctx => new { Person = ctx.Vars.person, Rel = ctx.Vars.rel, Role = ctx.Vars.role }) // Cypher RETURN clause
     .Fetch(); // GO!
 
 /* Executes Cypher: 
-* START person:node(*) 
-* MATCH (person)-[rel]->(role) 
-* WHERE person.name! = 'mark' AND role.title! = 'developer' 
-* RETURN person as Person, rel as Rel, role as ROle
+ * START person:node(*) 
+ * MATCH (person)-[rel]->(role) 
+ * WHERE person.name! = 'mark' AND role.title! = 'developer' 
+ * RETURN person as Person, rel as Rel, role as ROle
 */
 
 Assert.IsTrue(nodes.Any());
@@ -38,7 +40,7 @@ foreach (var node in nodes)
     Assert.AreEqual("mark", start.name);
     Assert.AreEqual("developer", end.title);
     Console.WriteLine(String.Format("{0} {1} {2}", start.name, node.Rel.Type, end.title));
-    // Prints "mark IS_A developer"
+        // Prints "mark IS_A developer"
 }
 ```
 <dl>
