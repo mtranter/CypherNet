@@ -48,31 +48,30 @@ foreach (var node in nodes)
     <dd></dd>
 </dl>
 ```C#
-var sessionFactory = Fluently.Configure("http://localhost:7474/db/data/").CreateSessionFactory();
-var cypherSession = sessionFactory.Create();
-
+var clientFactory = Fluently.Configure("http://localhost:7474/db/data/").CreateSessionFactory();
+var cypherEndpoint = clientFactory.Create();
 Node node1, node2;
-using (var trans1 = new TransactionScope(TransactionScopeOption.RequiresNew))
+using (var trans1 = new TransactionScope(TransactionScopeOption.RequiresNew, TimeSpan.FromDays(1)))
 {
-    node1 = cypherSession.CreateNode(new {name = "test node1"});
+    node1 = cypherEndpoint.CreateNode(new {name = "test node1"});
     using (var trans2 = new TransactionScope(TransactionScopeOption.RequiresNew))
     {
-        node2 = cypherSession.CreateNode(new {name = "test node2"});
+        node2 = cypherEndpoint.CreateNode(new {name = "test node2"});
         trans2.Complete();
     }
 }
 
 var node1Query = cypherEndpoint.BeginQuery(s => new {node1 = s.Node})
-                           .Start(s => Start.At(s.node1, node1.Id))
-                           .Return(r => new {r.node1})
-                           .Fetch()
-                           .FirstOrDefault();
+                               .Start(ctx => ctx.StartAtId(ctx.Vars.node1, node1.Id))
+                               .Return(ctx => new {ctx.Vars.node1})
+                               .Fetch()
+                               .FirstOrDefault();
 
 var node2Query = cypherEndpoint.BeginQuery(s => new {node2 = s.Node})
-                           .Start(s => Start.At(s.node2, node2.Id))
-                           .Return(r => new {r.node2})
-                           .Fetch()
-                           .FirstOrDefault();
+                               .Start(ctx => ctx.StartAtId(ctx.Vars.node2, node2.Id))
+                               .Return(ctx => new { ctx.Vars.node2 })
+                               .Fetch()
+                               .FirstOrDefault();
 
 Assert.IsNull(node1Query);
 Assert.IsNotNull(node2Query);
