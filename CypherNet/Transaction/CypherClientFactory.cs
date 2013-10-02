@@ -1,4 +1,6 @@
-﻿namespace CypherNet.Transaction
+﻿using CypherNet.Serialization;
+
+namespace CypherNet.Transaction
 {
     #region
 
@@ -22,11 +24,13 @@
         private static readonly object Lock = new object();
         private readonly string _baseUri;
         private readonly IWebClient _webClient;
+        private readonly IWebSerializer _serializer;
 
-        public CypherClientFactory(string baseUri, IWebClient webClient)
+        public CypherClientFactory(string baseUri, IWebClient webClient, IWebSerializer serializer)
         {
             _baseUri = baseUri;
             _webClient = webClient;
+            _serializer = serializer;
         }
 
         public ICypherClient Create()
@@ -43,7 +47,7 @@
                     }
                     else
                     {
-                        client = new TransactionalCypherClient(_baseUri, _webClient);
+                        client = new TransactionalCypherClient(_baseUri, _webClient, _serializer);
                         var notifier = new ResourceManager((ICypherUnitOfWork) client);
 
                         notifier.Complete += (o, e) =>
@@ -61,7 +65,7 @@
                 }
             }
 
-            return new NonTransactionalCypherClient(_baseUri, _webClient);
+            return new NonTransactionalCypherClient(_baseUri, _webClient, _serializer);
         }
 
         private class ResourceManager : IEnlistmentNotification

@@ -1,4 +1,8 @@
-﻿namespace CypherNet.Transaction
+﻿using System.Linq;
+using CypherNet.Logging;
+using CypherNet.Serialization;
+
+namespace CypherNet.Transaction
 {
     #region
 
@@ -12,11 +16,13 @@
     {
         private readonly string _baseUri;
         private readonly IWebClient _webClient;
+        private readonly IWebSerializer _serializer;
 
-        internal NonTransactionalCypherClient(string baseUri, IWebClient webClient)
+        internal NonTransactionalCypherClient(string baseUri, IWebClient webClient, IWebSerializer serializer)
         {
             _baseUri = UriHelper.Combine(baseUri, "transaction/commit");
             _webClient = webClient;
+            _serializer = serializer;
         }
 
         #region IRawCypherClient Members
@@ -24,16 +30,22 @@
         public IEnumerable<TOut> ExecuteQuery<TOut>(string cypherQuery)
         {
             var request = CypherQueryRequest.Create(cypherQuery);
-            var responseTask = _webClient.PostAsync<CypherResponse<TOut>>(_baseUri, request);
-            var response = responseTask.Result;
-
-            return response.Results;
+            var srequest = _serializer.Serialize(request);
+            Logger.Current.Log("Executing: " + srequest, LogLevel.Info);
+            var responseTask = _webClient.PostAsync(_baseUri, srequest);
+            var response = responseTask.Result.Content.ReadAsStringAsync().Result;
+            Logger.Current.Log("Response: " + response, LogLevel.Info);
+            var cypherResponse = _serializer.Deserialize<CypherResponse<TOut>>(response);
+            if (cypherResponse.Errors.Any())
+            {
+                throw new CypherResponseException(cypherResponse.Errors);
+            }
+            return cypherResponse.Results;
         }
 
         public void ExecuteCommand(string cypherCommand)
         {
-            var request = CypherQueryRequest.Create(cypherCommand);
-            _webClient.PostAsync<CypherResponse<object>>(_baseUri, request);
+            ExecuteQuery<dynamic>(cypherCommand);
         }
 
         #endregion

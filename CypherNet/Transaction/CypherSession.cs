@@ -19,10 +19,9 @@ namespace CypherNet.Transaction
 
     public class CypherSession : ICypherSession
     {
-
         private static readonly int[] MinimumVersionNumber = new[] {2, 0, 0};
        
-        private static readonly string NodeVariableName = ReflectOn<CreateNodeResult>.Member(a => a.NewNode).Name;
+        private static readonly string NodeVariableName = ReflectOn<SingleNodeResult>.Member(a => a.NewNode).Name;
 
         private static readonly string CreateNodeClauseFormat =
             String.Format(@"CREATE ({0}{{0}} {{1}}) RETURN {0} as {{2}}, id({0}) as {{3}}, labels({0}) as {{4}};",
@@ -35,31 +34,35 @@ namespace CypherNet.Transaction
         private readonly IWebClient _webClient;
 
         internal CypherSession(string uri)
+            : this(uri, new WebClient())
+        {
+        }
+
+        internal CypherSession(string uri, IWebClient webClient)
         {
             _uri = uri;
-            // I would prefer to inject these dependencies, however
-            // I'm not sure how else we can ensure that an instance of CypherSession
-            // shares the same instance of IEnityCache with its
-            // IWebSerializer???
+            _webClient = webClient;
             _entityCache = new DictionaryEntityCache();
             _webSerializer = new DefaultJsonSerializer(_entityCache);
-            _webClient = new WebClient(_webSerializer);
-            _clientFactory = new CypherClientFactory(uri, _webClient);
+            _clientFactory = new CypherClientFactory(uri, _webClient, _webSerializer);
         }
 
         internal void Connect()
         {
-            ServiceRootResponse response = null;
+            
+            IHttpResponseMessage response = null;
             try
             {
-                response = _webClient.GetAsync<ServiceRootResponse>(_uri).Result;
+                response = _webClient.GetAsync(_uri).Result;
             }
             catch (Exception)
             {
                 throw new NeoServerUnavalaibleExpcetion(_uri);
             }
+            var json = response.Content.ReadAsStringAsync().Result;
+            var serviceResponse = _webSerializer.Deserialize<ServiceRootResponse>(json);
 
-            AssertVersion(response);
+            AssertVersion(serviceResponse);
         }
 
         private void AssertVersion(ServiceRootResponse response)
@@ -87,9 +90,7 @@ namespace CypherNet.Transaction
                     return;
                 }
             }
-
         }
-
 
         #region ICypherSession Members
 
@@ -117,7 +118,7 @@ namespace CypherNet.Transaction
                                        propNames.PropertiesPropertyName, propNames.IdPropertyName,
                                        propNames.LabelsPropertyName);
             var endpoint = _clientFactory.Create();
-            var result = endpoint.ExecuteQuery<CreateNodeResult>(clause);
+            var result = endpoint.ExecuteQuery<SingleNodeResult>(clause);
             var node = result.First().NewNode;
             return node;
         }
@@ -167,49 +168,48 @@ namespace CypherNet.Transaction
             Delete(node.Id);
         }
 
-        private static readonly MethodInfo SetMethodInfo = typeof(IUpdateQueryContext<CreateNodeResult>).GetMethod("Set");
+        public void Clear()
+        {
+            _entityCache.Clear();
+        }
+
+        private static readonly MethodInfo SetMethodInfo = typeof(IUpdateQueryContext<SingleNodeResult>).GetMethod("Set");
         private static readonly PropertyInfo VarsProperty =
-                (PropertyInfo)ReflectOn<IUpdateQueryContext<CreateNodeResult>>.Member(c => c.Vars).MemberInfo;
+                (PropertyInfo)ReflectOn<IUpdateQueryContext<SingleNodeResult>>.Member(c => c.Vars).MemberInfo;
         private static readonly PropertyInfo NewNodeProperty =
-            (PropertyInfo) ReflectOn<CreateNodeResult>.Member(c => c.NewNode).MemberInfo;
+            (PropertyInfo) ReflectOn<SingleNodeResult>.Member(c => c.NewNode).MemberInfo;
 
         public void Save(Node node)
         {
             var props = node as IDynamicMetaData;
             var vals = props.GetAllValues();
-            var setActions = new List<Expression<Func<IUpdateQueryContext<CreateNodeResult>, ISetResult>>>();
+            var setActions = new List<Expression<Func<IUpdateQueryContext<SingleNodeResult>, ISetResult>>>();
             foreach (var val in vals)
             {
-                var param = Expression.Parameter(typeof(IUpdateQueryContext<CreateNodeResult>));
+                var param = Expression.Parameter(typeof(IUpdateQueryContext<SingleNodeResult>));
                 var propType = val.Value.GetType();
                 var method = SetMethodInfo.MakeGenericMethod(new[] { typeof(Node), propType });
                 var member = Expression.Property(Expression.Property(param, VarsProperty), NewNodeProperty);
                 var call = Expression.Call(param, method, member, Expression.Constant(val.Key), Expression.Constant(val.Value));
-                var lambda = Expression.Lambda<Func<IUpdateQueryContext<CreateNodeResult>, ISetResult>>(call, param);
+                var lambda = Expression.Lambda<Func<IUpdateQueryContext<SingleNodeResult>, ISetResult>>(call, param);
                 setActions.Add(lambda);
             }
 
-            BeginQuery<CreateNodeResult>().Start(v => v.StartAtId(v.Vars.NewNode, node.Id))
+            BeginQuery<SingleNodeResult>().Start(v => v.StartAtId(v.Vars.NewNode, node.Id))
                                           .Update(setActions.ToArray())
                                           .Execute();
-
         }
 
         #endregion
 
-        internal class CreateNodeResult
+        internal class SingleNodeResult
         {
-            public CreateNodeResult(Node newNode)
+            public SingleNodeResult(Node newNode)
             {
                 NewNode = newNode;
             }
 
             public Node NewNode { get; private set; }
-        }
-
-        public void Clear()
-        {
-            _entityCache.Clear();
         }
     }
 }
