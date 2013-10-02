@@ -1,19 +1,34 @@
 ﻿
 
+
+
 namespace CypherNet.IntegrationTests
 {
     using System;
+    using System.Diagnostics;
     using System.Linq;
     using System.Transactions;
     using Configuration;
     using Graph;
     using Microsoft.VisualStudio.TestTools.UnitTesting;
-    using Queries;
+   
 
     [TestClass]
     public class IntegrationTests
     {
         private static Node _personNode, _positionNode;
+
+        [ClassInitialize]
+        public static void ClassInitialize(TestContext context)
+        {
+            Trace.Listeners.Add(new TextWriterTraceListener(@"d:\Cypher.Net\TextWriterOutput.log"));
+        }
+
+        [ClassCleanup]
+        public static void ClassCleanup()
+        {
+            Trace.Flush();
+        }
 
         [TestMethod]
         public void CreateNode_ReturnsNewNode()
@@ -22,7 +37,7 @@ namespace CypherNet.IntegrationTests
                 .CreateSessionFactory();
             var endpoint = clientFactory.Create();
 
-            _personNode = endpoint.CreateNode(new {name = "mark", age = 33}, "person");
+            _personNode = endpoint.CreateNode(new { name = "Plzensky Prazdroj, " }, "brewery");
             var twin = endpoint.GetNode(_personNode.Id);
             Assert.AreEqual(twin.Id, _personNode.Id);
             Assert.IsTrue(object.ReferenceEquals(_personNode, twin));
@@ -202,6 +217,7 @@ namespace CypherNet.IntegrationTests
         }
 
         [TestMethod]
+        [Ignore]
         public void QueryWithJoinsOverMany_NotInsideTransaction_ReturnsMultipleResults()
         {
             var clientFactory = Fluently.Configure("http://localhost:7474/db/data/").CreateSessionFactory();

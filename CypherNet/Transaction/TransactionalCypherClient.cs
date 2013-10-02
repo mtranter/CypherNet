@@ -1,4 +1,7 @@
-﻿namespace CypherNet.Transaction
+﻿using CypherNet.Logging;
+using CypherNet.Serialization;
+
+namespace CypherNet.Transaction
 {
     #region
 
@@ -13,13 +16,15 @@
     internal class TransactionalCypherClient : ICypherClient, ICypherUnitOfWork
     {
         private readonly IWebClient _webClient;
+        private readonly IWebSerializer _serializer;
         private bool _isInitialized;
         private string _transactionUri;
 
-        internal TransactionalCypherClient(string baseUri, IWebClient webClient)
+        internal TransactionalCypherClient(string baseUri, IWebClient webClient, IWebSerializer serializer)
         {
             _transactionUri = UriHelper.Combine(baseUri, "transaction/");
             _webClient = webClient;
+            _serializer = serializer;
         }
 
         #region IRawCypherClient Members
@@ -27,26 +32,28 @@
         public IEnumerable<TOut> ExecuteQuery<TOut>(string cypherQuery)
         {
             var request = CypherQueryRequest.Create(cypherQuery);
-            var responseTask = _webClient.PostAsync<CypherResponse<TOut>>(_transactionUri, request);
-            var response = responseTask.Result;
+            var srequest = _serializer.Serialize(request);
+            Logger.Current.Log("Executing: " + srequest, LogLevel.Info);
+            var responseTask = _webClient.PostAsync(_transactionUri, srequest);
+            var response = responseTask.Result.Content.ReadAsStringAsync().Result;
+            Logger.Current.Log("Response: " + response, LogLevel.Info);
+            var cypherResponse = _serializer.Deserialize<CypherResponse<TOut>>(response);
+            if (cypherResponse.Errors.Any())
+            {
+                throw new CypherResponseException(cypherResponse.Errors);
+            }
             if (!_isInitialized)
             {
-                _transactionUri = response.Commit.Substring(0, response.Commit.Length - ("/commit").Length);
+                _transactionUri = cypherResponse.Commit.Substring(0, cypherResponse.Commit.Length - ("/commit").Length);
                 _isInitialized = true;
             }
-            return response.Results;
+            return cypherResponse.Results;
+
         }
 
         public void ExecuteCommand(string cypherCommand)
         {
-            var request = CypherQueryRequest.Create(cypherCommand);
-            var responseTask = _webClient.PostAsync<CypherResponse<object>>(_transactionUri, request);
-            var response = responseTask.Result;
-            if (!_isInitialized)
-            {
-                _transactionUri = response.Commit.Substring(0, response.Commit.Length - ("/commit").Length);
-                _isInitialized = true;
-            }
+            ExecuteQuery<dynamic>(cypherCommand);
         }
 
         #endregion
@@ -55,32 +62,41 @@
         {
             var commitUri = UriHelper.Combine(_transactionUri, "commit");
             var emptyRequest = CypherQueryRequest.Empty();
-            var resultTask = _webClient.PostAsync<CypherResponse<object>>(commitUri, emptyRequest);
-            var result = resultTask.Result;
-            if (result.Errors.Any())
+            Logger.Current.Log("Executing: " + emptyRequest, LogLevel.Info);
+            var srequest = _serializer.Serialize(emptyRequest);
+            var resultTask = _webClient.PostAsync(commitUri, srequest);
+            var response = resultTask.Result.Content.ReadAsStringAsync().Result;
+            Logger.Current.Log("Response: " + response, LogLevel.Info);
+            var cypherResponse = _serializer.Deserialize<CypherResponse<dynamic>>(response);
+            if (cypherResponse.Errors.Any())
             {
-                throw new Exception("Errors returned from Neo Server: " + String.Join(",", result.Errors));
+                throw new Exception("Errors returned from Neo Server: " + String.Join(",", cypherResponse.Errors));
             }
         }
 
         public void Rollback()
         {
-            var resultTask = _webClient.DeleteAsync<CypherResponse<object>>(_transactionUri);
-            var result = resultTask.Result;
-            if (result.Errors.Any())
+            var resultTask = _webClient.DeleteAsync(_transactionUri);
+            var response = resultTask.Result.Content.ReadAsStringAsync().Result;
+            var cypherResponse = _serializer.Deserialize<CypherResponse<dynamic>>(response);
+            if (cypherResponse.Errors.Any())
             {
-                throw new Exception("Errors returned from Neo Server: " + String.Join(",", result.Errors));
+                throw new Exception("Errors returned from Neo Server: " + String.Join(",", cypherResponse.Errors));
             }
         }
 
         public bool KeepAlive()
         {
-            var emptyRequest = new CypherQueryRequest();
-            var resultTask = _webClient.PostAsync<CypherResponse<object>>(_transactionUri, emptyRequest);
-            var result = resultTask.Result;
-            if (result.Errors.Any())
+            var emptyRequest = CypherQueryRequest.Empty();
+            var srequest = _serializer.Serialize(emptyRequest);
+            Logger.Current.Log("Executing: " + srequest, LogLevel.Info);
+            var resultTask = _webClient.PostAsync(_transactionUri, srequest);
+            var response = resultTask.Result.Content.ReadAsStringAsync().Result;
+            Logger.Current.Log("Response: " + response, LogLevel.Info);
+            var cypherResponse = _serializer.Deserialize<CypherResponse<dynamic>>(response);
+            if (cypherResponse.Errors.Any())
             {
-                throw new Exception("Errors returned from Neo Server: " + String.Join(",", result.Errors));
+                throw new Exception("Errors returned from Neo Server: " + String.Join(",", cypherResponse.Errors));
             }
             return true;
         }

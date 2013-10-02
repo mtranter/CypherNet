@@ -1,72 +1,63 @@
-﻿using System.Net.Http;
+﻿using System;
+using System.Net.Http;
 using System.Net.Http.Headers;
 using System.Threading.Tasks;
-using CypherNet.Serialization;
 
 namespace CypherNet.Http
 {
     public class WebClient : IWebClient
     {
-        private readonly IWebSerializer _serializer;
-
-        public WebClient(IWebSerializer serializer)
-        {
-            _serializer = serializer;
-        }
-
         #region IWebClient Members
 
-        public async Task<TResult> GetAsync<TResult>(string url)
+        public async Task<IHttpResponseMessage> GetAsync(string url)
         {
-            return await Execute<TResult>(url, HttpMethod.Get);
+            return await Execute(url, HttpMethod.Get);
         }
 
-        public async Task<TResult> PostAsync<TResult>(string url, object body)
+        public async Task<IHttpResponseMessage> PostAsync(string url, String body)
         {
-            return await Execute<TResult>(url, body, HttpMethod.Post);
+            return await Execute(url, body, HttpMethod.Post);
         }
 
-        public async Task<TResult> PutAsync<TResult>(string url, object body)
+        public async Task<IHttpResponseMessage> PutAsync(string url, String body)
         {
-            return await Execute<TResult>(url, body, HttpMethod.Put);
+            return await Execute(url, body, HttpMethod.Put);
         }
 
-        public async Task<TResult> DeleteAsync<TResult>(string url)
+        public async Task<IHttpResponseMessage> DeleteAsync(string url)
         {
-            return await Execute<TResult>(url, HttpMethod.Delete);
+            return await Execute(url, HttpMethod.Delete);
         }
 
         #endregion
 
-        private async Task<TResult> Execute<TResult>(string url, HttpMethod method)
+        private async Task<IHttpResponseMessage> Execute(string url, HttpMethod method)
         {
             var msg = new HttpRequestMessage(method, url);
 
             using (var client = new HttpClient())
             {
                 var result = await client.SendAsync(msg);
-                var json = result.Content.ReadAsStringAsync();
-                return _serializer.Deserialize<TResult>(json.Result);
+                return new HttpResponseMessageWrapper(result);
             }
         }
 
-        private async Task<TResult> Execute<TResult>(string url, object body, HttpMethod method)
+        private async Task<IHttpResponseMessage> Execute(string url, String content, HttpMethod method)
         {
             var msg = new HttpRequestMessage(method, url);
 
-            if (body != null)
+            if (content != null)
             {
-                var jsonBody = _serializer.Serialize(body);
-                msg.Content = new StringContent(jsonBody);
+                msg.Content = new StringContent(content);
                 msg.Content.Headers.ContentType = new MediaTypeHeaderValue("application/json");
             }
 
             using (var client = new HttpClient())
             {
                 var result = await client.SendAsync(msg);
-                var json = result.Content.ReadAsStringAsync();
-                return _serializer.Deserialize<TResult>(json.Result);
+                return new HttpResponseMessageWrapper(result);
             }
         }
     }
+
 }

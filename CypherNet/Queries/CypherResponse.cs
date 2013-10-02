@@ -1,4 +1,6 @@
-﻿namespace CypherNet.Queries
+﻿using System.Linq;
+
+namespace CypherNet.Queries
 {
     #region
 
@@ -17,6 +19,12 @@
 
     internal class CypherResponse<TResult> : ICypherResponse
     {
+
+        public CypherResponse()
+        {
+            Errors = Enumerable.Empty<string>().ToArray();
+        }
+
         [JsonProperty(PropertyName = "commit", NullValueHandling = NullValueHandling.Ignore)]
         internal string Commit { get; set; }
 

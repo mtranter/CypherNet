@@ -11,7 +11,7 @@
     internal class CypherQueryRequest
     {
         private const string JsonRegex =
-            @"{(\s*""\w+""\s*:\s*""?[\w\s]+""?\s*)(\s*,\s*(\s*""\w+""\s*:\s*""?[\w\s]+""?\s*))*\}";
+            @"{(\s*""\w+""\s*:\s*("".+"")?(\d+[^,])?\s*)(\s*,\s*(\s*""\w+""\s*:\s*("".+"")?(\d+[^,])?\s*))*\}";
 
         private readonly List<CypherQueryStatement> _statements = new List<CypherQueryStatement>();
 

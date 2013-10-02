@@ -88,17 +88,6 @@
             Assert.AreEqual(actor.age, 33);
             Assert.AreEqual(actor.name, "mark");
         }
-
-        [TestMethod]
-        public void SerializeCypherRequest__IsValid()
-        {
-            var request =
-                CypherQueryRequest.Create(
-                                          @"START x=node(1), y=node(2) CREATE x-[r:OWNS {""name"":""mark""}]->y<-[r2:IS_OWNED_BY {""age"": 33}]");
-            var serializer = new DefaultJsonSerializer(new DictionaryEntityCache());
-            var result = serializer.Serialize(request);
-            Console.WriteLine(result);
-        }
     }
 
     public class DeserializationTestClass

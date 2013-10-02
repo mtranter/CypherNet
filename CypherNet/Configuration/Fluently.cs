@@ -1,4 +1,7 @@
-﻿namespace CypherNet.Configuration
+﻿using System;
+using CypherNet.Logging;
+
+namespace CypherNet.Configuration
 {
     #region
 
@@ -23,6 +26,7 @@
         public SessionConfiguration(string endpointUri)
         {
             _endpointUri = endpointUri;
+            Logging.Logger.Current = new TraceLogger();
         }
 
         public ICypherSessionFactory CreateSessionFactory()
