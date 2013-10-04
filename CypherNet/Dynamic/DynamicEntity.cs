@@ -170,4 +170,14 @@
             }
         }
     }
+
+
+    public static class DynamicExtensions
+    {
+        public static dynamic AsDynamic<TDynamic>(this TDynamic @dynamic)
+            where TDynamic : IDynamicMetaObjectProvider
+        {
+            return @dynamic;
+        }
+    }
 }

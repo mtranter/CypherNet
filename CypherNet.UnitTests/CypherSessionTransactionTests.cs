@@ -2,6 +2,7 @@
 using System.Net;
 using System.Threading.Tasks;
 using System.Transactions;
+using CypherNet.Dynamic;
 using CypherNet.Graph;
 using CypherNet.Http;
 using CypherNet.Transaction;
@@ -21,6 +22,7 @@ namespace CypherNet.UnitTests
         private const string EmptyRequest = @"{""statements"":[]}";
         private const string EmptyResponse = @"{""results"":[],""errors"":[]}";
         private const string Name = "Marcus.T.Peeps";
+        private static readonly object Node = new {name = Name};
 
         [TestMethod]
         public void CreateNode__CreatesNode()
@@ -28,12 +30,11 @@ namespace CypherNet.UnitTests
             var mock = InitializeMockWebClient(AutoCommitAddress);
 
             var session = new CypherSession(BaseUri, mock.Object);
-            dynamic node = session.CreateNode(new {name = Name}, "person");
-            Assert.AreEqual(node.name, Name);
-            Assert.AreEqual(((Node)node).Labels.First(), "person");
+            var node = session.CreateNode(new {name = Name}, "person");
+            Assert.AreEqual(node.AsDynamic().name, Name);
+            Assert.AreEqual((node).Labels.First(), "person");
         }
-
-
+        
         [TestMethod]
         public void CreateNode_WithinCommitedTransaction_CallsCommit()
         {
@@ -41,7 +42,7 @@ namespace CypherNet.UnitTests
 
             //Keep alive.
             mock.Setup(m => m.PostAsync(KeepAliveAddress, EmptyRequest))
-                .Returns(() => BuildResponse(@"{""commit"":""http://localhost:7474/db/data/transaction/1/commit"",""results"":[],""transaction"":{""expires"":""Wed, 02 Oct 2013 15:18:27 +0000""},""errors"":[]}"));
+                .Returns(() => BuildResponse(@"{""commit"":""" + CommitAddress + @""",""results"":[],""transaction"":{""expires"":""Wed, 02 Oct 2013 15:18:27 +0000""},""errors"":[]}"));
             
             //Commit
             mock.Setup(m => m.PostAsync(CommitAddress, EmptyRequest)).Returns(() => BuildResponse(EmptyResponse));
@@ -56,8 +57,7 @@ namespace CypherNet.UnitTests
             mock.Verify(m => m.PostAsync(KeepAliveAddress, EmptyRequest));
             mock.Verify(m => m.PostAsync(CommitAddress, EmptyRequest));
         }
-
-
+        
         [TestMethod]
         public void CreateNode_WithinRollbackTransaction_CallsRollback()
         {
@@ -88,7 +88,7 @@ namespace CypherNet.UnitTests
                 .Returns(
                     () =>
                     BuildResponse(@"{""commit"":""" + CommitAddress +
-                                  @""",""results"":[{""columns"":[""NewNode"",""NewNode__Id"",""NewNode__Labels""],""data"":[[{""name"":""Marcus.T.Peeps""},15026,[""person""]]]}],""errors"":[]}"));
+                                  @""",""results"":[{""columns"":[""NewNode"",""NewNode__Id"",""NewNode__Labels""],""data"":[[{""name"":""" + Name + @"""},15026,[""person""]]]}],""errors"":[]}"));
             return mock;
         }
 

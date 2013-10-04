@@ -69,7 +69,6 @@
     <Compile Include="MockHttpResponseMessage.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="TestCypherClause.cs" />
-    <Compile Include="TransactionTests.cs" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\CypherNet\CypherNet.csproj">
