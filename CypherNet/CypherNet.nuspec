@@ -10,7 +10,7 @@
     <projectUrl>https://github.com/mtranter/CypherNet</projectUrl>    
     <requireLicenseAcceptance>false</requireLicenseAcceptance>
     <description>$description$</description>
-    <releaseNotes>Change Cypher Queries to use Lambdas of type Func&lt;IQueryContext&lt;TQueryVariables&gt;&gt;</releaseNotes>
+    <releaseNotes>Fix parsing JSON with special characters</releaseNotes>
     <copyright>Copyright 2013</copyright>    
   </metadata>
 </package>
