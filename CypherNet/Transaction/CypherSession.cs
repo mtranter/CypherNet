@@ -28,7 +28,6 @@ namespace CypherNet.Transaction
                           NodeVariableName);
 
         private readonly string _uri;
-        private readonly ICypherClientFactory _clientFactory;
         private readonly IWebSerializer _webSerializer;
         private readonly IEntityCache _entityCache;
         private readonly IWebClient _webClient;
@@ -44,12 +43,10 @@ namespace CypherNet.Transaction
             _webClient = webClient;
             _entityCache = new DictionaryEntityCache();
             _webSerializer = new DefaultJsonSerializer(_entityCache);
-            _clientFactory = new CypherClientFactory(uri, _webClient, _webSerializer);
         }
 
         internal void Connect()
         {
-            
             IHttpResponseMessage response = null;
             try
             {
@@ -96,13 +93,13 @@ namespace CypherNet.Transaction
 
         public ICypherQueryStart<TVariables> BeginQuery<TVariables>()
         {
-            return new FluentCypherQueryBuilder<TVariables>(_clientFactory);
+            return new FluentCypherQueryBuilder<TVariables>(new CypherClientFactory(_uri, _webClient, _webSerializer));
         }
 
         public ICypherQueryStart<TVariables> BeginQuery<TVariables>(
             Expression<Func<ICypherPrototype, TVariables>> variablePrototype)
         {
-            return new FluentCypherQueryBuilder<TVariables>(_clientFactory);
+            return new FluentCypherQueryBuilder<TVariables>(new CypherClientFactory(_uri, _webClient, _webSerializer));
         }
 
         public Node CreateNode(object properties)
@@ -117,7 +114,7 @@ namespace CypherNet.Transaction
             var clause = String.Format(CreateNodeClauseFormat, String.IsNullOrEmpty(label) ? "" : ":" + label, props,
                                        propNames.PropertiesPropertyName, propNames.IdPropertyName,
                                        propNames.LabelsPropertyName);
-            var endpoint = _clientFactory.Create();
+            var endpoint = new CypherClientFactory(_uri, _webClient, _webSerializer).Create();
             var result = endpoint.ExecuteQuery<SingleNodeResult>(clause);
             var node = result.First().NewNode;
             return node;
