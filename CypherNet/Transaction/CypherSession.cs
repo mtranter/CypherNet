@@ -136,9 +136,9 @@ namespace CypherNet.Transaction
 
         public Node GetNode(long id)
         {
-            if (_entityCache.Contains(id))
+            if (_entityCache.Contains<Node>(id))
             {
-                return _entityCache.GetEntity(id) as Node;
+                return _entityCache.GetEntity<Node>(id);
             }
             else
             {
@@ -157,7 +157,7 @@ namespace CypherNet.Transaction
                 .Start(v => v.StartAtId(v.Vars.newNode, nodeId))
                 .Delete(v => v.newNode)
                 .Execute();
-            _entityCache.Remove(nodeId);
+            _entityCache.Remove<Node>(nodeId);
         }
 
         public void Delete(Node node)

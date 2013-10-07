@@ -1,54 +1,102 @@
 ﻿
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using CypherNet.Graph;
 
 namespace CypherNet
 {
+    using System.Collections;
+
     internal interface IEntityCache
     {
-        bool Contains(long entityId);
+        bool Contains<TEntity>(long entityId) where TEntity : class, IGraphEntity;
+        bool Contains(long entityId, Type type);
         void CacheEntity(IGraphEntity entity);
-        IGraphEntity GetEntity(long entityId);
+        TEntity GetEntity<TEntity>(long entityId) where TEntity : class, IGraphEntity;
+        IGraphEntity GetEntity(long entityId, Type entityType);
         void Clear();
 
-        void Remove(long nodeId);
+        void Remove<TEntity>(long entityId) where TEntity : class, IGraphEntity;
+        void Remove(long entityId, Type type);
     }
 
     internal class DictionaryEntityCache : IEntityCache
     {
-        private readonly IDictionary<long, IGraphEntity> _internalCache = new Dictionary<long, IGraphEntity>();
+        private readonly IDictionary<long, IDictionary<Type, IGraphEntity>> _inner = new Dictionary<long, IDictionary<Type, IGraphEntity>>();
+
+
+        #region IEntityCache Members
+
+        public bool Contains<TEntity>(long entityId) where TEntity : class, IGraphEntity
+        {
+            return Contains(entityId, typeof (TEntity));
+        }
+
+        public bool Contains(long entityId, Type type)
+        {
+            return _inner.ContainsKey(entityId) && _inner[entityId].ContainsKey(type);
+        }
 
         public void CacheEntity(IGraphEntity entity)
         {
-            if (_internalCache.ContainsKey(entity.Id))
+            var entType = entity.GetType();
+            if (Contains(entity.Id, entType))
             {
-                throw new Exception("Cache already contains entity with Id: " + entity.Id);
+                throw new Exception("Entry already exists in the cache");
             }
-
-            _internalCache.Add(entity.Id, entity);
+            var useExistingDictionary = _inner.ContainsKey(entity.Id);
+            var dic = useExistingDictionary
+                          ? _inner[entity.Id]
+                          : new Dictionary<Type, IGraphEntity>();
+            dic[entType] = entity;
+            if (!useExistingDictionary)
+            {
+                _inner.Add(entity.Id, dic);
+            }
         }
 
-        public IGraphEntity GetEntity(long entityId) 
+        public TEntity GetEntity<TEntity>(long entityId) where TEntity : class,IGraphEntity
         {
-            IGraphEntity entity;
-            _internalCache.TryGetValue(entityId, out entity);
-            return entity;
+            var type = typeof (TEntity);
+            if(!Contains(entityId, type))
+            {
+                return null;
+            }
+
+            return (TEntity)_inner[entityId][type];
+        }
+
+        public IGraphEntity GetEntity(long entityId, Type entityType)
+        {
+            if (!Contains(entityId, entityType))
+            {
+                return null;
+            }
+
+            return _inner[entityId][entityType];
         }
 
         public void Clear()
         {
-            _internalCache.Clear();
+            _inner.Clear();
         }
 
-        public bool Contains(long entityId)
+        public void Remove<TEntity>(long entityId) where TEntity : class, IGraphEntity
         {
-            return _internalCache.ContainsKey(entityId);
+            Remove(entityId, typeof (TEntity));
         }
 
-        public void Remove(long nodeId)
+        public void Remove(long entityId, Type type)
         {
-            _internalCache.Remove(nodeId);
+            if (!Contains(entityId, type))
+            {
+                return;
+            }
+            _inner[entityId].Remove(type);
         }
+
+        #endregion
+
     }
 }

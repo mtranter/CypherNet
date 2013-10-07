@@ -201,9 +201,9 @@
 
                 AssertNecesaryColumnForType(entityPropertyNames.IdPropertyName, typeof (IGraphEntity));
                 var entityId = record[_propertyCache[entityPropertyNames.IdPropertyName]].ToObject<long>();
-                if (_cache.Contains(entityId))
+                if (_cache.Contains(entityId, propertyType))
                 {
-                    graphEntity = _cache.GetEntity(entityId);
+                    graphEntity = _cache.GetEntity(entityId, propertyType);
                 }
                 else
                 {
