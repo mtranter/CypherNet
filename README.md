@@ -76,3 +76,6 @@ var node2Query = cypherEndpoint.BeginQuery(s => new {node2 = s.Node})
 Assert.IsNull(node1Query);
 Assert.IsNotNull(node2Query);
 ```
+
+
+Me: [http://www.mtranter.com](http://www.mtranter.com)
