@@ -1,3 +1,7 @@
+[Update: I am currently looking for London based .Net Software Engineers. If you are interested please see [here](http://mtranter.com/2013/12/11/work-with-me/)!!]
+----------------------------------------------------------------------------------------------------------------
+
+
 CypherNet
 =========
 
