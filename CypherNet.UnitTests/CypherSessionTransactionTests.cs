@@ -31,7 +31,7 @@ namespace CypherNet.UnitTests
 
             var session = new CypherSession(BaseUri, mock.Object);
             var node = session.CreateNode(new {name = Name}, "person");
-            Assert.AreEqual(node.AsDynamic().name, Name);
+            Assert.AreEqual(node.AsDynamic().person, Name);
             Assert.AreEqual((node).Labels.First(), "person");
         }
         
@@ -88,7 +88,7 @@ namespace CypherNet.UnitTests
                 .Returns(
                     () =>
                     BuildResponse(@"{""commit"":""" + CommitAddress +
-                                  @""",""results"":[{""columns"":[""NewNode"",""NewNode__Id"",""NewNode__Labels""],""data"":[[{""name"":""" + Name + @"""},15026,[""person""]]]}],""errors"":[]}"));
+                                  @""",""results"":[{""columns"":[""NewNode"",""NewNode__Id"",""NewNode__Labels""],""data"":[[{""person"":""" + Name + @"""},15026,[""person""]]]}],""errors"":[]}"));
             return mock;
         }
 

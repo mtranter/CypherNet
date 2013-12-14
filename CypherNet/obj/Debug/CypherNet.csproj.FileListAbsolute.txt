@@ -35,3 +35,10 @@ C:\DevResources\NET\CypherNet-master\CypherNet\bin\Debug\ServiceStack.Interfaces
 C:\DevResources\NET\CypherNet-master\CypherNet\bin\Debug\ServiceStack.Redis.xml
 C:\DevResources\NET\CypherNet-master\CypherNet\bin\Debug\ServiceStack.Text.xml
 C:\DevResources\NET\CypherNet-master\CypherNet\obj\Debug\CypherNet.csprojResolveAssemblyReference.cache
+C:\DevResources\NET\CypherNet-orig-master\CypherNet\CypherNet\obj\Debug\CypherNet.csprojResolveAssemblyReference.cache
+C:\DevResources\NET\CypherNet-orig-master\CypherNet\CypherNet\obj\Debug\CypherNet.dll
+C:\DevResources\NET\CypherNet-orig-master\CypherNet\CypherNet\obj\Debug\CypherNet.pdb
+C:\DevResources\NET\CypherNet-orig-master\CypherNet\CypherNet\bin\Debug\CypherNet.dll
+C:\DevResources\NET\CypherNet-orig-master\CypherNet\CypherNet\bin\Debug\CypherNet.pdb
+C:\DevResources\NET\CypherNet-orig-master\CypherNet\CypherNet\bin\Debug\Newtonsoft.Json.dll
+C:\DevResources\NET\CypherNet-orig-master\CypherNet\CypherNet\bin\Debug\Newtonsoft.Json.xml

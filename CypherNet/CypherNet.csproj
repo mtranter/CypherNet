@@ -36,30 +36,6 @@
       <SpecificVersion>False</SpecificVersion>
       <HintPath>..\packages\Newtonsoft.Json.5.0.8\lib\net45\Newtonsoft.Json.dll</HintPath>
     </Reference>
-    <Reference Include="ServiceStack">
-      <HintPath>..\..\..\..\DevelopmentMullen\Github\acura-sundance\BL\Sundance.Worker\packages\ServiceStack.3.9.71\lib\net35\ServiceStack.dll</HintPath>
-    </Reference>
-    <Reference Include="ServiceStack.Common">
-      <HintPath>..\..\..\..\DevelopmentMullen\Github\acura-sundance\BL\Sundance.Worker\packages\ServiceStack.Common.3.9.71\lib\net35\ServiceStack.Common.dll</HintPath>
-    </Reference>
-    <Reference Include="ServiceStack.Interfaces">
-      <HintPath>..\..\..\..\DevelopmentMullen\Github\acura-sundance\BL\Sundance.Worker\packages\ServiceStack.Common.3.9.71\lib\net35\ServiceStack.Interfaces.dll</HintPath>
-    </Reference>
-    <Reference Include="ServiceStack.OrmLite">
-      <HintPath>..\..\..\..\DevelopmentMullen\Github\acura-sundance\BL\Sundance.Worker\packages\ServiceStack.OrmLite.SqlServer.3.9.71\lib\net35\ServiceStack.OrmLite.dll</HintPath>
-    </Reference>
-    <Reference Include="ServiceStack.OrmLite.SqlServer">
-      <HintPath>..\..\..\..\DevelopmentMullen\Github\acura-sundance\BL\Sundance.Worker\packages\ServiceStack.OrmLite.SqlServer.3.9.71\lib\net35\ServiceStack.OrmLite.SqlServer.dll</HintPath>
-    </Reference>
-    <Reference Include="ServiceStack.Redis">
-      <HintPath>..\..\..\..\DevelopmentMullen\Github\acura-sundance\BL\Sundance.Worker\packages\ServiceStack.Redis.3.9.71\lib\net35\ServiceStack.Redis.dll</HintPath>
-    </Reference>
-    <Reference Include="ServiceStack.ServiceInterface">
-      <HintPath>..\..\..\..\DevelopmentMullen\Github\acura-sundance\BL\Sundance.Worker\packages\ServiceStack.3.9.71\lib\net35\ServiceStack.ServiceInterface.dll</HintPath>
-    </Reference>
-    <Reference Include="ServiceStack.Text">
-      <HintPath>..\..\..\..\DevelopmentMullen\Github\acura-sundance\BL\Sundance.Worker\packages\ServiceStack.Text.3.9.71\lib\net35\ServiceStack.Text.dll</HintPath>
-    </Reference>
     <Reference Include="StaticReflection">
       <HintPath>..\..\..\..\DevelopmentMullen\Github\acura-sundance\BL\Sundance.Worker\packages\ExpressionReflection.1.2.0\lib\net45\StaticReflection.dll</HintPath>
     </Reference>

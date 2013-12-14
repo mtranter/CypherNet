@@ -1,6 +1,4 @@
-﻿using ServiceStack.Logging;
-
-namespace CypherNet.Serialization
+﻿namespace CypherNet.Serialization
 {
     #region
 
@@ -200,7 +198,11 @@ namespace CypherNet.Serialization
                 IGraphEntity graphEntity = null;
                 var entityPropertyNames = new EntityReturnColumns(propertyName);
                 AssertNecesaryColumnForType(entityPropertyNames.IdPropertyName, typeof (IGraphEntity));
-                var entityId = record["row"][_propertyCache[entityPropertyNames.IdPropertyName]].Value<long>();
+
+                var recordIsArray = record.GetType().IsAssignableFrom(typeof (JArray));
+                var entityId = recordIsArray
+                    ? record[_propertyCache[entityPropertyNames.IdPropertyName]].Value<long>() :
+                    record["row"][_propertyCache[entityPropertyNames.IdPropertyName]].Value<long>();
                 if (_cache.Contains(entityId, propertyType))
                 {
                     graphEntity = _cache.GetEntity(entityId, propertyType);
@@ -211,6 +213,9 @@ namespace CypherNet.Serialization
 
                     AssertNecesaryColumnForType(entityPropertyNames.PropertiesPropertyName, typeof (IGraphEntity));
                     var entityProperties =
+                        recordIsArray
+                            ? record[_propertyCache[entityPropertyNames.PropertiesPropertyName]]
+                            .ToObject<Dictionary<string, object>>() :
                         record["row"][_propertyCache[entityPropertyNames.PropertiesPropertyName]].ToObject<Dictionary<string, object>>();
                     itemproperties.Add("properties", entityProperties);
 
@@ -224,7 +229,9 @@ namespace CypherNet.Serialization
                     {
                         AssertNecesaryColumnForType(entityPropertyNames.TypePropertyName,
                                                     typeof (Relationship));
-                        var relType = record["row"][_propertyCache[entityPropertyNames.TypePropertyName]].ToObject<string>();
+                        var relType = recordIsArray ?
+                            record[_propertyCache[entityPropertyNames.TypePropertyName]].ToObject<string>() :
+                            record["row"][_propertyCache[entityPropertyNames.TypePropertyName]].ToObject<string>();
                         itemproperties.Add("type", relType);
                     }
 
