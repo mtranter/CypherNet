@@ -10,7 +10,7 @@
     <projectUrl>https://github.com/mtranter/CypherNet</projectUrl>    
     <requireLicenseAcceptance>false</requireLicenseAcceptance>
     <description>$description$</description>
-    <releaseNotes>Fix entity caching</releaseNotes>
+    <releaseNotes>Fix Deserialization of new Cypher Response JSON format</releaseNotes>
 	<tags>Neo4j Cypher</tags>
     <copyright>Copyright 2013</copyright>    
   </metadata>

@@ -157,8 +157,7 @@
                     while (reader.TokenType != JsonToken.EndArray)
                     {
                         var row = serializer.Deserialize<JToken>(reader);
-                        var drow = row["row"];
-                        var record = drow.Values<JToken>().ToArray();
+                        var record = row["row"].Values<JToken>().ToArray();
                         var items = new Dictionary<string, object>();
                         if (typeof (IGraphEntity).IsAssignableFrom(typeof (TCypherResponse)))
                         {
