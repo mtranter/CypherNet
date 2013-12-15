@@ -20,3 +20,15 @@ c:\Projects\Git\CypherNet\CypherNet.UnitTests\obj\Debug\CypherNet.UnitTests.dll
 c:\Projects\Git\CypherNet\CypherNet.UnitTests\obj\Debug\CypherNet.UnitTests.pdb
 D:\Cypher.Net\CypherNet.UnitTests\bin\Debug\StaticReflection.dll
 C:\Projects\Git\CypherNet\CypherNet.UnitTests\bin\Debug\StaticReflection.dll
+C:\DevResources\NET\CypherNet-orig-master\CypherNet\CypherNet.UnitTests\bin\Debug\CypherNet.UnitTests.dll
+C:\DevResources\NET\CypherNet-orig-master\CypherNet\CypherNet.UnitTests\bin\Debug\CypherNet.UnitTests.pdb
+C:\DevResources\NET\CypherNet-orig-master\CypherNet\CypherNet.UnitTests\bin\Debug\CypherNet.dll
+C:\DevResources\NET\CypherNet-orig-master\CypherNet\CypherNet.UnitTests\bin\Debug\Moq.dll
+C:\DevResources\NET\CypherNet-orig-master\CypherNet\CypherNet.UnitTests\bin\Debug\Newtonsoft.Json.dll
+C:\DevResources\NET\CypherNet-orig-master\CypherNet\CypherNet.UnitTests\bin\Debug\StaticReflection.dll
+C:\DevResources\NET\CypherNet-orig-master\CypherNet\CypherNet.UnitTests\bin\Debug\CypherNet.pdb
+C:\DevResources\NET\CypherNet-orig-master\CypherNet\CypherNet.UnitTests\bin\Debug\Moq.xml
+C:\DevResources\NET\CypherNet-orig-master\CypherNet\CypherNet.UnitTests\bin\Debug\Newtonsoft.Json.xml
+C:\DevResources\NET\CypherNet-orig-master\CypherNet\CypherNet.UnitTests\obj\Debug\CypherNet.UnitTests.csprojResolveAssemblyReference.cache
+C:\DevResources\NET\CypherNet-orig-master\CypherNet\CypherNet.UnitTests\obj\Debug\CypherNet.UnitTests.dll
+C:\DevResources\NET\CypherNet-orig-master\CypherNet\CypherNet.UnitTests\obj\Debug\CypherNet.UnitTests.pdb

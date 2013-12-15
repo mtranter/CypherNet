@@ -1,4 +1,6 @@
-﻿namespace CypherNet.Queries
+﻿using StaticReflection.Extensions;
+
+namespace CypherNet.Queries
 {
     #region
 
@@ -32,6 +34,16 @@
                 var entityPropertyNames = new EntityReturnColumns(prop.Member.Name);
 
                 return BuildStatement(prop.Member.Name, entityPropertyNames, typeof(Relationship).IsAssignableFrom(((PropertyInfo)prop.Member).PropertyType));
+            }
+
+            var memberInit = body as MemberInitExpression;
+            if (memberInit != null)
+            {
+                var statement = string.Join(", ", memberInit.Bindings.Select(
+                    b =>
+                        BuildStatement(b.Member.Name, new EntityReturnColumns(b.Member.Name),
+                            typeof (Relationship).IsAssignableFrom(((PropertyInfo) b.Member).PropertyType))));
+                return statement;
             }
 
             throw new InvalidCypherReturnsExpressionException();

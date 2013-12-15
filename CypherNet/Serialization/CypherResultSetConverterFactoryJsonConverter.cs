@@ -17,7 +17,6 @@
     internal class CypherResultSetConverterFactoryJsonConverter : JsonConverter
     {
         private readonly IEntityCache _entityCache;
-
         internal CypherResultSetConverterFactoryJsonConverter(IEntityCache entityCache)
         {
             _entityCache = entityCache;
@@ -156,32 +155,32 @@
                     reader.Read();
                     while (reader.TokenType != JsonToken.EndArray)
                     {
-                        var record = serializer.Deserialize<JToken[]>(reader);
+                        var record = serializer.Deserialize<JToken>(reader);
                         var items = new Dictionary<string, object>();
-                        if (typeof (IGraphEntity).IsAssignableFrom(typeof (TCypherResponse)))
+                        if (typeof(IGraphEntity).IsAssignableFrom(typeof(TCypherResponse)))
                         {
                             var propertyName = _columns.First(c => c.EndsWith("__Id")).Replace("__Id", "");
                             var graphEntity = LoadGraphEntity(propertyName, record, new Dictionary<string, object>(),
-                                                              typeof (TCypherResponse));
+                                                              typeof(TCypherResponse));
                             reader.Read();
-                            yield return (TCypherResponse) graphEntity;
+                            yield return (TCypherResponse)graphEntity;
                         }
                         else
                         {
 
-                            foreach (var property in typeof (TCypherResponse).GetProperties())
+                            foreach (var property in typeof(TCypherResponse).GetProperties())
                             {
                                 var itemproperties = new Dictionary<string, object>();
                                 var propertyType = property.PropertyType;
                                 var propertyName = property.Name;
-                                if (typeof (IGraphEntity).IsAssignableFrom(propertyType))
+                                if (typeof(IGraphEntity).IsAssignableFrom(propertyType))
                                 {
                                     var graphEntity = LoadGraphEntity(propertyName, record, itemproperties, propertyType);
                                     items.Add(propertyName, graphEntity);
                                 }
                                 else
                                 {
-                                    var restEntity = record[_propertyCache[propertyName]];
+                                    var restEntity = record["row"][_propertyCache[propertyName]];
                                     itemproperties.Add(propertyName, restEntity.ToObject(propertyType));
                                 }
                             }
@@ -193,14 +192,17 @@
                 }
             }
 
-            private IGraphEntity LoadGraphEntity(string propertyName, JToken[] record, Dictionary<string, object> itemproperties,
+            private IGraphEntity LoadGraphEntity(string propertyName, JToken record, Dictionary<string, object> itemproperties,
                                                            Type propertyType)
             {
                 IGraphEntity graphEntity = null;
                 var entityPropertyNames = new EntityReturnColumns(propertyName);
-
                 AssertNecesaryColumnForType(entityPropertyNames.IdPropertyName, typeof (IGraphEntity));
-                var entityId = record[_propertyCache[entityPropertyNames.IdPropertyName]].ToObject<long>();
+
+                var recordIsArray = record.GetType().IsAssignableFrom(typeof (JArray));
+                var entityId = recordIsArray
+                    ? record[_propertyCache[entityPropertyNames.IdPropertyName]].Value<long>() :
+                    record["row"][_propertyCache[entityPropertyNames.IdPropertyName]].Value<long>();
                 if (_cache.Contains(entityId, propertyType))
                 {
                     graphEntity = _cache.GetEntity(entityId, propertyType);
@@ -211,20 +213,25 @@
 
                     AssertNecesaryColumnForType(entityPropertyNames.PropertiesPropertyName, typeof (IGraphEntity));
                     var entityProperties =
-                        record[_propertyCache[entityPropertyNames.PropertiesPropertyName]].ToObject<Dictionary<string, object>>();
+                        recordIsArray
+                            ? record[_propertyCache[entityPropertyNames.PropertiesPropertyName]]
+                            .ToObject<Dictionary<string, object>>() :
+                        record["row"][_propertyCache[entityPropertyNames.PropertiesPropertyName]].ToObject<Dictionary<string, object>>();
                     itemproperties.Add("properties", entityProperties);
 
                     if (typeof (Node).IsAssignableFrom(propertyType))
                     {
                         AssertNecesaryColumnForType(entityPropertyNames.LabelsPropertyName, typeof (Node));
-                        var labels = record[_propertyCache[entityPropertyNames.LabelsPropertyName]].ToObject<string[]>();
+                        var labels = entityProperties.Keys.ToArray();
                         itemproperties.Add("labels", labels);
                     }
                     else
                     {
                         AssertNecesaryColumnForType(entityPropertyNames.TypePropertyName,
                                                     typeof (Relationship));
-                        var relType = record[_propertyCache[entityPropertyNames.TypePropertyName]].ToObject<string>();
+                        var relType = recordIsArray ?
+                            record[_propertyCache[entityPropertyNames.TypePropertyName]].ToObject<string>() :
+                            record["row"][_propertyCache[entityPropertyNames.TypePropertyName]].ToObject<string>();
                         itemproperties.Add("type", relType);
                     }
 
