@@ -14,3 +14,10 @@ C:\Projects\Git\CypherNet\CypherNet\obj\Debug\CypherNet.csprojResolveAssemblyRef
 D:\Cypher.Net\CypherNet\bin\Debug\StaticReflection.dll
 C:\Projects\Git\CypherNet\CypherNet\bin\Debug\StaticReflection.dll
 D:\Cypher.Net\CypherNet\obj\Debug\CypherNet.csprojResolveAssemblyReference.cache
+E:\CypherNet\CypherNet\bin\Debug\CypherNet.dll
+E:\CypherNet\CypherNet\bin\Debug\CypherNet.pdb
+E:\CypherNet\CypherNet\bin\Debug\Newtonsoft.Json.dll
+E:\CypherNet\CypherNet\bin\Debug\StaticReflection.dll
+E:\CypherNet\CypherNet\bin\Debug\Newtonsoft.Json.xml
+E:\CypherNet\CypherNet\obj\Debug\CypherNet.dll
+E:\CypherNet\CypherNet\obj\Debug\CypherNet.pdb

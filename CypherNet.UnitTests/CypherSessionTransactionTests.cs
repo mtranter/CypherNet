@@ -88,7 +88,7 @@ namespace CypherNet.UnitTests
                 .Returns(
                     () =>
                     BuildResponse(@"{""commit"":""" + CommitAddress +
-                                  @""",""results"":[{""columns"":[""NewNode"",""NewNode__Id"",""NewNode__Labels""],""data"":[[{""name"":""" + Name + @"""},15026,[""person""]]]}],""errors"":[]}"));
+                                  @""",""results"":[{""columns"":[""NewNode"",""NewNode__Id"",""NewNode__Labels""],""data"":[{""row"": [{""name"":""" + Name + @"""},15026,[""person""]]}]}],""errors"":[]}"));
             return mock;
         }
 
