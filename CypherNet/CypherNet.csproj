@@ -37,7 +37,7 @@
       <HintPath>..\packages\Newtonsoft.Json.5.0.8\lib\net45\Newtonsoft.Json.dll</HintPath>
     </Reference>
     <Reference Include="StaticReflection">
-      <HintPath>..\..\..\..\DevelopmentMullen\Github\acura-sundance\BL\Sundance.Worker\packages\ExpressionReflection.1.2.0\lib\net45\StaticReflection.dll</HintPath>
+      <HintPath>..\..\Dependencies\StaticReflection\StaticReflection.dll</HintPath>
     </Reference>
     <Reference Include="System" />
     <Reference Include="System.Core" />

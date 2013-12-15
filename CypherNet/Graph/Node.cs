@@ -21,8 +21,11 @@
             : base(id, properties)
         {
             Labels = labels.ToList();
+            Properties = properties;
         }
 
         public IList<string> Labels { get; private set; }
+
+        public IDictionary<string, object> Properties { get; private set; }  
     }
 }

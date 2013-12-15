@@ -1,0 +1,4 @@
+== December 14, 2013 ==
+== hsrobmln ==
+* Add support for MemberInitExpression in CypherReturnsClauseBuilder
+* Expose Properties Dictionary on Node. If you have a strongly typed model, this allows you to instantiate it directly via reflection (by iterating through the Properties/Members and calling SetValue() on them)
