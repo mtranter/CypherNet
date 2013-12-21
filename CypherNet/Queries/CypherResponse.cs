@@ -22,7 +22,7 @@ namespace CypherNet.Queries
 
         public CypherResponse()
         {
-            Errors = Enumerable.Empty<string>().ToArray();
+            Errors = Enumerable.Empty<CypherError>().ToArray();
         }
 
         [JsonProperty(PropertyName = "commit", NullValueHandling = NullValueHandling.Ignore)]
@@ -32,7 +32,7 @@ namespace CypherNet.Queries
         internal CypherResultSet<TResult> Results { get; set; }
 
         [JsonProperty(PropertyName = "errors")]
-        internal string[] Errors { get; private set; }
+        internal CypherError[] Errors { get; private set; }
 
         [JsonProperty(PropertyName = "transaction", NullValueHandling = NullValueHandling.Ignore)]
         internal TransactionDetails Transaction { get; private set; }
@@ -51,6 +51,14 @@ namespace CypherNet.Queries
         }
     }
 
+    internal class CypherError
+    {
+        [JsonProperty(PropertyName = "message")]
+        public string Message { get; set; }
+
+        [JsonProperty(PropertyName = "code")]
+        public string Code { get; set; }
+    }
 
     internal class CypherResultSet<TEnumerable> : IEnumerable<TEnumerable>
     {

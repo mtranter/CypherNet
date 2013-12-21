@@ -36,11 +36,13 @@ namespace CypherNet.Transaction
             var response = responseTask.Result.Content.ReadAsStringAsync().Result;
             Logger.Current.Log("Response: " + response, LogLevel.Info);
             var cypherResponse = _serializer.Deserialize<CypherResponse<TOut>>(response);
+
             if (cypherResponse.Errors.Any())
             {
-                throw new CypherResponseException(cypherResponse.Errors);
+                throw new CypherResponseException(cypherResponse.Errors.Select(e => e.Message).ToArray());
             }
-            return cypherResponse.Results;
+
+            return cypherResponse.Results ?? Enumerable.Empty<TOut>();
         }
 
         public void ExecuteCommand(string cypherCommand)

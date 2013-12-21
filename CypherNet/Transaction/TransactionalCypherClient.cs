@@ -40,14 +40,14 @@ namespace CypherNet.Transaction
             var cypherResponse = _serializer.Deserialize<CypherResponse<TOut>>(response);
             if (cypherResponse.Errors.Any())
             {
-                throw new CypherResponseException(cypherResponse.Errors);
+                throw new CypherResponseException(cypherResponse.Errors.Select(e => e.Message).ToArray());
             }
             if (!_isInitialized)
             {
                 _transactionUri = cypherResponse.Commit.Substring(0, cypherResponse.Commit.Length - ("/commit").Length);
                 _isInitialized = true;
             }
-            return cypherResponse.Results;
+            return cypherResponse.Results ?? Enumerable.Empty<TOut>();
 
         }
 
@@ -70,7 +70,7 @@ namespace CypherNet.Transaction
             var cypherResponse = _serializer.Deserialize<CypherResponse<dynamic>>(response);
             if (cypherResponse.Errors.Any())
             {
-                throw new Exception("Errors returned from Neo Server: " + String.Join(",", cypherResponse.Errors));
+                throw new Exception("Errors returned from Neo Server: " + String.Join(",", cypherResponse.Errors.Select(e => e.Message)));
             }
         }
 
@@ -81,7 +81,7 @@ namespace CypherNet.Transaction
             var cypherResponse = _serializer.Deserialize<CypherResponse<dynamic>>(response);
             if (cypherResponse.Errors.Any())
             {
-                throw new Exception("Errors returned from Neo Server: " + String.Join(",", cypherResponse.Errors));
+                throw new Exception("Errors returned from Neo Server: " + String.Join(",", cypherResponse.Errors.Select(e => e.Message)));
             }
         }
 
@@ -96,7 +96,7 @@ namespace CypherNet.Transaction
             var cypherResponse = _serializer.Deserialize<CypherResponse<dynamic>>(response);
             if (cypherResponse.Errors.Any())
             {
-                throw new Exception("Errors returned from Neo Server: " + String.Join(",", cypherResponse.Errors));
+                throw new Exception("Errors returned from Neo Server: " + String.Join(",", cypherResponse.Errors.Select(e => e.Message)));
             }
             return true;
         }

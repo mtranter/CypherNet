@@ -2,6 +2,8 @@
 
 
 
+using CypherNet.Transaction;
+
 namespace CypherNet.IntegrationTests
 {
     using System;
@@ -41,6 +43,25 @@ namespace CypherNet.IntegrationTests
             var twin = endpoint.GetNode(_personNode.Id);
             Assert.AreEqual(twin.Id, _personNode.Id);
             Assert.IsTrue(object.ReferenceEquals(_personNode, twin));
+        }
+
+
+        [TestMethod]
+        [ExpectedException(typeof(CypherResponseException))]
+        public void NonsenseQuery_ThrowsException()
+        {
+            var clientFactory = Fluently.Configure("http://localhost:7474/db/data/")
+                .CreateSessionFactory();
+            var endpoint = clientFactory.Create();
+
+            var query =
+                endpoint.BeginQuery(c => new {Node = c.Node})
+                    .Start(c => c.StartAtId(c.Vars.Node, 1))
+                    .Where(c => c.Prop<int>(c.Vars.Node, "aaa sss ddd") == 1)
+                    .Return(c => c.Vars.Node)
+                    .Fetch();
+          
+            
         }
 
         [TestMethod]
@@ -228,7 +249,7 @@ namespace CypherNet.IntegrationTests
                 .Start(ctx => ctx.StartAtAny(ctx.Vars.person)) // Cypher START clause
                 .Match(ctx => ctx.Node(ctx.Vars.person).Outgoing(ctx.Vars.rel).To(ctx.Vars.role)) // Cypher MATCH clause
                 .Where(ctx =>
-                       ctx.Prop<string>(ctx.Vars.person, "name!") == "mark" && ctx.Prop<string>(ctx.Vars.role, "title!") == "developer")
+                       ctx.Prop<string>(ctx.Vars.person, "name") == "mark" && ctx.Prop<string>(ctx.Vars.role, "title") == "developer")
                 // Cypher WHERE predicate
                 .Return(ctx => new { Person = ctx.Vars.person, Rel = ctx.Vars.rel, Role = ctx.Vars.role }) // Cypher RETURN clause
                 .Fetch(); // GO!

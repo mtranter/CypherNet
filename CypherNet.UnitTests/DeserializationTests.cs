@@ -14,11 +14,11 @@
     [TestClass]
     public class SerializationTests
     {
-        [TestMethod]
-        public void DerializeJson_EntitiesOnly_ReturnsCollectionOfEntities()
-        {
-            const string json =
-                @"{
+
+        #region JSON Constants
+
+        const string Json =
+            @"{
    ""commit"":""http://localhost:7474/db/data/transaction/6/commit"",
    ""results"":[
       {
@@ -80,13 +80,32 @@
    ]
 }";
 
+        const string ErrorJson = @"{""results"":[],""errors"":[{""code"":""Neo.ClientError.Statement.InvalidSyntax"",""message"":""Invalid input 's': expected whitespace, comment, , '.', node labels, '[', \""=~\"", IN, IS, '*', '/', '%', '^', '+', '-', '<', '>', \""<=\"", \"">=\"", '=', \""<>\"", \""!=\"", AND, XOR, OR or ')' (line 1, column 36)\n\""START Node=node(1) WHERE (Node.aaa sss ddd = 1) RETURN Node as Node, id(Node) as Node__Id, labels(Node) as Node__Labels\""\n                                    ^""}]}";
+
+        #endregion
+
+        [TestMethod]
+        public void DerializeJson_EntitiesOnly_ReturnsCollectionOfEntities()
+        {
+
             var deserializer = new DefaultJsonSerializer(new DictionaryEntityCache());
 
-            var retval = deserializer.Deserialize<CypherResponse<DeserializationTestClass>>(json);
+            var retval = deserializer.Deserialize<CypherResponse<DeserializationTestClass>>(Json);
             Assert.AreEqual(retval.Results.Count(), 2);
             dynamic actor = retval.Results.Select(r => r.Actor).First();
             Assert.AreEqual(actor.age, 33);
             Assert.AreEqual(actor.name, "mark");
+        }
+
+        [TestMethod]
+        public void DerializeJson_WithNeoErrors_ReturnsErrors()
+        {
+
+            var deserializer = new DefaultJsonSerializer(new DictionaryEntityCache());
+
+            var retval = deserializer.Deserialize<CypherResponse<DeserializationTestClass>>(ErrorJson);
+            Assert.IsNull(retval.Results);
+            Assert.IsTrue(retval.Errors.Any());
         }
     }
 
