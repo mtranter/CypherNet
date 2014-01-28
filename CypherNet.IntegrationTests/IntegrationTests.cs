@@ -39,12 +39,25 @@ namespace CypherNet.IntegrationTests
                 .CreateSessionFactory();
             var endpoint = clientFactory.Create();
 
-            _personNode = endpoint.CreateNode(new { name = "Plzensky Prazdroj, " }, "brewery");
+            _personNode = endpoint.CreateNode(new { name = "Plzensky Prazdroj" }, "brewery");
             var twin = endpoint.GetNode(_personNode.Id);
             Assert.AreEqual(twin.Id, _personNode.Id);
             Assert.IsTrue(object.ReferenceEquals(_personNode, twin));
         }
 
+        [TestMethod]
+        public void CreateNode_MultipleProperties_ReturnsNewNode()
+        {
+            var clientFactory = Fluently.Configure("http://localhost:7474/db/data/")
+                .CreateSessionFactory();
+            var endpoint = clientFactory.Create();
+
+            var newNode = endpoint.CreateNode(new { name = "Plzensky Prazdroj", age = 100 }, "brewery");
+            var twin = endpoint.GetNode(newNode.Id);
+            Assert.AreEqual(twin.Id, newNode.Id);
+            Assert.IsTrue(object.ReferenceEquals(newNode, twin));
+        }
+        
 
         [TestMethod]
         [ExpectedException(typeof(CypherResponseException))]
