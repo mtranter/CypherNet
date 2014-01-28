@@ -11,22 +11,22 @@ namespace CypherNet.Http
 
         public async Task<IHttpResponseMessage> GetAsync(string url)
         {
-            return await Execute(url, HttpMethod.Get);
+            return await Execute(url, HttpMethod.Get).ConfigureAwait(false);
         }
 
         public async Task<IHttpResponseMessage> PostAsync(string url, String body)
         {
-            return await Execute(url, body, HttpMethod.Post);
+            return await Execute(url, body, HttpMethod.Post).ConfigureAwait(false);
         }
 
         public async Task<IHttpResponseMessage> PutAsync(string url, String body)
         {
-            return await Execute(url, body, HttpMethod.Put);
+            return await Execute(url, body, HttpMethod.Put).ConfigureAwait(false);
         }
 
         public async Task<IHttpResponseMessage> DeleteAsync(string url)
         {
-            return await Execute(url, HttpMethod.Delete);
+            return await Execute(url, HttpMethod.Delete).ConfigureAwait(false);
         }
 
         #endregion
@@ -37,7 +37,7 @@ namespace CypherNet.Http
 
             using (var client = new HttpClient())
             {
-                var result = await client.SendAsync(msg);
+                var result = await client.SendAsync(msg).ConfigureAwait(false);
                 return new HttpResponseMessageWrapper(result);
             }
         }
@@ -54,7 +54,7 @@ namespace CypherNet.Http
 
             using (var client = new HttpClient())
             {
-                var result = await client.SendAsync(msg);
+                var result = await client.SendAsync(msg).ConfigureAwait(false);
                 return new HttpResponseMessageWrapper(result);
             }
         }

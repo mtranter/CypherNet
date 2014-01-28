@@ -33,7 +33,10 @@ namespace CypherNet.Transaction
             var srequest = _serializer.Serialize(request);
             Logger.Current.Log("Executing: " + srequest, LogLevel.Info);
             var responseTask = _webClient.PostAsync(_baseUri, srequest);
-            var response = responseTask.Result.Content.ReadAsStringAsync().Result;
+            responseTask.Wait();
+            var readTask = responseTask.Result.Content.ReadAsStringAsync();
+            readTask.Wait();
+            var response = readTask.Result;
             Logger.Current.Log("Response: " + response, LogLevel.Info);
             var cypherResponse = _serializer.Deserialize<CypherResponse<TOut>>(response);
 

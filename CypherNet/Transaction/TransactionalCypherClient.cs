@@ -35,7 +35,10 @@ namespace CypherNet.Transaction
             var srequest = _serializer.Serialize(request);
             Logger.Current.Log("Executing: " + srequest, LogLevel.Info);
             var responseTask = _webClient.PostAsync(_transactionUri, srequest);
-            var response = responseTask.Result.Content.ReadAsStringAsync().Result;
+            responseTask.Wait();
+            var readTask = responseTask.Result.Content.ReadAsStringAsync();
+            readTask.Wait();
+            var response = readTask.Result;
             Logger.Current.Log("Response: " + response, LogLevel.Info);
             var cypherResponse = _serializer.Deserialize<CypherResponse<TOut>>(response);
             if (cypherResponse.Errors.Any())
@@ -65,7 +68,10 @@ namespace CypherNet.Transaction
             Logger.Current.Log("Executing: " + emptyRequest, LogLevel.Info);
             var srequest = _serializer.Serialize(emptyRequest);
             var resultTask = _webClient.PostAsync(commitUri, srequest);
-            var response = resultTask.Result.Content.ReadAsStringAsync().Result;
+            resultTask.Wait();
+            var readTask = resultTask.Result.Content.ReadAsStringAsync();
+            readTask.Wait();
+            var response = readTask.Result;
             Logger.Current.Log("Response: " + response, LogLevel.Info);
             var cypherResponse = _serializer.Deserialize<CypherResponse<dynamic>>(response);
             if (cypherResponse.Errors.Any())
@@ -91,7 +97,11 @@ namespace CypherNet.Transaction
             var srequest = _serializer.Serialize(emptyRequest);
             Logger.Current.Log("Executing: " + srequest, LogLevel.Info);
             var resultTask = _webClient.PostAsync(_transactionUri, srequest);
-            var response = resultTask.Result.Content.ReadAsStringAsync().Result;
+            resultTask.Wait();
+
+            var readAsStringAsync = resultTask.Result.Content.ReadAsStringAsync();
+            readAsStringAsync.Wait();
+            var response = readAsStringAsync.Result;
             Logger.Current.Log("Response: " + response, LogLevel.Info);
             var cypherResponse = _serializer.Deserialize<CypherResponse<dynamic>>(response);
             if (cypherResponse.Errors.Any())

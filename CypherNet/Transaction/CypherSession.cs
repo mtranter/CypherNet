@@ -1,4 +1,5 @@
-﻿using CypherNet.Http;
+﻿using System.Threading.Tasks;
+using CypherNet.Http;
 
 namespace CypherNet.Transaction
 {
@@ -50,13 +51,17 @@ namespace CypherNet.Transaction
             IHttpResponseMessage response = null;
             try
             {
-                response = _webClient.GetAsync(_uri).Result;
+                var getTask = _webClient.GetAsync(_uri);
+                getTask.Wait();
+                response = getTask.Result;
             }
             catch (Exception)
             {
                 throw new NeoServerUnavalaibleExpcetion(_uri);
             }
-            var json = response.Content.ReadAsStringAsync().Result;
+            var readTask = response.Content.ReadAsStringAsync();
+            Task.WaitAll(readTask);
+            var json = readTask.Result;
             var serviceResponse = _webSerializer.Deserialize<ServiceRootResponse>(json);
 
             AssertVersion(serviceResponse);
