@@ -59,17 +59,19 @@
 
         bool IDynamicMetaData.HasProperty(string propName)
         {
-            return _storage.ContainsKey(propName);
+            return (this as IDynamicMetaData).AllPropertyNames.Contains(propName);
         }
 
         IEnumerable<string> IDynamicMetaData.AllPropertyNames
         {
-            get { return _storage.Keys.AsEnumerable(); }
+            get { return (this as IDynamicMetaData).GetAllValues().Select(kvp => kvp.Key); }
         }
 
         IEnumerable<KeyValuePair<string, object>> IDynamicMetaData.GetAllValues()
         {
-            return _storage.AsEnumerable();
+
+            var props = CachedDictionaryPropertiesProvider.LoadProperties(this);
+            return _storage.AsEnumerable().Union(props);
         }
 
         public override string ToString()

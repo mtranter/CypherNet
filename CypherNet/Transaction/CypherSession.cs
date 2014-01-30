@@ -184,7 +184,8 @@ namespace CypherNet.Transaction
         public void Save(Node node)
         {
             var props = node as IDynamicMetaData;
-            var vals = props.GetAllValues();
+            var vals = props.GetAllValues().Where(kvp => !Node.NodePropertyNames.Contains(kvp.Key));
+            
             var setActions = new List<Expression<Func<IUpdateQueryContext<SingleNodeResult>, ISetResult>>>();
             foreach (var val in vals)
             {

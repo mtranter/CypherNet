@@ -1,4 +1,6 @@
-﻿namespace CypherNet.Graph
+﻿using System.Linq;
+
+namespace CypherNet.Graph
 {
     #region
 
@@ -23,5 +25,7 @@
         }
 
         public string Type { get; internal set; }
+
+        internal static string[] RelationshipPropertyNames = typeof(Relationship).GetProperties().Select(p => p.Name).ToArray();
     }
 }

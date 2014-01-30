@@ -1,4 +1,6 @@
-﻿namespace CypherNet.Graph
+﻿using System.Reflection;
+
+namespace CypherNet.Graph
 {
     #region
 
@@ -24,5 +26,7 @@
         }
 
         public IList<string> Labels { get; private set; }
+
+        internal static string[] NodePropertyNames = typeof (Node).GetProperties().Select(p => p.Name).ToArray();
     }
 }
