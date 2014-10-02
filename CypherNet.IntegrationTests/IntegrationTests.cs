@@ -2,18 +2,18 @@
 
 
 
-using CypherNet.Transaction;
-
 namespace CypherNet.IntegrationTests
 {
     using System;
     using System.Diagnostics;
     using System.Linq;
     using System.Transactions;
-    using Configuration;
-    using Graph;
+
+    using CypherNet.Configuration;
+    using CypherNet.Graph;
+    using CypherNet.Transaction;
+
     using Microsoft.VisualStudio.TestTools.UnitTesting;
-   
 
     [TestClass]
     public class IntegrationTests
@@ -35,8 +35,7 @@ namespace CypherNet.IntegrationTests
         [TestMethod]
         public void CreateNode_ReturnsNewNode()
         {
-            var clientFactory = Fluently.Configure("http://localhost:7474/db/data/")
-                .CreateSessionFactory();
+            var clientFactory = Fluently.Configure("http://localhost:7474/db/data/").CreateSessionFactory();
             var endpoint = clientFactory.Create();
 
             _personNode = endpoint.CreateNode(new { name = "Plzensky Prazdroj" }, "brewery");
@@ -48,8 +47,7 @@ namespace CypherNet.IntegrationTests
         [TestMethod]
         public void CreateNode_MultipleProperties_ReturnsNewNode()
         {
-            var clientFactory = Fluently.Configure("http://localhost:7474/db/data/")
-                .CreateSessionFactory();
+            var clientFactory = Fluently.Configure("http://localhost:7474/db/data/").CreateSessionFactory();
             var endpoint = clientFactory.Create();
 
             var newNode = endpoint.CreateNode(new { name = "Plzensky Prazdroj", age = 100 }, "brewery");
@@ -63,8 +61,7 @@ namespace CypherNet.IntegrationTests
         [ExpectedException(typeof(CypherResponseException))]
         public void NonsenseQuery_ThrowsException()
         {
-            var clientFactory = Fluently.Configure("http://localhost:7474/db/data/")
-                .CreateSessionFactory();
+            var clientFactory = Fluently.Configure("http://localhost:7474/db/data/").CreateSessionFactory();
             var endpoint = clientFactory.Create();
 
             var query =
@@ -73,15 +70,12 @@ namespace CypherNet.IntegrationTests
                     .Where(c => c.Prop<int>(c.Vars.Node, "aaa sss ddd") == 1)
                     .Return(c => c.Vars.Node)
                     .Fetch();
-          
-            
         }
 
         [TestMethod]
         public void CreateRelationship_ReturnsRelationship()
         {
-            var clientFactory = Fluently.Configure("http://localhost:7474/db/data/")
-                .CreateSessionFactory();
+            var clientFactory = Fluently.Configure("http://localhost:7474/db/data/").CreateSessionFactory();
             var endpoint = clientFactory.Create();
 
             var newNode1 = endpoint.CreateNode(new { name = "mark", age = 33 }, "person");
@@ -89,6 +83,85 @@ namespace CypherNet.IntegrationTests
             var rel = endpoint.CreateRelationship(newNode1, newNode2, "WORKS_AS_A");
             Assert.IsNotNull(rel);
             Assert.AreEqual("WORKS_AS_A", rel.Type);
+        }
+
+        [TestMethod]
+        public void DeleteRelationship_DeletesRelationship()
+        {
+            var clientFactory = Fluently.Configure("http://localhost:7474/db/data/").CreateSessionFactory();
+            var endpoint = clientFactory.Create();
+
+            var newNode1 = endpoint.CreateNode(new { name = "mark", age = 33 }, "person");
+            var newNode2 = endpoint.CreateNode(new { role = "developer" }, "job");
+            var rel = endpoint.CreateRelationship(newNode1, newNode2, "WORKS_AS_A");
+
+            endpoint.DeleteRelationship(rel);
+
+            var actual =
+                endpoint.BeginQuery(s => new { person = s.Node, worksAs = s.Rel, job = s.Node })
+                    .Start(ctx => ctx
+                        .StartAtId(ctx.Vars.person, newNode1.Id)
+                        .StartAtId(ctx.Vars.job, newNode2.Id))
+                        .Match(ctx => ctx.Node(ctx.Vars.person).Outgoing(ctx.Vars.worksAs).To(ctx.Vars.job))
+                    .Return(ctx => ctx.Vars.worksAs)
+                    .Fetch()
+                    .FirstOrDefault();
+
+            Assert.IsNull(actual);
+        }
+
+        [TestMethod]
+        public void DeleteRelationship_WithinTransaction_Commit_DeletesRelationship()
+        {
+            var clientFactory = Fluently.Configure("http://localhost:7474/db/data/").CreateSessionFactory();
+            var endpoint = clientFactory.Create();
+
+            var newNode1 = endpoint.CreateNode(new { name = "mark", age = 33 }, "person");
+            var newNode2 = endpoint.CreateNode(new { role = "developer" }, "job");
+            var rel = endpoint.CreateRelationship(newNode1, newNode2, "WORKS_AS_A");
+
+            using (var trans2 = new TransactionScope(TransactionScopeOption.RequiresNew))
+            {
+                endpoint.DeleteRelationship(rel);
+                trans2.Complete();
+            }
+
+            var actual =
+                endpoint.BeginQuery(s => new { person = s.Node, worksAs = s.Rel, job = s.Node })
+                    .Start(ctx => ctx.StartAtId(ctx.Vars.person, newNode1.Id).StartAtId(ctx.Vars.job, newNode2.Id))
+                    .Match(ctx => ctx.Node(ctx.Vars.person).Outgoing(ctx.Vars.worksAs).To(ctx.Vars.job))
+                    .Return(ctx => ctx.Vars.worksAs)
+                    .Fetch()
+                    .FirstOrDefault();
+
+            Assert.IsNull(actual);
+        }
+
+        [TestMethod]
+        public void DeleteRelationship_WithinTransaction_Rollback_DoesNotDeleteRelationship()
+        {
+            var clientFactory = Fluently.Configure("http://localhost:7474/db/data/").CreateSessionFactory();
+            var endpoint = clientFactory.Create();
+
+            var newNode1 = endpoint.CreateNode(new { name = "mark", age = 33 }, "person");
+            var newNode2 = endpoint.CreateNode(new { role = "developer" }, "job");
+            var rel = endpoint.CreateRelationship(newNode1, newNode2, "WORKS_AS_A");
+
+            using (var trans2 = new TransactionScope(TransactionScopeOption.RequiresNew))
+            {
+                endpoint.DeleteRelationship(rel);
+            }
+
+            var actual =
+                endpoint.BeginQuery(s => new { person = s.Node, worksAs = s.Rel, job = s.Node })
+                    .Start(ctx => ctx.StartAtId(ctx.Vars.person, newNode1.Id).StartAtId(ctx.Vars.job, newNode2.Id))
+                    .Match(ctx => ctx.Node(ctx.Vars.person).Outgoing(ctx.Vars.worksAs).To(ctx.Vars.job))
+                    .Return(ctx => ctx.Vars.worksAs)
+                    .Fetch()
+                    .FirstOrDefault();
+
+            Assert.IsNotNull(actual);
+            Assert.AreEqual(actual.Id, rel.Id);
         }
 
 
@@ -335,6 +408,5 @@ namespace CypherNet.IntegrationTests
             Assert.IsNull(node1Query);
             Assert.IsNotNull(node2Query);
         }
-
     }
 }

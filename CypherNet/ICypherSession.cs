@@ -17,6 +17,8 @@
         Node CreateNode(object properties, string label);
 
         Relationship CreateRelationship(Node node1, Node node2, string type, object relationshipProperties = null);
+        void DeleteRelationship(Relationship relationship);
+        void DeleteRelationship(long relationshipId);
         
         void Delete(Node node);
         void Delete(long nodeId);
