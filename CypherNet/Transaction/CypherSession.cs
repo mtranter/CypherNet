@@ -1,7 +1,4 @@
-﻿using System.Threading.Tasks;
-using CypherNet.Http;
-
-namespace CypherNet.Transaction
+﻿namespace CypherNet.Transaction
 {
     #region
 
@@ -10,10 +7,14 @@ namespace CypherNet.Transaction
     using System.Linq;
     using System.Linq.Expressions;
     using System.Reflection;
-    using Dynamic;
-    using Graph;
-    using Queries;
-    using Serialization;
+    using System.Threading.Tasks;
+
+    using CypherNet.Dynamic;
+    using CypherNet.Graph;
+    using CypherNet.Http;
+    using CypherNet.Queries;
+    using CypherNet.Serialization;
+
     using StaticReflection;
 
     #endregion
@@ -137,6 +138,17 @@ namespace CypherNet.Transaction
                 .Fetch();
 
             return query.FirstOrDefault();
+        }
+
+        public void DeleteRelationship(long relationshipId)
+        {
+            BeginQuery(n => new { relationship = n.Rel }).Start(v => v.StartAtId(v.Vars.relationship, relationshipId)).Delete(v => v.relationship).Execute();
+            _entityCache.Remove<Relationship>(relationshipId);
+        }
+
+        public void DeleteRelationship(Relationship relationship)
+        {
+            DeleteRelationship(relationship.Id);
         }
 
         public Node GetNode(long id)
