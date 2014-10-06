@@ -1,8 +1,4 @@
-﻿
-
-
-
-namespace CypherNet.IntegrationTests
+﻿namespace CypherNet.IntegrationTests
 {
     using System;
     using System.Diagnostics;
@@ -281,8 +277,8 @@ namespace CypherNet.IntegrationTests
             Assert.IsNotNull(path);
             dynamic person = path.person;
             dynamic position = path.position;
-            Assert.AreEqual("mark WORKS_AS developer",
-                            String.Format("{0} {1} {2}", person.name, path.worksAs.Type,
+            Assert.AreEqual("mark WORKS_AS developer", 
+                            String.Format("{0} {1} {2}", person.name, path.worksAs.Type, 
                                           position.position));
         }
 
@@ -407,6 +403,71 @@ namespace CypherNet.IntegrationTests
 
             Assert.IsNull(node1Query);
             Assert.IsNotNull(node2Query);
+        }
+
+        [TestMethod]
+        public void QueryGraph_SimpleQueryOnProperty_ReturnsResults()
+        {
+            using (var trans = new TransactionScope(TransactionScopeOption.RequiresNew, TimeSpan.FromDays(1)))
+            {
+                var clientFactory = Fluently.Configure("http://localhost:7474/db/data/").CreateSessionFactory();
+                var endpoint = clientFactory.Create();
+
+                dynamic node = endpoint.CreateNode(new { name = "fred", age = 33 }, "person");
+
+                var nodes = endpoint.BeginQuery(p => new { node = p.Node })
+                                          .Start(ctx => ctx.StartAtAny(ctx.Vars.node))
+                                          .Where(ctx => ctx.Prop<string>(ctx.Vars.node, "name") == "fred")
+                                          .Return(ctx => new { Node = ctx.Vars.node })
+                                          .Fetch();
+                Assert.AreEqual(1, nodes.Count());
+                Assert.AreEqual("fred", node.name);
+            }
+        }
+
+        [TestMethod]
+        public void CreateConstraint_DoesNotThrowException()
+        {
+            using (var trans = new TransactionScope(TransactionScopeOption.RequiresNew, TimeSpan.FromDays(1)))
+            {
+                var clientFactory = Fluently.Configure("http://localhost:7474/db/data/").CreateSessionFactory();
+                var endpoint = clientFactory.Create();
+
+                var uniqueLabel = "uniqueLabel";
+
+                endpoint.CreateConstraint(uniqueLabel, "name");
+
+                // Cannot modify data in same transacction as schema updates
+            }
+        }
+
+        [TestMethod]
+        public void CreateConstraint_PreventsDuplicates()
+        {
+            var clientFactory = Fluently.Configure("http://localhost:7474/db/data/").CreateSessionFactory();
+            var endpoint = clientFactory.Create();
+
+            var uniqueLabel = "anotherUniqueLabel";
+
+            try
+            {
+                endpoint.CreateConstraint(uniqueLabel, "name");
+
+                using (var trans = new TransactionScope(TransactionScopeOption.RequiresNew, TimeSpan.FromDays(1)))
+                {
+                    var txEndpoint = clientFactory.Create();
+                    txEndpoint.CreateNode(new { name = "fred", age = 33 }, uniqueLabel);
+                    txEndpoint.CreateNode(new { name = "fred", age = 33 }, uniqueLabel);
+                }
+            }
+            catch(Exception ex)
+            {
+                Assert.IsTrue(ex is CypherResponseException);
+            }
+            finally
+            {
+                endpoint.DropConstraint(uniqueLabel, "name");
+            }
         }
     }
 }

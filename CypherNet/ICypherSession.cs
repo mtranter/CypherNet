@@ -24,6 +24,9 @@
         void Delete(long nodeId);
         void Save(Node node);
 
+        void CreateConstraint(string label, string property);
+        void DropConstraint(string label, string property);
+
         void Clear();
 
         ICypherQueryStart<TVariables> BeginQuery<TVariables>();

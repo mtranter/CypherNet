@@ -54,6 +54,7 @@
     <Compile Include="Dynamic\CachedDictionaryPropertiesProvider.cs" />
     <Compile Include="Dynamic\DynamicEntity.cs" />
     <Compile Include="Dynamic\IDynamicMetaData.cs" />
+    <Compile Include="Graph\Constraint.cs" />
     <Compile Include="Graph\GraphEntity.cs" />
     <Compile Include="Graph\IGraphEntity.cs" />
     <Compile Include="Graph\Node.cs" />
