@@ -22,8 +22,10 @@
     public class CypherSession : ICypherSession
     {
         private const string CreateConstraintClauseFormat = "CREATE CONSTRAINT ON ({0}:{1}) ASSERT {0}.{2} IS UNIQUE";
-
         private const string DropConstraintClauseFormat = "DROP CONSTRAINT ON ({0}:{1}) ASSERT {0}.{2} IS UNIQUE";
+
+        private const string CreateIndexClauseFormat = "CREATE INDEX ON :{0}({1})";
+        private const string DropIndexClauseFormat = "DROP INDEX ON :{0}({1})";
 
         private static readonly int[] MinimumVersionNumber = new[] {2, 0, 0};
        
@@ -195,14 +197,28 @@
         {
             var clause = string.Format(CreateConstraintClauseFormat, NodeVariableName, label, property);
             var endpoint = new CypherClientFactory(_uri, _webClient, _webSerializer).Create();
-            endpoint.ExecuteQuery<Constraint>(clause);
+            endpoint.ExecuteCommand(clause);
         }
 
         public void DropConstraint(string label, string property)
         {
             var clause = string.Format(DropConstraintClauseFormat, NodeVariableName, label, property);
             var endpoint = new CypherClientFactory(_uri, _webClient, _webSerializer).Create();
-            endpoint.ExecuteQuery<Constraint>(clause);
+            endpoint.ExecuteCommand(clause);
+        }
+
+        public void CreateIndex(string label, string property)
+        {
+            var clause = string.Format(CreateIndexClauseFormat, label, property);
+            var endpoint = new CypherClientFactory(_uri, _webClient, _webSerializer).Create();
+            endpoint.ExecuteCommand(clause);
+        }
+
+        public void DropIndex(string label, string property)
+        {
+            var clause = string.Format(DropIndexClauseFormat, label, property);
+            var endpoint = new CypherClientFactory(_uri, _webClient, _webSerializer).Create();
+            endpoint.ExecuteCommand(clause);
         }
 
         private static readonly MethodInfo SetMethodInfo = typeof(IUpdateQueryContext<SingleNodeResult>).GetMethod("Set");

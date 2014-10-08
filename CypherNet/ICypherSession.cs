@@ -27,6 +27,9 @@
         void CreateConstraint(string label, string property);
         void DropConstraint(string label, string property);
 
+        void CreateIndex(string label, string property);
+        void DropIndex(string label, string property);
+
         void Clear();
 
         ICypherQueryStart<TVariables> BeginQuery<TVariables>();
