@@ -51,7 +51,21 @@
             Assert.AreEqual(twin.Id, newNode.Id);
             Assert.IsTrue(object.ReferenceEquals(newNode, twin));
         }
-        
+
+        [TestMethod]
+        public void CreateNode_NullProperty_ReturnsNewNode()
+        {
+            using (var trans = new TransactionScope(TransactionScopeOption.RequiresNew))
+            {
+                var clientFactory = Fluently.Configure("http://localhost:7474/db/data/").CreateSessionFactory();
+                var endpoint = clientFactory.Create();
+
+                var newNode = endpoint.CreateNode(new TestNodeType { Name = "Plzensky Prazdroj", Age = 33, Reference = null }, "brewery");
+                var twin = endpoint.GetNode(newNode.Id);
+                Assert.AreEqual(twin.Id, newNode.Id);
+                Assert.IsTrue(object.ReferenceEquals(newNode, twin));
+            }
+        }
 
         [TestMethod]
         [ExpectedException(typeof(CypherResponseException))]
@@ -77,6 +91,19 @@
             var newNode1 = endpoint.CreateNode(new { name = "mark", age = 33 }, "person");
             var newNode2 = endpoint.CreateNode(new { role = "developer"}, "job");
             var rel = endpoint.CreateRelationship(newNode1, newNode2, "WORKS_AS_A");
+            Assert.IsNotNull(rel);
+            Assert.AreEqual("WORKS_AS_A", rel.Type);
+        }
+
+        [TestMethod]
+        public void CreateRelationship_WithData_ReturnsRelationship()
+        {
+            var clientFactory = Fluently.Configure("http://localhost:7474/db/data/").CreateSessionFactory();
+            var endpoint = clientFactory.Create();
+
+            var newNode1 = endpoint.CreateNode(new { name = "mark", age = 33 }, "person");
+            var newNode2 = endpoint.CreateNode(new { role = "developer" }, "job");
+            var rel = endpoint.CreateRelationship(newNode1, newNode2, "WORKS_AS_A", new { created = DateTime.Now.ToString("s") });
             Assert.IsNotNull(rel);
             Assert.AreEqual("WORKS_AS_A", rel.Type);
         }
@@ -179,7 +206,7 @@
             var clientFactory = Fluently.Configure("http://localhost:7474/db/data/").CreateSessionFactory();
             var endpoint = clientFactory.Create();
 
-            dynamic node =  endpoint.CreateNode(new { name = "mark", age = 33 }, "person");
+            dynamic node = endpoint.CreateNode(new { name = "mark", age = 33 }, "person");
             node.name = "john";
             endpoint.Save(node);
             endpoint.Clear();
