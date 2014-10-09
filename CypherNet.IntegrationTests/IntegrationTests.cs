@@ -41,6 +41,18 @@
         }
 
         [TestMethod]
+        public void CreateNode_MultipleLabels_ReturnsNewNode()
+        {
+            var clientFactory = Fluently.Configure("http://localhost:7474/db/data/").CreateSessionFactory();
+            var endpoint = clientFactory.Create();
+
+            _personNode = endpoint.CreateNode(new { name = "Plzensky Prazdroj" }, "brewery", "czech");
+            var twin = endpoint.GetNode(_personNode.Id);
+            Assert.AreEqual(twin.Id, _personNode.Id);
+            Assert.IsTrue(object.ReferenceEquals(_personNode, twin));
+        }
+
+        [TestMethod]
         public void CreateNode_MultipleProperties_ReturnsNewNode()
         {
             var clientFactory = Fluently.Configure("http://localhost:7474/db/data/").CreateSessionFactory();

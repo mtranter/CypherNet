@@ -119,13 +119,18 @@
             return CreateNode(properties, null);
         }
 
-        public Node CreateNode(object properties, string label)
+        public Node CreateNode(object properties, params string[] labels)
         {
             var props = _webSerializer.Serialize(properties);
             var propNames = new EntityReturnColumns(NodeVariableName);
-            var clause = String.Format(CreateNodeClauseFormat, String.IsNullOrEmpty(label) ? "" : ":" + label, props,
-                                       propNames.PropertiesPropertyName, propNames.IdPropertyName,
-                                       propNames.LabelsPropertyName);
+
+            var clause = String.Format(
+                CreateNodeClauseFormat,
+                labels.Any() ? ":" + string.Join(":", labels) : string.Empty,
+                props,
+                propNames.PropertiesPropertyName,
+                propNames.IdPropertyName,
+                propNames.LabelsPropertyName);
             var endpoint = new CypherClientFactory(_uri, _webClient, _webSerializer).Create();
             var result = endpoint.ExecuteQuery<SingleNodeResult>(clause);
             var node = result.First().NewNode;
