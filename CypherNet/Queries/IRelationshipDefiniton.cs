@@ -14,6 +14,9 @@
         [ParseToCypher("-[:{0}]->")]
         IDefineCypherToNode Outgoing(string type);
 
+        [ParseToCypher("-[:{0}*{1}..]->")]
+        IDefineCypherToNode Outgoing(string type, int minHops);
+
         [ParseToCypher("-[:{0}*{1}..{2}]->")]
         IDefineCypherToNode Outgoing(string type, int minHops, int maxHops);
 
@@ -32,6 +35,9 @@
         [ParseToCypher("<-[:{0}]-")]
         IDefineCypherFromNode Incoming(string type);
 
+        [ParseToCypher("<-[:{0}*{1}..]-")]
+        IDefineCypherFromNode Incoming(string type, int minHops);
+
         [ParseToCypher("<-[:{0}*{1}..{2}]-")]
         IDefineCypherFromNode Incoming(string type, int minHops, int maxHops);
 
@@ -48,6 +54,9 @@
 
         [ParseToCypher("-[:{0}]-")]
         IDefineCypherWithNode Relates(string type);
+
+        [ParseToCypher("-[:{0}*{1}..]-")]
+        IDefineCypherWithNode Relates(string type, int minHops);
 
         [ParseToCypher("-[:{0}*{1}..{2}]-")]
         IDefineCypherWithNode Relates(string type, int minHops, int maxHops);
