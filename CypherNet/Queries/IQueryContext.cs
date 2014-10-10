@@ -27,6 +27,11 @@ namespace CypherNet.Queries
         object Prop(
             [ArgumentEvaluator(typeof(MemberNameArgumentEvaluator))] IGraphEntity entity,
             [ArgumentEvaluator(typeof(ValueArgumentEvaluator))] string property);
+
+        [ParseToCypher("has({0}.{1})")]
+        bool Has(
+            [ArgumentEvaluator(typeof(MemberNameArgumentEvaluator))] IGraphEntity entity,
+            [ArgumentEvaluator(typeof(ValueArgumentEvaluator))] string property);
     }
 
     public interface IUpdateQueryContext<out TVariables> : IQueryContext<TVariables>

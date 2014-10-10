@@ -508,5 +508,44 @@
                 endpoint.DropConstraint(uniqueLabel, "name");
             }
         }
+
+        [TestMethod]
+        public void QueryGraph_SimpleQueryHasProperty_ReturnsResults()
+        {
+            using (var trans = new TransactionScope(TransactionScopeOption.RequiresNew, TimeSpan.FromDays(1)))
+            {
+                var clientFactory = Fluently.Configure("http://localhost:7474/db/data/").CreateSessionFactory();
+                var endpoint = clientFactory.Create();
+
+                dynamic node = endpoint.CreateNode(new { name = "fred", age = 33 }, "person");
+
+                var nodes = endpoint.BeginQuery(p => new { node = p.Node })
+                                          .Start(ctx => ctx.StartAtAny(ctx.Vars.node))
+                                          .Where(ctx => ctx.Has(ctx.Vars.node, "name"))
+                                          .Return(ctx => new { Node = ctx.Vars.node })
+                                          .Fetch();
+                Assert.AreEqual(1, nodes.Count());
+                Assert.AreEqual("fred", node.name);
+            }
+        }
+
+        [TestMethod]
+        public void QueryGraph_SimpleQueryHasNonsenseProperty_ReturnsResults()
+        {
+            using (var trans = new TransactionScope(TransactionScopeOption.RequiresNew, TimeSpan.FromDays(1)))
+            {
+                var clientFactory = Fluently.Configure("http://localhost:7474/db/data/").CreateSessionFactory();
+                var endpoint = clientFactory.Create();
+
+                dynamic node = endpoint.CreateNode(new { name = "fred", age = 33 }, "person");
+
+                var nodes = endpoint.BeginQuery(p => new { node = p.Node })
+                                          .Start(ctx => ctx.StartAtAny(ctx.Vars.node))
+                                          .Where(ctx => ctx.Has(ctx.Vars.node, "xxxxx"))
+                                          .Return(ctx => new { Node = ctx.Vars.node })
+                                          .Fetch();
+                Assert.AreEqual(0, nodes.Count());
+            }
+        }
     }
 }
