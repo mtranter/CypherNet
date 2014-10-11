@@ -1,4 +1,4 @@
 install:
-  - ps: (new-object net.webclient).DownloadFile('http://neo4j.com/artifact.php?name=neo4j-community-2.1.5-windows.zip', 'neo4j.zip
+  - ps: (new-object net.webclient).DownloadFile('http://neo4j.com/artifact.php?name=neo4j-community-2.1.5-windows.zip', 'neo4j.zip')
   - ps: & 7z x .\neo4j.zip
   - ps: & .\neo4j-community-2.1.5\bin\Neo4jInstaller.bat install
