@@ -1,5 +1,5 @@
 install:
   - ps: cd 'c:\projects\CypherNet'
   - ps: Start-FileDownload 'http://neo4j.com/artifact.php?name=neo4j-community-2.1.5-windows.zip'
-  - cmd: 7z x 'c:\projects\CypherNet\neo4j-community-2.1.5-windows.zip'
-  - cmd: 'c:\projects\CypherNet\neo4j-community-2.1.5\bin\Neo4jInstaller.bat' install
+  - cmd: 7z x c:\projects\CypherNet\neo4j-community-2.1.5-windows.zip
+  - cmd: c:\projects\CypherNet\neo4j-community-2.1.5\bin\Neo4jInstaller.bat install
