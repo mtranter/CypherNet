@@ -517,15 +517,15 @@
                 var clientFactory = Fluently.Configure("http://localhost:7474/db/data/").CreateSessionFactory();
                 var endpoint = clientFactory.Create();
 
-                dynamic node = endpoint.CreateNode(new { name = "fred", age = 33 }, "person");
+                dynamic node = endpoint.CreateNode(new { firstname = "fred", age = 33 }, "person");
 
                 var nodes = endpoint.BeginQuery(p => new { node = p.Node })
                                           .Start(ctx => ctx.StartAtAny(ctx.Vars.node))
-                                          .Where(ctx => ctx.Has(ctx.Vars.node, "name"))
+                                          .Where(ctx => ctx.Has(ctx.Vars.node, "firstname"))
                                           .Return(ctx => new { Node = ctx.Vars.node })
                                           .Fetch();
                 Assert.AreEqual(1, nodes.Count());
-                Assert.AreEqual("fred", node.name);
+                Assert.AreEqual("fred", node.firstname);
             }
         }
 

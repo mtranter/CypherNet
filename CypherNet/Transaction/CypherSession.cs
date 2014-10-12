@@ -126,7 +126,7 @@
 
             var clause = String.Format(
                 CreateNodeClauseFormat,
-                labels.Any() ? ":" + string.Join(":", labels) : string.Empty,
+                labels != null && labels.Any() ? ":" + string.Join(":", labels) : string.Empty,
                 props,
                 propNames.PropertiesPropertyName,
                 propNames.IdPropertyName,
