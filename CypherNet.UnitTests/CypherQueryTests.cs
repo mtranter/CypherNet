@@ -208,6 +208,23 @@
                          "START actor=node(1) RETURN actor as actor, id(actor) as actor__Id, labels(actor) as actor__Labels ORDER BY actedIn.fgds, actedIn.name SKIP 2 LIMIT 1");
         }
 
+        [TestMethod]
+        [Ignore]
+        public void BuildCypherQuery_WhereNot_ExecutesCorrectQuery()
+        {
+            FluentCypherQueryBuilder<TestCypherClause> query;
+            var cypher = SetupMocks(out query);
+            var results = query
+                .Start(ctx => ctx.StartAtId(ctx.Vars.actor, 1))
+                .Match(ctx => ctx.Node(ctx.Vars.actor).Outgoing("STARED_IN", 0).To(ctx.Vars.movie))
+                .Where(ctx => ctx.Clause("not movie-[:DIRECTED]->director"))
+                .Return(ctx => ctx.Vars.movie)
+                .Fetch();
+
+            VerifyCypher(cypher, results.FirstOrDefault(),
+                         "START actor=node(1) MATCH actor-[:STARED_IN*0..]->movie WHERE not movie-[:DIRECTED_BY]->director RETURN movie");
+        }
+
         private static Mock<ICypherClient> SetupMocks(out FluentCypherQueryBuilder<TestCypherClause> query)
         {
             var cypher = new Mock<ICypherClient>();
