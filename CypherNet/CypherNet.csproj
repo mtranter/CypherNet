@@ -87,6 +87,7 @@
     <Compile Include="Queries\ExpressionTreeOnlyUsageException.cs" />
     <Compile Include="Queries\FindsGraphEntityMethodAttribute.cs" />
     <Compile Include="Queries\GraphEntityExtensions.cs" />
+    <Compile Include="Queries\ICypherQueryOptionalMatchOnly.cs" />
     <Compile Include="Queries\IMatchQueryContext.cs" />
     <Compile Include="Queries\ICreateRelationshipQueryContext.cs" />
     <Compile Include="Queries\ICypherEntityReference.cs" />

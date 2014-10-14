@@ -547,5 +547,35 @@
                 Assert.AreEqual(0, nodes.Count());
             }
         }
+
+        [TestMethod]
+        public void QueryGraph_OptionalMatch_ReturnsResults()
+        {
+            using (var trans = new TransactionScope(TransactionScopeOption.RequiresNew, TimeSpan.FromDays(1)))
+            {
+                var clientFactory = Fluently.Configure("http://localhost:7474/db/data/").CreateSessionFactory();
+                var endpoint = clientFactory.Create();
+
+                var acme = endpoint.CreateNode(new { role = "acme co." }, "company");
+
+                var frank = endpoint.CreateNode(new { name = "frank", age = 35 }, "person");
+                var rel2 = endpoint.CreateRelationship(frank, acme, "WORKS_FOR");
+
+                var james = endpoint.CreateNode(new { name = "james", age = 25 }, "person");
+                var rel3 = endpoint.CreateRelationship(james, acme, "WORKS_FOR");
+
+                var nodes =
+                    endpoint.BeginQuery(p => new { person = p.Node, company = p.Node, x = p.Node })
+                        .Start(ctx => ctx.StartAtId(ctx.Vars.person, frank.Id))
+                        .Match(ctx => ctx.Node(ctx.Vars.person).Outgoing("WORKS_FOR").To(ctx.Vars.company))
+                        .OptionalMatch(ctx => ctx.Node(ctx.Vars.company).Incoming().From(ctx.Vars.x))
+                        .Return(ctx => new { ctx.Vars.x })
+                        .Fetch();
+
+                Assert.AreEqual(2, nodes.Count());
+                Assert.AreEqual(nodes.First().x.Id, frank.Id);
+                Assert.AreEqual(nodes.Last().x.Id, james.Id);
+            }
+        }
     }
 }

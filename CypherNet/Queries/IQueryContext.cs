@@ -1,7 +1,7 @@
-﻿using CypherNet.Graph;
-
-namespace CypherNet.Queries
+﻿namespace CypherNet.Queries
 {
+    using CypherNet.Graph;
+
     public interface IQueryContext<out TVariables>
     {
         TVariables Vars { get; }
@@ -11,7 +11,7 @@ namespace CypherNet.Queries
     {
     }
 
-    public interface IWhereQueryContext<out TVariables> : IQueryContext<TVariables>, IEntityPropertyAccessor
+    public interface IWhereQueryContext<out TVariables> : IMatchQueryContext<TVariables>, IEntityPropertyAccessor
     {
 
     }

@@ -14,6 +14,9 @@
         private readonly List<Expression<Func<IMatchQueryContext<TIn>, IDefineCypherRelationship>>> _matchClauses =
             new List<Expression<Func<IMatchQueryContext<TIn>, IDefineCypherRelationship>>>();
 
+        private readonly List<Expression<Func<IMatchQueryContext<TIn>, IDefineCypherRelationship>>> _optionalMatchClauses =
+            new List<Expression<Func<IMatchQueryContext<TIn>, IDefineCypherRelationship>>>();
+
         private readonly List<Expression<Func<TIn, dynamic>>> _orderByClauses =
             new List<Expression<Func<TIn, dynamic>>>();
 
@@ -45,12 +48,22 @@
             get { return _matchClauses.AsEnumerable(); }
         }
 
+        internal IEnumerable<Expression<Func<IMatchQueryContext<TIn>, IDefineCypherRelationship>>> OptionalMatchClauses
+        {
+            get { return _optionalMatchClauses.AsEnumerable(); }
+        }
+
         internal int? Skip { get; set; }
         internal int? Limit { get; set; }
 
         internal void AddMatchClause(Expression<Func<IMatchQueryContext<TIn>, IDefineCypherRelationship>> match)
         {
             _matchClauses.Add(match);
+        }
+
+        internal void AddOptionalMatchClause(Expression<Func<IMatchQueryContext<TIn>, IDefineCypherRelationship>> match)
+        {
+            _optionalMatchClauses.Add(match);
         }
 
         internal void AddOrderByClause(Expression<Func<TIn, dynamic>> match)
@@ -88,11 +101,14 @@
 
         internal string BuildStatement()
         {
-
             var start = StartClause == null ? null : "START " + CypherStartClauseBuilder.BuildStartClause(StartClause);
             var match = MatchClauses.Any()
                             ? "MATCH " +
                               String.Join(", ", MatchClauses.Select(CypherMatchClauseBuilder.BuildMatchClause))
+                            : null;
+            var optionalMatch = OptionalMatchClauses.Any()
+                            ? "OPTIONAL MATCH " +
+                              String.Join(", ", OptionalMatchClauses.Select(CypherMatchClauseBuilder.BuildMatchClause))
                             : null;
             var createRel = CreateRelationpClause == null
                                 ? null
@@ -115,7 +131,7 @@
             var skip = Skip == null ? null : String.Format("SKIP {0}", Skip);
             var limit = Limit == null ? null : String.Format("LIMIT {0}", Limit);
             return String.Join(" ",
-                               new[] {start, createRel, match, where, setClause, @return, @delete, orderBy, skip, limit}.Where(s => s != null));
+                               new[] { start, createRel, match, optionalMatch, where, setClause, @return, @delete, orderBy, skip, limit }.Where(s => s != null));
         }
     }
 }
