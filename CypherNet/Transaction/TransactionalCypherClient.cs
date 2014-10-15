@@ -45,13 +45,14 @@ namespace CypherNet.Transaction
             {
                 throw new CypherResponseException(cypherResponse.Errors.Select(e => e.Message).ToArray());
             }
+
             if (!_isInitialized)
             {
                 _transactionUri = cypherResponse.Commit.Substring(0, cypherResponse.Commit.Length - ("/commit").Length);
                 _isInitialized = true;
             }
-            return cypherResponse.Results ?? Enumerable.Empty<TOut>();
 
+            return cypherResponse.Results ?? Enumerable.Empty<TOut>();
         }
 
         public void ExecuteCommand(string cypherCommand)

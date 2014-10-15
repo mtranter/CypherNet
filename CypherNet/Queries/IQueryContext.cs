@@ -1,7 +1,7 @@
-﻿using CypherNet.Graph;
-
-namespace CypherNet.Queries
+﻿namespace CypherNet.Queries
 {
+    using CypherNet.Graph;
+
     public interface IQueryContext<out TVariables>
     {
         TVariables Vars { get; }
@@ -11,7 +11,7 @@ namespace CypherNet.Queries
     {
     }
 
-    public interface IWhereQueryContext<out TVariables> : IQueryContext<TVariables>, IEntityPropertyAccessor
+    public interface IWhereQueryContext<out TVariables> : IMatchQueryContext<TVariables>, IEntityPropertyAccessor
     {
 
     }
@@ -27,6 +27,14 @@ namespace CypherNet.Queries
         object Prop(
             [ArgumentEvaluator(typeof(MemberNameArgumentEvaluator))] IGraphEntity entity,
             [ArgumentEvaluator(typeof(ValueArgumentEvaluator))] string property);
+
+        [ParseToCypher("has({0}.{1})")]
+        bool Has(
+            [ArgumentEvaluator(typeof(MemberNameArgumentEvaluator))] IGraphEntity entity,
+            [ArgumentEvaluator(typeof(ValueArgumentEvaluator))] string property);
+
+        [ParseToCypher("{0}")]
+        bool Clause([ArgumentEvaluator(typeof(ValueArgumentEvaluator))] string clause);
     }
 
     public interface IUpdateQueryContext<out TVariables> : IQueryContext<TVariables>

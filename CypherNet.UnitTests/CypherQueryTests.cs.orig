@@ -209,6 +209,10 @@
         }
 
         [TestMethod]
+<<<<<<< Updated upstream
+        [Ignore]
+=======
+>>>>>>> Stashed changes
         public void BuildCypherQuery_WhereNot_ExecutesCorrectQuery()
         {
             FluentCypherQueryBuilder<TestCypherClause> query;
@@ -216,15 +220,21 @@
             var results = query
                 .Start(ctx => ctx.StartAtId(ctx.Vars.actor, 1))
                 .Match(ctx => ctx.Node(ctx.Vars.actor).Outgoing("STARED_IN", 0).To(ctx.Vars.movie))
-                ////.Where(ctx => ctx.Not(ctx.Node(ctx.Vars.movie).Outgoing("DIRECTED").To(ctx.Vars.director)))
+<<<<<<< Updated upstream
                 .Where(ctx => ctx.Clause("not movie-[:DIRECTED]->director"))
                 .Return(ctx => ctx.Vars.movie)
+=======
+                ////.Where(ctx => ctx.Not(ctx.Node(ctx.Vars.movie).Outgoing("DIRECTED").To(ctx.Vars.director)))
+                .Return(ctx => new { ctx.Vars.movie })
+>>>>>>> Stashed changes
                 .Fetch();
 
             VerifyCypher(cypher, results.FirstOrDefault(),
-                         "START actor=node(1) MATCH (actor)-[:STARED_IN*0..]->(movie) WHERE not movie-[:DIRECTED]->director RETURN movie as movie, id(movie) as movie__Id, labels(movie) as movie__Labels");
+                         "START actor=node(1) MATCH actor-[:STARED_IN*0..]->movie WHERE not movie-[:DIRECTED_BY]->director RETURN movie");
         }
 
+<<<<<<< Updated upstream
+=======
         [TestMethod]
         public void BuildCypherQuery_OptionalMatch_ExecutesCorrectQuery()
         {
@@ -238,9 +248,10 @@
                 .Fetch();
 
             VerifyCypher(cypher, results.FirstOrDefault(),
-                         "START actor=node(1) MATCH (actor)-[:STARED_IN*0..]->(movie) OPTIONAL MATCH (movie)<-[:DIRECTED_BY]-(director) RETURN movie as movie, id(movie) as movie__Id, labels(movie) as movie__Labels");
+                         "START actor=node(1) MATCH actor-[:STARED_IN*0..]->movie OPTIONAL MATCH movie-[:DIRECTED_BY]->director RETURN movie");
         }
 
+>>>>>>> Stashed changes
         private static Mock<ICypherClient> SetupMocks(out FluentCypherQueryBuilder<TestCypherClause> query)
         {
             var cypher = new Mock<ICypherClient>();

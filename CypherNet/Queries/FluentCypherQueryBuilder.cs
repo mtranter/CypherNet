@@ -19,6 +19,7 @@
         private readonly string _cypherQuery = String.Empty;
         private Expression<Func<ICreateRelationshipQueryContext<TIn>, ICreateCypherRelationship>> _createClause;
         private Expression<Func<IMatchQueryContext<TIn>, IDefineCypherRelationship>>[] _matchClauses;
+        private Expression<Func<IMatchQueryContext<TIn>, IDefineCypherRelationship>>[] _optionalMatchClauses;
         private Expression<Func<IUpdateQueryContext<TIn>, ISetResult>>[] _setters;
         private Expression<Action<IStartQueryContext<TIn>>> _startDef;
         private Expression<Func<IWhereQueryContext<TIn>, bool>> _wherePredicate;
@@ -71,6 +72,10 @@
             {
                 query.AddMatchClause(m);
             }
+            foreach (var m in _optionalMatchClauses ?? Enumerable.Empty<Expression<Func<IMatchQueryContext<TIn>, IDefineCypherRelationship>>>())
+            {
+                query.AddOptionalMatchClause(m);
+            }
             foreach (var m in _setters ?? Enumerable.Empty<Expression<Func<IUpdateQueryContext<TIn>, ISetResult>>>())
             {
                 query.AddSetClause(m);
@@ -84,9 +89,15 @@
             return this;
         }
 
-        public ICypherQueryWhere<TIn> Match(params Expression<Func<IMatchQueryContext<TIn>, IDefineCypherRelationship>>[] matchDefs)
+        public ICypherQueryOptionalMatchOnly<TIn> Match(params Expression<Func<IMatchQueryContext<TIn>, IDefineCypherRelationship>>[] matchDefs)
         {
             _matchClauses = matchDefs;
+            return this;
+        }
+
+        public ICypherQueryWhere<TIn> OptionalMatch(params Expression<Func<IMatchQueryContext<TIn>, IDefineCypherRelationship>>[] matchDefs)
+        {
+            _optionalMatchClauses = matchDefs;
             return this;
         }
 
@@ -102,6 +113,10 @@
             foreach (var m in _matchClauses ?? Enumerable.Empty<Expression<Func<IMatchQueryContext<TIn>, IDefineCypherRelationship>>>())
             {
                 query.AddMatchClause(m);
+            }
+            foreach (var m in _optionalMatchClauses ?? Enumerable.Empty<Expression<Func<IMatchQueryContext<TIn>, IDefineCypherRelationship>>>())
+            {
+                query.AddOptionalMatchClause(m);
             }
             foreach (var m in _setters ?? Enumerable.Empty<Expression<Func<IUpdateQueryContext<TIn>, ISetResult>>>())
             {
@@ -166,6 +181,5 @@
             }
 
         }
-
     }
 }

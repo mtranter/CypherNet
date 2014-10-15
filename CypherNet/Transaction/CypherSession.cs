@@ -1,7 +1,4 @@
-﻿using System.Threading.Tasks;
-using CypherNet.Http;
-
-namespace CypherNet.Transaction
+﻿namespace CypherNet.Transaction
 {
     #region
 
@@ -10,16 +7,26 @@ namespace CypherNet.Transaction
     using System.Linq;
     using System.Linq.Expressions;
     using System.Reflection;
-    using Dynamic;
-    using Graph;
-    using Queries;
-    using Serialization;
+    using System.Threading.Tasks;
+
+    using CypherNet.Dynamic;
+    using CypherNet.Graph;
+    using CypherNet.Http;
+    using CypherNet.Queries;
+    using CypherNet.Serialization;
+
     using StaticReflection;
 
     #endregion
 
     public class CypherSession : ICypherSession
     {
+        private const string CreateConstraintClauseFormat = "CREATE CONSTRAINT ON ({0}:{1}) ASSERT {0}.{2} IS UNIQUE";
+        private const string DropConstraintClauseFormat = "DROP CONSTRAINT ON ({0}:{1}) ASSERT {0}.{2} IS UNIQUE";
+
+        private const string CreateIndexClauseFormat = "CREATE INDEX ON :{0}({1})";
+        private const string DropIndexClauseFormat = "DROP INDEX ON :{0}({1})";
+
         private static readonly int[] MinimumVersionNumber = new[] {2, 0, 0};
        
         private static readonly string NodeVariableName = ReflectOn<SingleNodeResult>.Member(a => a.NewNode).Name;
@@ -112,13 +119,18 @@ namespace CypherNet.Transaction
             return CreateNode(properties, null);
         }
 
-        public Node CreateNode(object properties, string label)
+        public Node CreateNode(object properties, params string[] labels)
         {
             var props = _webSerializer.Serialize(properties);
             var propNames = new EntityReturnColumns(NodeVariableName);
-            var clause = String.Format(CreateNodeClauseFormat, String.IsNullOrEmpty(label) ? "" : ":" + label, props,
-                                       propNames.PropertiesPropertyName, propNames.IdPropertyName,
-                                       propNames.LabelsPropertyName);
+
+            var clause = String.Format(
+                CreateNodeClauseFormat,
+                labels != null && labels.Any() ? ":" + string.Join(":", labels) : string.Empty,
+                props,
+                propNames.PropertiesPropertyName,
+                propNames.IdPropertyName,
+                propNames.LabelsPropertyName);
             var endpoint = new CypherClientFactory(_uri, _webClient, _webSerializer).Create();
             var result = endpoint.ExecuteQuery<SingleNodeResult>(clause);
             var node = result.First().NewNode;
@@ -137,6 +149,17 @@ namespace CypherNet.Transaction
                 .Fetch();
 
             return query.FirstOrDefault();
+        }
+
+        public void DeleteRelationship(long relationshipId)
+        {
+            BeginQuery(n => new { relationship = n.Rel }).Start(v => v.StartAtId(v.Vars.relationship, relationshipId)).Delete(v => v.relationship).Execute();
+            _entityCache.Remove<Relationship>(relationshipId);
+        }
+
+        public void DeleteRelationship(Relationship relationship)
+        {
+            DeleteRelationship(relationship.Id);
         }
 
         public Node GetNode(long id)
@@ -173,6 +196,34 @@ namespace CypherNet.Transaction
         public void Clear()
         {
             _entityCache.Clear();
+        }
+
+        public void CreateConstraint(string label, string property)
+        {
+            var clause = string.Format(CreateConstraintClauseFormat, NodeVariableName, label, property);
+            var endpoint = new CypherClientFactory(_uri, _webClient, _webSerializer).Create();
+            endpoint.ExecuteCommand(clause);
+        }
+
+        public void DropConstraint(string label, string property)
+        {
+            var clause = string.Format(DropConstraintClauseFormat, NodeVariableName, label, property);
+            var endpoint = new CypherClientFactory(_uri, _webClient, _webSerializer).Create();
+            endpoint.ExecuteCommand(clause);
+        }
+
+        public void CreateIndex(string label, string property)
+        {
+            var clause = string.Format(CreateIndexClauseFormat, label, property);
+            var endpoint = new CypherClientFactory(_uri, _webClient, _webSerializer).Create();
+            endpoint.ExecuteCommand(clause);
+        }
+
+        public void DropIndex(string label, string property)
+        {
+            var clause = string.Format(DropIndexClauseFormat, label, property);
+            var endpoint = new CypherClientFactory(_uri, _webClient, _webSerializer).Create();
+            endpoint.ExecuteCommand(clause);
         }
 
         private static readonly MethodInfo SetMethodInfo = typeof(IUpdateQueryContext<SingleNodeResult>).GetMethod("Set");
