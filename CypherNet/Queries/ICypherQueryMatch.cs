@@ -7,14 +7,13 @@
 
     #endregion
 
-    public interface ICypherQueryMatch<TVariables> : ICypherQueryMatchOnly<TVariables>, ICypherQueryWhere<TVariables>,
-                                                     ICypherQueryCreate<TVariables>
+    public interface ICypherQueryMatch<TVariables> : ICypherQueryMatchOnly<TVariables>, ICypherQueryOptionalMatchOnly<TVariables>
     {
     }
 
     public interface ICypherQuerySetable<TVariables> : ICypherQueryCreate<TVariables>
     {
-        ICypherQueryReturnOrExecute<TVariables> Update(params Expression<Func<IUpdateQueryContext<TVariables>,ISetResult>>[] setters);
+        ICypherQueryReturnOrExecute<TVariables> Update(params Expression<Func<IUpdateQueryContext<TVariables>, ISetResult>>[] setters);
     }
 
     public interface ICypherQueryCreate<TVariables>

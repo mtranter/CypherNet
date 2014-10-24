@@ -7,9 +7,9 @@
 
     #endregion
 
-    public interface ICypherQueryMatchOnly<TVariables> 
+    public interface ICypherQueryOptionalMatchOnly<TVariables> : ICypherQueryWhere<TVariables>
     {
-        ICypherQueryOptionalMatchOnly<TVariables> Match(
+        ICypherQueryWhere<TVariables> OptionalMatch(
             params Expression<Func<IMatchQueryContext<TVariables>, IDefineCypherRelationship>>[] matchDef);
     }
 }

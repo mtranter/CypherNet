@@ -1,8 +1,4 @@
-﻿
-
-
-
-namespace CypherNet.IntegrationTests
+﻿namespace CypherNet.IntegrationTests
 {
     using System;
     using System.Diagnostics;
@@ -45,6 +41,18 @@ namespace CypherNet.IntegrationTests
         }
 
         [TestMethod]
+        public void CreateNode_MultipleLabels_ReturnsNewNode()
+        {
+            var clientFactory = Fluently.Configure("http://localhost:7474/db/data/").CreateSessionFactory();
+            var endpoint = clientFactory.Create();
+
+            _personNode = endpoint.CreateNode(new { name = "Plzensky Prazdroj" }, "brewery", "czech");
+            var twin = endpoint.GetNode(_personNode.Id);
+            Assert.AreEqual(twin.Id, _personNode.Id);
+            Assert.IsTrue(object.ReferenceEquals(_personNode, twin));
+        }
+
+        [TestMethod]
         public void CreateNode_MultipleProperties_ReturnsNewNode()
         {
             var clientFactory = Fluently.Configure("http://localhost:7474/db/data/").CreateSessionFactory();
@@ -55,7 +63,21 @@ namespace CypherNet.IntegrationTests
             Assert.AreEqual(twin.Id, newNode.Id);
             Assert.IsTrue(object.ReferenceEquals(newNode, twin));
         }
-        
+
+        [TestMethod]
+        public void CreateNode_NullProperty_ReturnsNewNode()
+        {
+            using (var trans = new TransactionScope(TransactionScopeOption.RequiresNew))
+            {
+                var clientFactory = Fluently.Configure("http://localhost:7474/db/data/").CreateSessionFactory();
+                var endpoint = clientFactory.Create();
+
+                var newNode = endpoint.CreateNode(new TestNodeType { Name = "Plzensky Prazdroj", Age = 33, Reference = null }, "brewery");
+                var twin = endpoint.GetNode(newNode.Id);
+                Assert.AreEqual(twin.Id, newNode.Id);
+                Assert.IsTrue(object.ReferenceEquals(newNode, twin));
+            }
+        }
 
         [TestMethod]
         [ExpectedException(typeof(CypherResponseException))]
@@ -81,6 +103,19 @@ namespace CypherNet.IntegrationTests
             var newNode1 = endpoint.CreateNode(new { name = "mark", age = 33 }, "person");
             var newNode2 = endpoint.CreateNode(new { role = "developer"}, "job");
             var rel = endpoint.CreateRelationship(newNode1, newNode2, "WORKS_AS_A");
+            Assert.IsNotNull(rel);
+            Assert.AreEqual("WORKS_AS_A", rel.Type);
+        }
+
+        [TestMethod]
+        public void CreateRelationship_WithData_ReturnsRelationship()
+        {
+            var clientFactory = Fluently.Configure("http://localhost:7474/db/data/").CreateSessionFactory();
+            var endpoint = clientFactory.Create();
+
+            var newNode1 = endpoint.CreateNode(new { name = "mark", age = 33 }, "person");
+            var newNode2 = endpoint.CreateNode(new { role = "developer" }, "job");
+            var rel = endpoint.CreateRelationship(newNode1, newNode2, "WORKS_AS_A", new { created = DateTime.Now.ToString("s") });
             Assert.IsNotNull(rel);
             Assert.AreEqual("WORKS_AS_A", rel.Type);
         }
@@ -183,7 +218,7 @@ namespace CypherNet.IntegrationTests
             var clientFactory = Fluently.Configure("http://localhost:7474/db/data/").CreateSessionFactory();
             var endpoint = clientFactory.Create();
 
-            dynamic node =  endpoint.CreateNode(new { name = "mark", age = 33 }, "person");
+            dynamic node = endpoint.CreateNode(new { name = "mark", age = 33 }, "person");
             node.name = "john";
             endpoint.Save(node);
             endpoint.Clear();
@@ -281,8 +316,8 @@ namespace CypherNet.IntegrationTests
             Assert.IsNotNull(path);
             dynamic person = path.person;
             dynamic position = path.position;
-            Assert.AreEqual("mark WORKS_AS developer",
-                            String.Format("{0} {1} {2}", person.name, path.worksAs.Type,
+            Assert.AreEqual("mark WORKS_AS developer", 
+                            String.Format("{0} {1} {2}", person.name, path.worksAs.Type, 
                                           position.position));
         }
 
@@ -407,6 +442,140 @@ namespace CypherNet.IntegrationTests
 
             Assert.IsNull(node1Query);
             Assert.IsNotNull(node2Query);
+        }
+
+        [TestMethod]
+        public void QueryGraph_SimpleQueryOnProperty_ReturnsResults()
+        {
+            using (var trans = new TransactionScope(TransactionScopeOption.RequiresNew, TimeSpan.FromDays(1)))
+            {
+                var clientFactory = Fluently.Configure("http://localhost:7474/db/data/").CreateSessionFactory();
+                var endpoint = clientFactory.Create();
+
+                dynamic node = endpoint.CreateNode(new { name = "fred", age = 33 }, "person");
+
+                var nodes = endpoint.BeginQuery(p => new { node = p.Node })
+                                          .Start(ctx => ctx.StartAtAny(ctx.Vars.node))
+                                          .Where(ctx => ctx.Prop<string>(ctx.Vars.node, "name") == "fred")
+                                          .Return(ctx => new { Node = ctx.Vars.node })
+                                          .Fetch();
+                Assert.AreEqual(1, nodes.Count());
+                Assert.AreEqual("fred", node.name);
+            }
+        }
+
+        [TestMethod]
+        public void CreateConstraint_DoesNotThrowException()
+        {
+            using (var trans = new TransactionScope(TransactionScopeOption.RequiresNew, TimeSpan.FromDays(1)))
+            {
+                var clientFactory = Fluently.Configure("http://localhost:7474/db/data/").CreateSessionFactory();
+                var endpoint = clientFactory.Create();
+
+                var uniqueLabel = "uniqueLabel";
+
+                endpoint.CreateConstraint(uniqueLabel, "name");
+
+                // Cannot modify data in same transacction as schema updates
+            }
+        }
+
+        [TestMethod]
+        public void CreateConstraint_PreventsDuplicates()
+        {
+            var clientFactory = Fluently.Configure("http://localhost:7474/db/data/").CreateSessionFactory();
+            var endpoint = clientFactory.Create();
+
+            var uniqueLabel = "anotherUniqueLabel";
+
+            try
+            {
+                endpoint.CreateConstraint(uniqueLabel, "name");
+
+                using (var trans = new TransactionScope(TransactionScopeOption.RequiresNew, TimeSpan.FromDays(1)))
+                {
+                    var txEndpoint = clientFactory.Create();
+                    txEndpoint.CreateNode(new { name = "fred", age = 33 }, uniqueLabel);
+                    txEndpoint.CreateNode(new { name = "fred", age = 33 }, uniqueLabel);
+                }
+            }
+            catch(Exception ex)
+            {
+                Assert.IsTrue(ex is CypherResponseException);
+            }
+            finally
+            {
+                endpoint.DropConstraint(uniqueLabel, "name");
+            }
+        }
+
+        [TestMethod]
+        public void QueryGraph_SimpleQueryHasProperty_ReturnsResults()
+        {
+            using (var trans = new TransactionScope(TransactionScopeOption.RequiresNew, TimeSpan.FromDays(1)))
+            {
+                var clientFactory = Fluently.Configure("http://localhost:7474/db/data/").CreateSessionFactory();
+                var endpoint = clientFactory.Create();
+
+                dynamic node = endpoint.CreateNode(new { firstname = "fred", age = 33 }, "person");
+
+                var nodes = endpoint.BeginQuery(p => new { node = p.Node })
+                                          .Start(ctx => ctx.StartAtAny(ctx.Vars.node))
+                                          .Where(ctx => ctx.Has(ctx.Vars.node, "firstname"))
+                                          .Return(ctx => new { Node = ctx.Vars.node })
+                                          .Fetch();
+                Assert.AreEqual(1, nodes.Count());
+                Assert.AreEqual("fred", node.firstname);
+            }
+        }
+
+        [TestMethod]
+        public void QueryGraph_SimpleQueryHasNonsenseProperty_ReturnsResults()
+        {
+            using (var trans = new TransactionScope(TransactionScopeOption.RequiresNew, TimeSpan.FromDays(1)))
+            {
+                var clientFactory = Fluently.Configure("http://localhost:7474/db/data/").CreateSessionFactory();
+                var endpoint = clientFactory.Create();
+
+                dynamic node = endpoint.CreateNode(new { name = "fred", age = 33 }, "person");
+
+                var nodes = endpoint.BeginQuery(p => new { node = p.Node })
+                                          .Start(ctx => ctx.StartAtAny(ctx.Vars.node))
+                                          .Where(ctx => ctx.Has(ctx.Vars.node, "xxxxx"))
+                                          .Return(ctx => new { Node = ctx.Vars.node })
+                                          .Fetch();
+                Assert.AreEqual(0, nodes.Count());
+            }
+        }
+
+        [TestMethod]
+        public void QueryGraph_OptionalMatch_ReturnsResults()
+        {
+            using (var trans = new TransactionScope(TransactionScopeOption.RequiresNew, TimeSpan.FromDays(1)))
+            {
+                var clientFactory = Fluently.Configure("http://localhost:7474/db/data/").CreateSessionFactory();
+                var endpoint = clientFactory.Create();
+
+                var acme = endpoint.CreateNode(new { role = "acme co." }, "company");
+
+                var frank = endpoint.CreateNode(new { name = "frank", age = 35 }, "person");
+                var rel2 = endpoint.CreateRelationship(frank, acme, "WORKS_FOR");
+
+                var james = endpoint.CreateNode(new { name = "james", age = 25 }, "person");
+                var rel3 = endpoint.CreateRelationship(james, acme, "WORKS_FOR");
+
+                var nodes =
+                    endpoint.BeginQuery(p => new { person = p.Node, company = p.Node, x = p.Node })
+                        .Start(ctx => ctx.StartAtId(ctx.Vars.person, frank.Id))
+                        .Match(ctx => ctx.Node(ctx.Vars.person).Outgoing("WORKS_FOR").To(ctx.Vars.company))
+                        .OptionalMatch(ctx => ctx.Node(ctx.Vars.company).Incoming().From(ctx.Vars.x))
+                        .Return(ctx => new { ctx.Vars.x })
+                        .Fetch();
+
+                Assert.AreEqual(2, nodes.Count());
+                Assert.AreEqual(nodes.First().x.Id, frank.Id);
+                Assert.AreEqual(nodes.Last().x.Id, james.Id);
+            }
         }
     }
 }

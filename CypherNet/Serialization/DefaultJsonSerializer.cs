@@ -15,7 +15,7 @@
 
         internal DefaultJsonSerializer(IEntityCache cache)
         {
-            _serializer = new JsonSerializer();
+            _serializer = new JsonSerializer { NullValueHandling = NullValueHandling.Ignore };
             _serializer.Converters.Insert(0, new CypherResultSetConverterFactoryJsonConverter(cache));
         }
 

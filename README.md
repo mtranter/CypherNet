@@ -1,6 +1,7 @@
 
 CypherNet
 =========
+[![Gitter](https://badges.gitter.im/Join Chat.svg)](https://gitter.im/mtranter/CypherNet?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge&utm_content=badge)
 
 A .Net API for the Neo4j HTTP Transactional Endpoint. (v2.0.0)
 
