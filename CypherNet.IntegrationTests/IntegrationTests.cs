@@ -577,5 +577,55 @@
                 Assert.AreEqual(nodes.Last().x.Id, james.Id);
             }
         }
+
+        [TestMethod]
+        public void UpdateCompleteTransaction_UpdateIsPersisted()
+        {
+            var clientFactory = Fluently.Configure("http://localhost:7474/db/data/").CreateSessionFactory();
+            var endpoint = clientFactory.Create();
+
+            const int originalValue = 100;
+            const int newValue = 200;
+
+            var personNode = endpoint.CreateNode(new { name = "Plzensky Prazdroj", age = originalValue });
+
+            using (var transaction = new TransactionScope())
+            {
+                dynamic node = endpoint.GetNode(personNode.Id);
+
+                node.age = newValue;
+                endpoint.Save(node);
+
+                transaction.Complete();
+
+            }
+
+            dynamic actualPerson = endpoint.GetNode(personNode.Id);
+            Assert.AreEqual(newValue, actualPerson.age);
+        }
+
+        [TestMethod]
+        public void UpdateRollback_EnsureEverythingIsRolledBack()
+        {
+            var clientFactory = Fluently.Configure("http://localhost:7474/db/data/").CreateSessionFactory();
+            var endpoint = clientFactory.Create();
+
+            const int originalValue = 100;
+            const int newValue = 200;
+
+            var personNode = endpoint.CreateNode(new { name = "Plzensky Prazdroj", age = originalValue });
+
+            using (var transaction = new TransactionScope())
+            {
+                dynamic node = endpoint.GetNode(personNode.Id);
+
+                node.age = newValue;
+                endpoint.Save(node);
+
+            }
+
+            dynamic actualPerson = endpoint.GetNode(personNode.Id);
+            Assert.AreEqual(originalValue, actualPerson.age);
+        }
     }
 }
