@@ -25,12 +25,14 @@ namespace CypherNet.Transaction
         private readonly string _baseUri;
         private readonly IWebClient _webClient;
         private readonly IWebSerializer _serializer;
+        private readonly IEntityCache _entityCache;
 
-        public CypherClientFactory(string baseUri, IWebClient webClient, IWebSerializer serializer)
+        public CypherClientFactory(string baseUri, IWebClient webClient, IWebSerializer serializer, IEntityCache entityCache)
         {
-            _baseUri = baseUri;
-            _webClient = webClient;
-            _serializer = serializer;
+            this._baseUri = baseUri;
+            this._webClient = webClient;
+            this._serializer = serializer;
+            this._entityCache = entityCache;
         }
 
         public ICypherClient Create()
@@ -47,7 +49,7 @@ namespace CypherNet.Transaction
                     }
                     else
                     {
-                        client = new TransactionalCypherClient(_baseUri, _webClient, _serializer);
+                        client = new TransactionalCypherClient(_baseUri, _webClient, _serializer, this._entityCache);
                         var notifier = new ResourceManager((ICypherUnitOfWork) client);
 
                         notifier.Complete += (o, e) =>

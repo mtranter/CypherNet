@@ -216,13 +216,13 @@
             var results = query
                 .Start(ctx => ctx.StartAtId(ctx.Vars.actor, 1))
                 .Match(ctx => ctx.Node(ctx.Vars.actor).Outgoing("STARED_IN", 0).To(ctx.Vars.movie))
-                ////.Where(ctx => ctx.Not(ctx.Node(ctx.Vars.movie).Outgoing("DIRECTED").To(ctx.Vars.director)))
-                .Where(ctx => ctx.Clause("not movie-[:DIRECTED]->director"))
+                ////.Where(ctx => ctx.Not(ctx.Node(ctx.Vars.movie).Outgoing("DIRECTED_BY").To(ctx.Vars.director)))
+                .Where(ctx => ctx.Clause("not movie-[:DIRECTED_BY]->director"))
                 .Return(ctx => ctx.Vars.movie)
                 .Fetch();
 
             VerifyCypher(cypher, results.FirstOrDefault(),
-                         "START actor=node(1) MATCH (actor)-[:STARED_IN*0..]->(movie) WHERE not movie-[:DIRECTED]->director RETURN movie as movie, id(movie) as movie__Id, labels(movie) as movie__Labels");
+                         "START actor=node(1) MATCH (actor)-[:STARED_IN*0..]->(movie) WHERE not movie-[:DIRECTED_BY]->director RETURN movie as movie, id(movie) as movie__Id, labels(movie) as movie__Labels");
         }
 
         [TestMethod]

@@ -17,14 +17,18 @@ namespace CypherNet.Transaction
     {
         private readonly IWebClient _webClient;
         private readonly IWebSerializer _serializer;
+
+        private readonly IEntityCache _entityCache;
+
         private bool _isInitialized;
         private string _transactionUri;
 
-        internal TransactionalCypherClient(string baseUri, IWebClient webClient, IWebSerializer serializer)
+        internal TransactionalCypherClient(string baseUri, IWebClient webClient, IWebSerializer serializer, IEntityCache entityCache)
         {
-            _transactionUri = UriHelper.Combine(baseUri, "transaction/");
-            _webClient = webClient;
-            _serializer = serializer;
+            this._transactionUri = UriHelper.Combine(baseUri, "transaction/");
+            this._webClient = webClient;
+            this._serializer = serializer;
+            this._entityCache = entityCache;
         }
 
         #region IRawCypherClient Members
@@ -86,6 +90,7 @@ namespace CypherNet.Transaction
             var resultTask = _webClient.DeleteAsync(_transactionUri);
             var response = resultTask.Result.Content.ReadAsStringAsync().Result;
             var cypherResponse = _serializer.Deserialize<CypherResponse<dynamic>>(response);
+            this._entityCache.Clear();
             if (cypherResponse.Errors.Any())
             {
                 throw new Exception("Errors returned from Neo Server: " + String.Join(",", cypherResponse.Errors.Select(e => e.Message)));
