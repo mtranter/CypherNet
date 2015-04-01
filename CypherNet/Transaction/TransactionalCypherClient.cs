@@ -15,6 +15,8 @@ namespace CypherNet.Transaction
 
     internal class TransactionalCypherClient : ICypherClient, ICypherUnitOfWork
     {
+        private readonly string _username;
+        private readonly string _password;
         private readonly IWebClient _webClient;
         private readonly IWebSerializer _serializer;
 
@@ -23,12 +25,14 @@ namespace CypherNet.Transaction
         private bool _isInitialized;
         private string _transactionUri;
 
-        internal TransactionalCypherClient(string baseUri, IWebClient webClient, IWebSerializer serializer, IEntityCache entityCache)
+        internal TransactionalCypherClient(string baseUri, string username, string password, IWebClient webClient, IWebSerializer serializer, IEntityCache entityCache)
         {
-            this._transactionUri = UriHelper.Combine(baseUri, "transaction/");
-            this._webClient = webClient;
-            this._serializer = serializer;
-            this._entityCache = entityCache;
+            _transactionUri = UriHelper.Combine(baseUri, "transaction/");
+            _username = username;
+            _password = password;
+            _webClient = webClient;
+            _serializer = serializer;
+            _entityCache = entityCache;
         }
 
         #region IRawCypherClient Members
@@ -38,7 +42,7 @@ namespace CypherNet.Transaction
             var request = CypherQueryRequest.Create(cypherQuery);
             var srequest = _serializer.Serialize(request);
             Logger.Current.Log("Executing: " + srequest, LogLevel.Info);
-            var responseTask = _webClient.PostAsync(_transactionUri, srequest);
+            var responseTask = _webClient.PostAsync(_transactionUri, _username, _password, srequest);
             responseTask.Wait();
             var readTask = responseTask.Result.Content.ReadAsStringAsync();
             readTask.Wait();
@@ -72,7 +76,7 @@ namespace CypherNet.Transaction
             var emptyRequest = CypherQueryRequest.Empty();
             Logger.Current.Log("Executing: " + emptyRequest, LogLevel.Info);
             var srequest = _serializer.Serialize(emptyRequest);
-            var resultTask = _webClient.PostAsync(commitUri, srequest);
+            var resultTask = _webClient.PostAsync(commitUri, _username, _password, srequest);
             resultTask.Wait();
             var readTask = resultTask.Result.Content.ReadAsStringAsync();
             readTask.Wait();
@@ -87,7 +91,7 @@ namespace CypherNet.Transaction
 
         public void Rollback()
         {
-            var resultTask = _webClient.DeleteAsync(_transactionUri);
+            var resultTask = _webClient.DeleteAsync(_transactionUri, _username, _password);
             var response = resultTask.Result.Content.ReadAsStringAsync().Result;
             var cypherResponse = _serializer.Deserialize<CypherResponse<dynamic>>(response);
             this._entityCache.Clear();
@@ -102,7 +106,7 @@ namespace CypherNet.Transaction
             var emptyRequest = CypherQueryRequest.Empty();
             var srequest = _serializer.Serialize(emptyRequest);
             Logger.Current.Log("Executing: " + srequest, LogLevel.Info);
-            var resultTask = _webClient.PostAsync(_transactionUri, srequest);
+            var resultTask = _webClient.PostAsync(_transactionUri, _username, _password, srequest);
             resultTask.Wait();
 
             var readAsStringAsync = resultTask.Result.Content.ReadAsStringAsync();

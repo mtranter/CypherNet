@@ -23,16 +23,20 @@ namespace CypherNet.Transaction
 
         private static readonly object Lock = new object();
         private readonly string _baseUri;
+        private readonly string _username;
+        private readonly string _password;
         private readonly IWebClient _webClient;
         private readonly IWebSerializer _serializer;
         private readonly IEntityCache _entityCache;
 
-        public CypherClientFactory(string baseUri, IWebClient webClient, IWebSerializer serializer, IEntityCache entityCache)
+        public CypherClientFactory(string baseUri, string username, string password, IWebClient webClient, IWebSerializer serializer, IEntityCache entityCache)
         {
-            this._baseUri = baseUri;
-            this._webClient = webClient;
-            this._serializer = serializer;
-            this._entityCache = entityCache;
+            _baseUri = baseUri;
+            _username = username;
+            _password = password;
+            _webClient = webClient;
+            _serializer = serializer;
+            _entityCache = entityCache;
         }
 
         public ICypherClient Create()
@@ -49,7 +53,7 @@ namespace CypherNet.Transaction
                     }
                     else
                     {
-                        client = new TransactionalCypherClient(_baseUri, _webClient, _serializer, this._entityCache);
+                        client = new TransactionalCypherClient(_baseUri, _username, _password, _webClient, _serializer, this._entityCache);
                         var notifier = new ResourceManager((ICypherUnitOfWork) client);
 
                         notifier.Complete += (o, e) =>
@@ -67,7 +71,7 @@ namespace CypherNet.Transaction
                 }
             }
 
-            return new NonTransactionalCypherClient(_baseUri, _webClient, _serializer);
+            return new NonTransactionalCypherClient(_baseUri, _username, _password, _webClient, _serializer);
         }
 
         private class ResourceManager : IEnlistmentNotification

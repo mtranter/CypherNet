@@ -39,16 +39,18 @@
         private readonly IWebSerializer _webSerializer;
         private readonly IEntityCache _entityCache;
         private readonly IWebClient _webClient;
-
-        internal CypherSession(string uri)
-            : this(uri, new WebClient())
+   
+        internal CypherSession(string uri, string username, string password)
+            : this(uri, new WebClient(), username, password)
         {
         }
-
-        internal CypherSession(string uri, IWebClient webClient)
+      
+        internal CypherSession(string uri, IWebClient webClient, string username, string password)
         {
             _uri = uri;
             _webClient = webClient;
+            _username = username;
+            _password = password;
             _entityCache = new DictionaryEntityCache();
             _webSerializer = new DefaultJsonSerializer(_entityCache);
         }
@@ -58,14 +60,18 @@
             IHttpResponseMessage response = null;
             try
             {
-                var getTask = _webClient.GetAsync(_uri);
+                var getTask = _webClient.GetAsync(_uri, _username, _password);
                 getTask.Wait();
-                response = getTask.Result;
+                response = getTask.Result;               
             }
             catch (Exception)
             {
-                throw new NeoServerUnavalaibleExpcetion(_uri);
+                throw new NeoServerUnavalaibleExpcetion(_uri, response.StatusCode.ToString());
             }
+
+            if (!response.IsSuccessStatusCode)
+                throw new NeoServerUnavalaibleExpcetion(_uri, response.StatusCode.ToString());
+
             var readTask = response.Content.ReadAsStringAsync();
             Task.WaitAll(readTask);
             var json = readTask.Result;
@@ -105,13 +111,13 @@
 
         public ICypherQueryStart<TVariables> BeginQuery<TVariables>()
         {
-            return new FluentCypherQueryBuilder<TVariables>(new CypherClientFactory(_uri, _webClient, _webSerializer, _entityCache));
+            return new FluentCypherQueryBuilder<TVariables>(new CypherClientFactory(_uri, _username, _password, _webClient, _webSerializer, _entityCache));
         }
 
         public ICypherQueryStart<TVariables> BeginQuery<TVariables>(
             Expression<Func<ICypherPrototype, TVariables>> variablePrototype)
         {
-            return new FluentCypherQueryBuilder<TVariables>(new CypherClientFactory(_uri, _webClient, _webSerializer, _entityCache));
+            return new FluentCypherQueryBuilder<TVariables>(new CypherClientFactory(_uri, _username, _password, _webClient, _webSerializer, _entityCache));
         }
 
         public Node CreateNode(object properties)
@@ -131,7 +137,7 @@
                 propNames.PropertiesPropertyName,
                 propNames.IdPropertyName,
                 propNames.LabelsPropertyName);
-            var endpoint = new CypherClientFactory(_uri, _webClient, _webSerializer, _entityCache).Create();
+            var endpoint = new CypherClientFactory(_uri, _username, _password, _webClient, _webSerializer, _entityCache).Create();
             var result = endpoint.ExecuteQuery<SingleNodeResult>(clause);
             var node = result.First().NewNode;
             return node;
@@ -201,28 +207,28 @@
         public void CreateConstraint(string label, string property)
         {
             var clause = string.Format(CreateConstraintClauseFormat, NodeVariableName, label, property);
-            var endpoint = new CypherClientFactory(_uri, _webClient, _webSerializer, _entityCache).Create();
+            var endpoint = new CypherClientFactory(_uri, _username, _password, _webClient, _webSerializer, _entityCache).Create();
             endpoint.ExecuteCommand(clause);
         }
 
         public void DropConstraint(string label, string property)
         {
             var clause = string.Format(DropConstraintClauseFormat, NodeVariableName, label, property);
-            var endpoint = new CypherClientFactory(_uri, _webClient, _webSerializer, _entityCache).Create();
+            var endpoint = new CypherClientFactory(_uri, _username, _password, _webClient, _webSerializer, _entityCache).Create();
             endpoint.ExecuteCommand(clause);
         }
 
         public void CreateIndex(string label, string property)
         {
             var clause = string.Format(CreateIndexClauseFormat, label, property);
-            var endpoint = new CypherClientFactory(_uri, _webClient, _webSerializer, _entityCache).Create();
+            var endpoint = new CypherClientFactory(_uri, _username, _password, _webClient, _webSerializer, _entityCache).Create();
             endpoint.ExecuteCommand(clause);
         }
 
         public void DropIndex(string label, string property)
         {
             var clause = string.Format(DropIndexClauseFormat, label, property);
-            var endpoint = new CypherClientFactory(_uri, _webClient, _webSerializer, _entityCache).Create();
+            var endpoint = new CypherClientFactory(_uri, _username, _password, _webClient, _webSerializer, _entityCache).Create();
             endpoint.ExecuteCommand(clause);
         }
 
@@ -231,6 +237,11 @@
                 (PropertyInfo)ReflectOn<IUpdateQueryContext<SingleNodeResult>>.Member(c => c.Vars).MemberInfo;
         private static readonly PropertyInfo NewNodeProperty =
             (PropertyInfo) ReflectOn<SingleNodeResult>.Member(c => c.NewNode).MemberInfo;
+
+        private readonly string _username;
+        private readonly string _password;
+
+
 
         public void Save(Node node)
         {

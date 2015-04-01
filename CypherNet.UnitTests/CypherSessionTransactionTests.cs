@@ -22,6 +22,9 @@ namespace CypherNet.UnitTests
         private const string EmptyRequest = @"{""statements"":[]}";
         private const string EmptyResponse = @"{""results"":[],""errors"":[]}";
         private const string Name = "Marcus.T.Peeps";
+        private const string Username = "neo4j";
+        private const string Password = "password";
+
         private static readonly object Node = new {name = Name};
 
         [TestMethod]
@@ -29,7 +32,7 @@ namespace CypherNet.UnitTests
         {
             var mock = InitializeMockWebClient(AutoCommitAddress);
 
-            var session = new CypherSession(BaseUri, mock.Object);
+            var session = new CypherSession(BaseUri, mock.Object, Username, Password);
             var node = session.CreateNode(new {name = Name}, "person");
             Assert.AreEqual(node.AsDynamic().name, Name);
             Assert.AreEqual((node).Labels.First(), "person");
@@ -41,21 +44,21 @@ namespace CypherNet.UnitTests
             var mock = InitializeMockWebClient(BeginTransactionUri);
 
             //Keep alive.
-            mock.Setup(m => m.PostAsync(KeepAliveAddress, EmptyRequest))
+            mock.Setup(m => m.PostAsync(KeepAliveAddress, Username, Password, EmptyRequest))
                 .Returns(() => BuildResponse(@"{""commit"":""" + CommitAddress + @""",""results"":[],""transaction"":{""expires"":""Wed, 02 Oct 2013 15:18:27 +0000""},""errors"":[]}"));
             
             //Commit
-            mock.Setup(m => m.PostAsync(CommitAddress, EmptyRequest)).Returns(() => BuildResponse(EmptyResponse));
+            mock.Setup(m => m.PostAsync(CommitAddress, Username, Password, EmptyRequest)).Returns(() => BuildResponse(EmptyResponse));
 
-            var session = new CypherSession(BaseUri, mock.Object);
+            var session = new CypherSession(BaseUri, mock.Object, Username, Password);
             using (var ts = new TransactionScope())
             {
                 session.CreateNode(new {name = Name}, "person");
                 ts.Complete();
             }
 
-            mock.Verify(m => m.PostAsync(KeepAliveAddress, EmptyRequest));
-            mock.Verify(m => m.PostAsync(CommitAddress, EmptyRequest));
+            mock.Verify(m => m.PostAsync(KeepAliveAddress, Username, Password, EmptyRequest));
+            mock.Verify(m => m.PostAsync(CommitAddress,  Username, Password, EmptyRequest));
         }
         
         [TestMethod]
@@ -64,16 +67,16 @@ namespace CypherNet.UnitTests
             var mock = InitializeMockWebClient(BeginTransactionUri);
 
             //Rollback
-            mock.Setup(m => m.DeleteAsync(KeepAliveAddress)).Returns(() => BuildResponse(EmptyResponse));
+            mock.Setup(m => m.DeleteAsync(KeepAliveAddress, Username, Password)).Returns(() => BuildResponse(EmptyResponse));
 
-            var session = new CypherSession(BaseUri, mock.Object);
+            var session = new CypherSession(BaseUri, mock.Object, Username, Password);
             
             using (new TransactionScope())
             {
                 session.CreateNode(new { name = Name }, "person");
             }
 
-            mock.Verify(m => m.DeleteAsync(KeepAliveAddress));
+            mock.Verify(m => m.DeleteAsync(KeepAliveAddress, Username, Password));
         }
 
         private Mock<IWebClient> InitializeMockWebClient(string uri)
@@ -82,7 +85,7 @@ namespace CypherNet.UnitTests
 
             mock.Setup(
                 m =>
-                m.PostAsync(uri,
+                m.PostAsync(uri, Username, Password,
                             @"{""statements"":[{""statement"":""CREATE (NewNode:person {param_0}) RETURN NewNode as NewNode, id(NewNode) as NewNode__Id, labels(NewNode) as NewNode__Labels;"",""parameters"":{""param_0"":{""name"":""" +
                             Name + @"""}}}]}"))
                 .Returns(

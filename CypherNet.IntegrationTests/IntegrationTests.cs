@@ -1,4 +1,6 @@
-﻿namespace CypherNet.IntegrationTests
+﻿using System.Net.NetworkInformation;
+
+namespace CypherNet.IntegrationTests
 {
     using System;
     using System.Diagnostics;
@@ -15,11 +17,13 @@
     public class IntegrationTests
     {
         private static Node _personNode, _positionNode;
+        private static string _username = "neo4j";
+        private static string _password = "password";
 
         [ClassInitialize]
         public static void ClassInitialize(TestContext context)
         {
-            Trace.Listeners.Add(new TextWriterTraceListener(@"d:\Cypher.Net\TextWriterOutput.log"));
+            Trace.Listeners.Add(new TextWriterTraceListener(@"C:\Temp\TextWriterOutput.log"));
         }
 
         [ClassCleanup]
@@ -31,7 +35,7 @@
         [TestMethod]
         public void CreateNode_ReturnsNewNode()
         {
-            var clientFactory = Fluently.Configure("http://localhost:7474/db/data/").CreateSessionFactory();
+            var clientFactory = Fluently.Configure("http://localhost:7474/db/data/", _username, _password).CreateSessionFactory();
             var endpoint = clientFactory.Create();
 
             _personNode = endpoint.CreateNode(new { name = "Plzensky Prazdroj" }, "brewery");
@@ -43,7 +47,7 @@
         [TestMethod]
         public void CreateNode_MultipleLabels_ReturnsNewNode()
         {
-            var clientFactory = Fluently.Configure("http://localhost:7474/db/data/").CreateSessionFactory();
+            var clientFactory = Fluently.Configure("http://localhost:7474/db/data/", _username, _password).CreateSessionFactory();
             var endpoint = clientFactory.Create();
 
             _personNode = endpoint.CreateNode(new { name = "Plzensky Prazdroj" }, "brewery", "czech");
@@ -55,7 +59,7 @@
         [TestMethod]
         public void CreateNode_MultipleProperties_ReturnsNewNode()
         {
-            var clientFactory = Fluently.Configure("http://localhost:7474/db/data/").CreateSessionFactory();
+            var clientFactory = Fluently.Configure("http://localhost:7474/db/data/", _username, _password).CreateSessionFactory();
             var endpoint = clientFactory.Create();
 
             var newNode = endpoint.CreateNode(new { name = "Plzensky Prazdroj", age = 100 }, "brewery");
@@ -69,7 +73,7 @@
         {
             using (var trans = new TransactionScope(TransactionScopeOption.RequiresNew))
             {
-                var clientFactory = Fluently.Configure("http://localhost:7474/db/data/").CreateSessionFactory();
+                var clientFactory = Fluently.Configure("http://localhost:7474/db/data/", _username, _password).CreateSessionFactory();
                 var endpoint = clientFactory.Create();
 
                 var newNode = endpoint.CreateNode(new TestNodeType { Name = "Plzensky Prazdroj", Age = 33, Reference = null }, "brewery");
@@ -83,11 +87,11 @@
         [ExpectedException(typeof(CypherResponseException))]
         public void NonsenseQuery_ThrowsException()
         {
-            var clientFactory = Fluently.Configure("http://localhost:7474/db/data/").CreateSessionFactory();
+            var clientFactory = Fluently.Configure("http://localhost:7474/db/data/", _username, _password).CreateSessionFactory();
             var endpoint = clientFactory.Create();
 
             var query =
-                endpoint.BeginQuery(c => new {Node = c.Node})
+                endpoint.BeginQuery(c => new { Node = c.Node })
                     .Start(c => c.StartAtId(c.Vars.Node, 1))
                     .Where(c => c.Prop<int>(c.Vars.Node, "aaa sss ddd") == 1)
                     .Return(c => c.Vars.Node)
@@ -97,11 +101,11 @@
         [TestMethod]
         public void CreateRelationship_ReturnsRelationship()
         {
-            var clientFactory = Fluently.Configure("http://localhost:7474/db/data/").CreateSessionFactory();
+            var clientFactory = Fluently.Configure("http://localhost:7474/db/data/", _username, _password).CreateSessionFactory();
             var endpoint = clientFactory.Create();
 
             var newNode1 = endpoint.CreateNode(new { name = "mark", age = 33 }, "person");
-            var newNode2 = endpoint.CreateNode(new { role = "developer"}, "job");
+            var newNode2 = endpoint.CreateNode(new { role = "developer" }, "job");
             var rel = endpoint.CreateRelationship(newNode1, newNode2, "WORKS_AS_A");
             Assert.IsNotNull(rel);
             Assert.AreEqual("WORKS_AS_A", rel.Type);
@@ -110,7 +114,7 @@
         [TestMethod]
         public void CreateRelationship_WithData_ReturnsRelationship()
         {
-            var clientFactory = Fluently.Configure("http://localhost:7474/db/data/").CreateSessionFactory();
+            var clientFactory = Fluently.Configure("http://localhost:7474/db/data/", _username, _password).CreateSessionFactory();
             var endpoint = clientFactory.Create();
 
             var newNode1 = endpoint.CreateNode(new { name = "mark", age = 33 }, "person");
@@ -123,7 +127,7 @@
         [TestMethod]
         public void DeleteRelationship_DeletesRelationship()
         {
-            var clientFactory = Fluently.Configure("http://localhost:7474/db/data/").CreateSessionFactory();
+            var clientFactory = Fluently.Configure("http://localhost:7474/db/data/", _username, _password).CreateSessionFactory();
             var endpoint = clientFactory.Create();
 
             var newNode1 = endpoint.CreateNode(new { name = "mark", age = 33 }, "person");
@@ -148,7 +152,7 @@
         [TestMethod]
         public void DeleteRelationship_WithinTransaction_Commit_DeletesRelationship()
         {
-            var clientFactory = Fluently.Configure("http://localhost:7474/db/data/").CreateSessionFactory();
+            var clientFactory = Fluently.Configure("http://localhost:7474/db/data/", _username, _password).CreateSessionFactory();
             var endpoint = clientFactory.Create();
 
             var newNode1 = endpoint.CreateNode(new { name = "mark", age = 33 }, "person");
@@ -175,7 +179,7 @@
         [TestMethod]
         public void DeleteRelationship_WithinTransaction_Rollback_DoesNotDeleteRelationship()
         {
-            var clientFactory = Fluently.Configure("http://localhost:7474/db/data/").CreateSessionFactory();
+            var clientFactory = Fluently.Configure("http://localhost:7474/db/data/", _username, _password).CreateSessionFactory();
             var endpoint = clientFactory.Create();
 
             var newNode1 = endpoint.CreateNode(new { name = "mark", age = 33 }, "person");
@@ -203,9 +207,9 @@
         [TestMethod]
         public void DeleteNode_DeletesNode()
         {
-            var clientFactory = Fluently.Configure("http://localhost:7474/db/data/").CreateSessionFactory();
+            var clientFactory = Fluently.Configure("http://localhost:7474/db/data/", _username, _password).CreateSessionFactory();
             var endpoint = clientFactory.Create();
-            var node  = endpoint.CreateNode(new { name = "mark", age = 33 }, "person");
+            var node = endpoint.CreateNode(new { name = "mark", age = 33 }, "person");
             endpoint.Delete(node);
             var twin = endpoint.GetNode(node.Id);
 
@@ -215,7 +219,7 @@
         [TestMethod]
         public void UpdateNode_UpdatesNode()
         {
-            var clientFactory = Fluently.Configure("http://localhost:7474/db/data/").CreateSessionFactory();
+            var clientFactory = Fluently.Configure("http://localhost:7474/db/data/", _username, _password).CreateSessionFactory();
             var endpoint = clientFactory.Create();
 
             dynamic node = endpoint.CreateNode(new { name = "mark", age = 33 }, "person");
@@ -230,7 +234,7 @@
         [TestMethod]
         public void UpdateNode_RollbackTransaction_DoesNotUpdatesNode()
         {
-            var clientFactory = Fluently.Configure("http://localhost:7474/db/data/").CreateSessionFactory();
+            var clientFactory = Fluently.Configure("http://localhost:7474/db/data/", _username, _password).CreateSessionFactory();
             var endpoint = clientFactory.Create();
 
             dynamic node = endpoint.CreateNode(new { name = "mark", age = 33 }, "person");
@@ -249,10 +253,10 @@
         [TestMethod]
         public void CreateNode_WithLabel_ReturnsNewNode()
         {
-            var clientFactory = Fluently.Configure("http://localhost:7474/db/data/").CreateSessionFactory();
+            var clientFactory = Fluently.Configure("http://localhost:7474/db/data/", _username, _password).CreateSessionFactory();
             var endpoint = clientFactory.Create();
 
-            _personNode = endpoint.CreateNode(new {name = "mark", age = 33}, "person");
+            _personNode = endpoint.CreateNode(new { name = "mark", age = 33 }, "person");
             dynamic node = _personNode;
 
             Assert.AreEqual(node.name, "mark");
@@ -263,11 +267,11 @@
         [TestMethod]
         public void QueryGraph_ReturnsMultipleInstancesOfANode_ReturnsIdenticallyEqualNodes()
         {
-            var clientFactory = Fluently.Configure("http://localhost:7474/db/data/").CreateSessionFactory();
+            var clientFactory = Fluently.Configure("http://localhost:7474/db/data/", _username, _password).CreateSessionFactory();
             var endpoint = clientFactory.Create();
 
             var testNode = endpoint.CreateNode(new { name = "mark", age = 33 }, "person");
-            var results = endpoint.BeginQuery(s => new {node1 = s.Node, node2 = s.Node})
+            var results = endpoint.BeginQuery(s => new { node1 = s.Node, node2 = s.Node })
                                  .Start(ctx => ctx.StartAtId(ctx.Vars.node1, testNode.Id).StartAtId(ctx.Vars.node2, testNode.Id))
                                  .Return(ctx => new { Node1 = ctx.Vars.node1, Node2 = ctx.Vars.node2 })
                                  .Fetch();
@@ -282,13 +286,13 @@
         [TestMethod]
         public void CreateNode_WithoutLabel_ReturnsNewNode()
         {
-            var clientFactory = Fluently.Configure("http://localhost:7474/db/data/").CreateSessionFactory();
+            var clientFactory = Fluently.Configure("http://localhost:7474/db/data/", _username, _password).CreateSessionFactory();
             var endpoint = clientFactory.Create();
 
-            _positionNode = endpoint.CreateNode(new {position = "developer"});
+            _positionNode = endpoint.CreateNode(new { position = "developer" });
 
             var newnode = endpoint
-                .BeginQuery(s => new {n = s.Node})
+                .BeginQuery(s => new { n = s.Node })
                 .Start(ctx => ctx.StartAtId(ctx.Vars.n, _positionNode.Id))
                 .Return(ctx => new { NewNode = ctx.Vars.n })
                 .Fetch().Select(s => s.NewNode).FirstOrDefault();
@@ -300,11 +304,11 @@
         [TestMethod]
         public void CreateRelationship_ReturnsResults()
         {
-            var clientFactory = Fluently.Configure("http://localhost:7474/db/data/").CreateSessionFactory();
+            var clientFactory = Fluently.Configure("http://localhost:7474/db/data/", _username, _password).CreateSessionFactory();
             var endpoint = clientFactory.Create();
 
             var path = endpoint
-                .BeginQuery(s => new {person = s.Node, worksAs = s.Rel, position = s.Node})
+                .BeginQuery(s => new { person = s.Node, worksAs = s.Rel, position = s.Node })
                 .Start(ctx => ctx
                                 .StartAtId(ctx.Vars.person, _personNode.Id)
                                 .StartAtId(ctx.Vars.position, _positionNode.Id))
@@ -316,8 +320,8 @@
             Assert.IsNotNull(path);
             dynamic person = path.person;
             dynamic position = path.position;
-            Assert.AreEqual("mark WORKS_AS developer", 
-                            String.Format("{0} {1} {2}", person.name, path.worksAs.Type, 
+            Assert.AreEqual("mark WORKS_AS developer",
+                            String.Format("{0} {1} {2}", person.name, path.worksAs.Type,
                                           position.position));
         }
 
@@ -325,19 +329,19 @@
         [TestMethod]
         public void CreateNodeWithinTransaction_Rollback_DoesNotCreateNode()
         {
-            var clientFactory = Fluently.Configure("http://localhost:7474/db/data/").CreateSessionFactory();
+            var clientFactory = Fluently.Configure("http://localhost:7474/db/data/", _username, _password).CreateSessionFactory();
             Node node = null;
 
             using (var trans = new TransactionScope())
             {
                 var endpoint = clientFactory.Create();
-                node = endpoint.CreateNode(new {name = "mark", age = 33});
+                node = endpoint.CreateNode(new { name = "mark", age = 33 });
             }
 
             var readEndpoint = clientFactory.Create();
-            var newnode = readEndpoint.BeginQuery(s => new {n = s.Node})
+            var newnode = readEndpoint.BeginQuery(s => new { n = s.Node })
                                       .Start(ctx => ctx.StartAtId(ctx.Vars.n, node.Id))
-                                      .Return(ctx => new {NewNode = ctx.Vars.n})
+                                      .Return(ctx => new { NewNode = ctx.Vars.n })
                                       .Fetch().FirstOrDefault();
 
             Assert.IsNull(newnode);
@@ -346,12 +350,12 @@
         [TestMethod]
         public void QueryGraph_SimpleQueryNotInsideTransaction_ReturnsResults()
         {
-            var clientFactory = Fluently.Configure("http://localhost:7474/db/data/").CreateSessionFactory();
+            var clientFactory = Fluently.Configure("http://localhost:7474/db/data/", _username, _password).CreateSessionFactory();
             var endpoint = clientFactory.Create();
 
-            var nodes = endpoint.BeginQuery(p => new {node = p.Node})
+            var nodes = endpoint.BeginQuery(p => new { node = p.Node })
                                 .Start(ctx => ctx.StartAtId(ctx.Vars.node, _personNode.Id))
-                                .Return(ctx => new {Node = ctx.Vars.node})
+                                .Return(ctx => new { Node = ctx.Vars.node })
                                 .Fetch();
 
             Assert.AreEqual(nodes.Count(), 1);
@@ -362,11 +366,11 @@
         [Ignore]
         public void QueryWithJoinsOverMany_NotInsideTransaction_ReturnsMultipleResults()
         {
-            var clientFactory = Fluently.Configure("http://localhost:7474/db/data/").CreateSessionFactory();
+            var clientFactory = Fluently.Configure("http://localhost:7474/db/data/", _username, _password).CreateSessionFactory();
             var cypherEndpoint = clientFactory.Create();
 
             var nodes = cypherEndpoint
-                .BeginQuery(p => new {person = p.Node, rel = p.Rel, role = p.Node}) // Define query variables
+                .BeginQuery(p => new { person = p.Node, rel = p.Rel, role = p.Node }) // Define query variables
                 .Start(ctx => ctx.StartAtAny(ctx.Vars.person)) // Cypher START clause
                 .Match(ctx => ctx.Node(ctx.Vars.person).Outgoing(ctx.Vars.rel).To(ctx.Vars.role)) // Cypher MATCH clause
                 .Where(ctx =>
@@ -391,7 +395,7 @@
                 Assert.AreEqual("mark", start.name);
                 Assert.AreEqual("developer", end.title);
                 Console.WriteLine(String.Format("{0} {1} {2}", start.name, node.Rel.Type, end.title));
-                    // Prints "mark IS_A developer"
+                // Prints "mark IS_A developer"
             }
         }
 
@@ -400,12 +404,12 @@
         {
             using (var trans = new TransactionScope(TransactionScopeOption.RequiresNew, TimeSpan.FromDays(1)))
             {
-                var clientFactory = Fluently.Configure("http://localhost:7474/db/data/").CreateSessionFactory();
+                var clientFactory = Fluently.Configure("http://localhost:7474/db/data/", _username, _password).CreateSessionFactory();
                 var cypherEndpoint = clientFactory.Create();
-                var nodes = cypherEndpoint.BeginQuery(p => new {node = p.Node})
+                var nodes = cypherEndpoint.BeginQuery(p => new { node = p.Node })
                                           .Start(ctx => ctx.StartAtAny(ctx.Vars.node))
                                           .Where(ctx => ctx.Vars.node.Id == _personNode.Id)
-                                          .Return(ctx => new {Node = ctx.Vars.node})
+                                          .Return(ctx => new { Node = ctx.Vars.node })
                                           .Fetch();
                 Assert.AreEqual(nodes.Count(), 1);
                 trans.Complete();
@@ -415,26 +419,26 @@
         [TestMethod]
         public void NestedTransactions_CommitInnerRollbackOuter_DoesNotCreateOuterNode()
         {
-            var clientFactory = Fluently.Configure("http://localhost:7474/db/data/").CreateSessionFactory();
+            var clientFactory = Fluently.Configure("http://localhost:7474/db/data/", _username, _password).CreateSessionFactory();
             var cypherEndpoint = clientFactory.Create();
             Node node1, node2;
             using (var trans1 = new TransactionScope(TransactionScopeOption.RequiresNew, TimeSpan.FromDays(1)))
             {
-                node1 = cypherEndpoint.CreateNode(new {name = "test node1"});
+                node1 = cypherEndpoint.CreateNode(new { name = "test node1" });
                 using (var trans2 = new TransactionScope(TransactionScopeOption.RequiresNew))
                 {
-                    node2 = cypherEndpoint.CreateNode(new {name = "test node2"});
+                    node2 = cypherEndpoint.CreateNode(new { name = "test node2" });
                     trans2.Complete();
                 }
             }
 
-            var node1Query = cypherEndpoint.BeginQuery(s => new {node1 = s.Node})
+            var node1Query = cypherEndpoint.BeginQuery(s => new { node1 = s.Node })
                                            .Start(ctx => ctx.StartAtId(ctx.Vars.node1, node1.Id))
-                                           .Return(ctx => new {ctx.Vars.node1})
+                                           .Return(ctx => new { ctx.Vars.node1 })
                                            .Fetch()
                                            .FirstOrDefault();
 
-            var node2Query = cypherEndpoint.BeginQuery(s => new {node2 = s.Node})
+            var node2Query = cypherEndpoint.BeginQuery(s => new { node2 = s.Node })
                                            .Start(ctx => ctx.StartAtId(ctx.Vars.node2, node2.Id))
                                            .Return(ctx => new { ctx.Vars.node2 })
                                            .Fetch()
@@ -449,7 +453,7 @@
         {
             using (var trans = new TransactionScope(TransactionScopeOption.RequiresNew, TimeSpan.FromDays(1)))
             {
-                var clientFactory = Fluently.Configure("http://localhost:7474/db/data/").CreateSessionFactory();
+                var clientFactory = Fluently.Configure("http://localhost:7474/db/data/", _username, _password).CreateSessionFactory();
                 var endpoint = clientFactory.Create();
 
                 dynamic node = endpoint.CreateNode(new { name = "fred", age = 33 }, "person");
@@ -469,7 +473,7 @@
         {
             using (var trans = new TransactionScope(TransactionScopeOption.RequiresNew, TimeSpan.FromDays(1)))
             {
-                var clientFactory = Fluently.Configure("http://localhost:7474/db/data/").CreateSessionFactory();
+                var clientFactory = Fluently.Configure("http://localhost:7474/db/data/", _username, _password).CreateSessionFactory();
                 var endpoint = clientFactory.Create();
 
                 var uniqueLabel = "uniqueLabel";
@@ -483,7 +487,7 @@
         [TestMethod]
         public void CreateConstraint_PreventsDuplicates()
         {
-            var clientFactory = Fluently.Configure("http://localhost:7474/db/data/").CreateSessionFactory();
+            var clientFactory = Fluently.Configure("http://localhost:7474/db/data/", _username, _password).CreateSessionFactory();
             var endpoint = clientFactory.Create();
 
             var uniqueLabel = "anotherUniqueLabel";
@@ -499,7 +503,7 @@
                     txEndpoint.CreateNode(new { name = "fred", age = 33 }, uniqueLabel);
                 }
             }
-            catch(Exception ex)
+            catch (Exception ex)
             {
                 Assert.IsTrue(ex is CypherResponseException);
             }
@@ -514,7 +518,7 @@
         {
             using (var trans = new TransactionScope(TransactionScopeOption.RequiresNew, TimeSpan.FromDays(1)))
             {
-                var clientFactory = Fluently.Configure("http://localhost:7474/db/data/").CreateSessionFactory();
+                var clientFactory = Fluently.Configure("http://localhost:7474/db/data/", _username, _password).CreateSessionFactory();
                 var endpoint = clientFactory.Create();
 
                 dynamic node = endpoint.CreateNode(new { firstname = "fred", age = 33 }, "person");
@@ -534,7 +538,7 @@
         {
             using (var trans = new TransactionScope(TransactionScopeOption.RequiresNew, TimeSpan.FromDays(1)))
             {
-                var clientFactory = Fluently.Configure("http://localhost:7474/db/data/").CreateSessionFactory();
+                var clientFactory = Fluently.Configure("http://localhost:7474/db/data/", _username, _password).CreateSessionFactory();
                 var endpoint = clientFactory.Create();
 
                 dynamic node = endpoint.CreateNode(new { name = "fred", age = 33 }, "person");
@@ -553,7 +557,7 @@
         {
             using (var trans = new TransactionScope(TransactionScopeOption.RequiresNew, TimeSpan.FromDays(1)))
             {
-                var clientFactory = Fluently.Configure("http://localhost:7474/db/data/").CreateSessionFactory();
+                var clientFactory = Fluently.Configure("http://localhost:7474/db/data/", _username, _password).CreateSessionFactory();
                 var endpoint = clientFactory.Create();
 
                 var acme = endpoint.CreateNode(new { role = "acme co." }, "company");
@@ -572,16 +576,17 @@
                         .Return(ctx => new { ctx.Vars.x })
                         .Fetch();
 
+                
                 Assert.AreEqual(2, nodes.Count());
-                Assert.AreEqual(nodes.First().x.Id, frank.Id);
-                Assert.AreEqual(nodes.Last().x.Id, james.Id);
+                Assert.IsTrue(nodes.Any(x => x.x.Id == frank.Id));
+                Assert.IsTrue(nodes.Any(x => x.x.Id == james.Id));                
             }
         }
 
         [TestMethod]
         public void UpdateCompleteTransaction_UpdateIsPersisted()
         {
-            var clientFactory = Fluently.Configure("http://localhost:7474/db/data/").CreateSessionFactory();
+            var clientFactory = Fluently.Configure("http://localhost:7474/db/data/", _username, _password).CreateSessionFactory();
             var endpoint = clientFactory.Create();
 
             const int originalValue = 100;
@@ -607,7 +612,7 @@
         [TestMethod]
         public void UpdateRollback_EnsureEverythingIsRolledBack()
         {
-            var clientFactory = Fluently.Configure("http://localhost:7474/db/data/").CreateSessionFactory();
+            var clientFactory = Fluently.Configure("http://localhost:7474/db/data/", _username, _password).CreateSessionFactory();
             var endpoint = clientFactory.Create();
 
             const int originalValue = 100;

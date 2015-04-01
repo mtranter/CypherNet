@@ -1,27 +1,25 @@
-﻿using System;
-using System.Collections.Generic;
-using System.IO;
+﻿using System.Collections.Generic;
 using System.Net;
 using System.Net.Http;
-using System.Net.Http.Headers;
+using System.Threading.Tasks;
 
 namespace CypherNet.Http
 {
     #region
 
-    using System.Threading.Tasks;
+    
 
     #endregion
 
     public interface IWebClient
     {
-        Task<IHttpResponseMessage> GetAsync(string url);
+        Task<IHttpResponseMessage> PostAsync(string url, string username, string password, string body);
 
-        Task<IHttpResponseMessage> PostAsync(string url, String body);
+        Task<IHttpResponseMessage> PutAsync(string url, string body, string username, string password);
 
-        Task<IHttpResponseMessage> PutAsync(string url, String body);
+        Task<IHttpResponseMessage> DeleteAsync(string url, string username, string password);
 
-        Task<IHttpResponseMessage> DeleteAsync(string url);
+        Task<IHttpResponseMessage> GetAsync(string url, string username, string password);
     }
 
     public interface IHttpResponseMessage
