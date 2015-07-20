@@ -6,6 +6,7 @@
     using System.Linq.Expressions;
     using Graph;
     using Queries;
+    using Newtonsoft.Json;
 
     #endregion
 
@@ -29,6 +30,8 @@
 
         void CreateIndex(string label, string property);
         void DropIndex(string label, string property);
+
+        JsonConverterCollection JsonConverters { get; }
 
         void Clear();
 
