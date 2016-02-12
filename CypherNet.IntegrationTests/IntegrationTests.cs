@@ -29,9 +29,21 @@
         }
 
         [TestMethod]
+        public void CanLogin_WithPassword()
+        {
+            var clientFactory = Fluently.Configure("server=http://localhost:7474/db/data/;User Id=neo4j;password=password").CreateSessionFactory();
+            var endpoint = clientFactory.Create();
+
+            _personNode = endpoint.CreateNode(new { name = "Plzensky Prazdroj" }, "brewery");
+            var twin = endpoint.GetNode(_personNode.Id);
+            Assert.AreEqual(twin.Id, _personNode.Id);
+            Assert.IsTrue(object.ReferenceEquals(_personNode, twin));
+        }
+
+        [TestMethod]
         public void CreateNode_ReturnsNewNode()
         {
-            var clientFactory = Fluently.Configure("http://localhost:7474/db/data/").CreateSessionFactory();
+            var clientFactory = Fluently.Configure("server=http://localhost:7474/db/data/;User Id=neo4j;password=password").CreateSessionFactory();
             var endpoint = clientFactory.Create();
 
             _personNode = endpoint.CreateNode(new { name = "Plzensky Prazdroj" }, "brewery");
@@ -43,7 +55,7 @@
         [TestMethod]
         public void CreateNode_MultipleLabels_ReturnsNewNode()
         {
-            var clientFactory = Fluently.Configure("http://localhost:7474/db/data/").CreateSessionFactory();
+            var clientFactory = Fluently.Configure("server=http://localhost:7474/db/data/;User Id=neo4j;password=password").CreateSessionFactory();
             var endpoint = clientFactory.Create();
 
             _personNode = endpoint.CreateNode(new { name = "Plzensky Prazdroj" }, "brewery", "czech");
@@ -55,7 +67,7 @@
         [TestMethod]
         public void CreateNode_MultipleProperties_ReturnsNewNode()
         {
-            var clientFactory = Fluently.Configure("http://localhost:7474/db/data/").CreateSessionFactory();
+            var clientFactory = Fluently.Configure("server=http://localhost:7474/db/data/;User Id=neo4j;password=password").CreateSessionFactory();
             var endpoint = clientFactory.Create();
 
             var newNode = endpoint.CreateNode(new { name = "Plzensky Prazdroj", age = 100 }, "brewery");
@@ -69,7 +81,7 @@
         {
             using (var trans = new TransactionScope(TransactionScopeOption.RequiresNew))
             {
-                var clientFactory = Fluently.Configure("http://localhost:7474/db/data/").CreateSessionFactory();
+                var clientFactory = Fluently.Configure("server=http://localhost:7474/db/data/;User Id=neo4j;password=password").CreateSessionFactory();
                 var endpoint = clientFactory.Create();
 
                 var newNode = endpoint.CreateNode(new TestNodeType { Name = "Plzensky Prazdroj", Age = 33, Reference = null }, "brewery");
@@ -83,7 +95,7 @@
         [ExpectedException(typeof(CypherResponseException))]
         public void NonsenseQuery_ThrowsException()
         {
-            var clientFactory = Fluently.Configure("http://localhost:7474/db/data/").CreateSessionFactory();
+            var clientFactory = Fluently.Configure("server=http://localhost:7474/db/data/;User Id=neo4j;password=password").CreateSessionFactory();
             var endpoint = clientFactory.Create();
 
             var query =
@@ -97,7 +109,7 @@
         [TestMethod]
         public void CreateRelationship_ReturnsRelationship()
         {
-            var clientFactory = Fluently.Configure("http://localhost:7474/db/data/").CreateSessionFactory();
+            var clientFactory = Fluently.Configure("server=http://localhost:7474/db/data/;User Id=neo4j;password=password").CreateSessionFactory();
             var endpoint = clientFactory.Create();
 
             var newNode1 = endpoint.CreateNode(new { name = "mark", age = 33 }, "person");
@@ -110,7 +122,7 @@
         [TestMethod]
         public void CreateRelationship_WithData_ReturnsRelationship()
         {
-            var clientFactory = Fluently.Configure("http://localhost:7474/db/data/").CreateSessionFactory();
+            var clientFactory = Fluently.Configure("server=http://localhost:7474/db/data/;User Id=neo4j;password=password").CreateSessionFactory();
             var endpoint = clientFactory.Create();
 
             var newNode1 = endpoint.CreateNode(new { name = "mark", age = 33 }, "person");
@@ -123,7 +135,7 @@
         [TestMethod]
         public void DeleteRelationship_DeletesRelationship()
         {
-            var clientFactory = Fluently.Configure("http://localhost:7474/db/data/").CreateSessionFactory();
+            var clientFactory = Fluently.Configure("server=http://localhost:7474/db/data/;User Id=neo4j;password=password").CreateSessionFactory();
             var endpoint = clientFactory.Create();
 
             var newNode1 = endpoint.CreateNode(new { name = "mark", age = 33 }, "person");
@@ -148,7 +160,7 @@
         [TestMethod]
         public void DeleteRelationship_WithinTransaction_Commit_DeletesRelationship()
         {
-            var clientFactory = Fluently.Configure("http://localhost:7474/db/data/").CreateSessionFactory();
+            var clientFactory = Fluently.Configure("server=http://localhost:7474/db/data/;User Id=neo4j;password=password").CreateSessionFactory();
             var endpoint = clientFactory.Create();
 
             var newNode1 = endpoint.CreateNode(new { name = "mark", age = 33 }, "person");
@@ -175,7 +187,7 @@
         [TestMethod]
         public void DeleteRelationship_WithinTransaction_Rollback_DoesNotDeleteRelationship()
         {
-            var clientFactory = Fluently.Configure("http://localhost:7474/db/data/").CreateSessionFactory();
+            var clientFactory = Fluently.Configure("server=http://localhost:7474/db/data/;User Id=neo4j;password=password").CreateSessionFactory();
             var endpoint = clientFactory.Create();
 
             var newNode1 = endpoint.CreateNode(new { name = "mark", age = 33 }, "person");
@@ -203,7 +215,7 @@
         [TestMethod]
         public void DeleteNode_DeletesNode()
         {
-            var clientFactory = Fluently.Configure("http://localhost:7474/db/data/").CreateSessionFactory();
+            var clientFactory = Fluently.Configure("server=http://localhost:7474/db/data/;User Id=neo4j;password=password").CreateSessionFactory();
             var endpoint = clientFactory.Create();
             var node  = endpoint.CreateNode(new { name = "mark", age = 33 }, "person");
             endpoint.Delete(node);
@@ -215,7 +227,7 @@
         [TestMethod]
         public void UpdateNode_UpdatesNode()
         {
-            var clientFactory = Fluently.Configure("http://localhost:7474/db/data/").CreateSessionFactory();
+            var clientFactory = Fluently.Configure("server=http://localhost:7474/db/data/;User Id=neo4j;password=password").CreateSessionFactory();
             var endpoint = clientFactory.Create();
 
             dynamic node = endpoint.CreateNode(new { name = "mark", age = 33 }, "person");
@@ -230,7 +242,7 @@
         [TestMethod]
         public void UpdateNode_RollbackTransaction_DoesNotUpdatesNode()
         {
-            var clientFactory = Fluently.Configure("http://localhost:7474/db/data/").CreateSessionFactory();
+            var clientFactory = Fluently.Configure("server=http://localhost:7474/db/data/;User Id=neo4j;password=password").CreateSessionFactory();
             var endpoint = clientFactory.Create();
 
             dynamic node = endpoint.CreateNode(new { name = "mark", age = 33 }, "person");
@@ -249,7 +261,7 @@
         [TestMethod]
         public void CreateNode_WithLabel_ReturnsNewNode()
         {
-            var clientFactory = Fluently.Configure("http://localhost:7474/db/data/").CreateSessionFactory();
+            var clientFactory = Fluently.Configure("server=http://localhost:7474/db/data/;User Id=neo4j;password=password").CreateSessionFactory();
             var endpoint = clientFactory.Create();
 
             _personNode = endpoint.CreateNode(new {name = "mark", age = 33}, "person");
@@ -263,7 +275,7 @@
         [TestMethod]
         public void QueryGraph_ReturnsMultipleInstancesOfANode_ReturnsIdenticallyEqualNodes()
         {
-            var clientFactory = Fluently.Configure("http://localhost:7474/db/data/").CreateSessionFactory();
+            var clientFactory = Fluently.Configure("server=http://localhost:7474/db/data/;User Id=neo4j;password=password").CreateSessionFactory();
             var endpoint = clientFactory.Create();
 
             var testNode = endpoint.CreateNode(new { name = "mark", age = 33 }, "person");
@@ -282,7 +294,7 @@
         [TestMethod]
         public void CreateNode_WithoutLabel_ReturnsNewNode()
         {
-            var clientFactory = Fluently.Configure("http://localhost:7474/db/data/").CreateSessionFactory();
+            var clientFactory = Fluently.Configure("server=http://localhost:7474/db/data/;User Id=neo4j;password=password").CreateSessionFactory();
             var endpoint = clientFactory.Create();
 
             _positionNode = endpoint.CreateNode(new {position = "developer"});
@@ -300,7 +312,7 @@
         [TestMethod]
         public void CreateRelationship_ReturnsResults()
         {
-            var clientFactory = Fluently.Configure("http://localhost:7474/db/data/").CreateSessionFactory();
+            var clientFactory = Fluently.Configure("server=http://localhost:7474/db/data/;User Id=neo4j;password=password").CreateSessionFactory();
             var endpoint = clientFactory.Create();
 
             var path = endpoint
@@ -325,7 +337,7 @@
         [TestMethod]
         public void CreateNodeWithinTransaction_Rollback_DoesNotCreateNode()
         {
-            var clientFactory = Fluently.Configure("http://localhost:7474/db/data/").CreateSessionFactory();
+            var clientFactory = Fluently.Configure("server=http://localhost:7474/db/data/;User Id=neo4j;password=password").CreateSessionFactory();
             Node node = null;
 
             using (var trans = new TransactionScope())
@@ -346,7 +358,7 @@
         [TestMethod]
         public void QueryGraph_SimpleQueryNotInsideTransaction_ReturnsResults()
         {
-            var clientFactory = Fluently.Configure("http://localhost:7474/db/data/").CreateSessionFactory();
+            var clientFactory = Fluently.Configure("server=http://localhost:7474/db/data/;User Id=neo4j;password=password").CreateSessionFactory();
             var endpoint = clientFactory.Create();
 
             var nodes = endpoint.BeginQuery(p => new {node = p.Node})
@@ -362,7 +374,7 @@
         [Ignore]
         public void QueryWithJoinsOverMany_NotInsideTransaction_ReturnsMultipleResults()
         {
-            var clientFactory = Fluently.Configure("http://localhost:7474/db/data/").CreateSessionFactory();
+            var clientFactory = Fluently.Configure("server=http://localhost:7474/db/data/;User Id=neo4j;password=password").CreateSessionFactory();
             var cypherEndpoint = clientFactory.Create();
 
             var nodes = cypherEndpoint
@@ -400,7 +412,7 @@
         {
             using (var trans = new TransactionScope(TransactionScopeOption.RequiresNew, TimeSpan.FromDays(1)))
             {
-                var clientFactory = Fluently.Configure("http://localhost:7474/db/data/").CreateSessionFactory();
+                var clientFactory = Fluently.Configure("server=http://localhost:7474/db/data/;User Id=neo4j;password=password").CreateSessionFactory();
                 var cypherEndpoint = clientFactory.Create();
                 var nodes = cypherEndpoint.BeginQuery(p => new {node = p.Node})
                                           .Start(ctx => ctx.StartAtAny(ctx.Vars.node))
@@ -415,7 +427,7 @@
         [TestMethod]
         public void NestedTransactions_CommitInnerRollbackOuter_DoesNotCreateOuterNode()
         {
-            var clientFactory = Fluently.Configure("http://localhost:7474/db/data/").CreateSessionFactory();
+            var clientFactory = Fluently.Configure("server=http://localhost:7474/db/data/;User Id=neo4j;password=password").CreateSessionFactory();
             var cypherEndpoint = clientFactory.Create();
             Node node1, node2;
             using (var trans1 = new TransactionScope(TransactionScopeOption.RequiresNew, TimeSpan.FromDays(1)))
@@ -449,7 +461,7 @@
         {
             using (var trans = new TransactionScope(TransactionScopeOption.RequiresNew, TimeSpan.FromDays(1)))
             {
-                var clientFactory = Fluently.Configure("http://localhost:7474/db/data/").CreateSessionFactory();
+                var clientFactory = Fluently.Configure("server=http://localhost:7474/db/data/;User Id=neo4j;password=password").CreateSessionFactory();
                 var endpoint = clientFactory.Create();
 
                 dynamic node = endpoint.CreateNode(new { name = "fred", age = 33 }, "person");
@@ -469,7 +481,7 @@
         {
             using (var trans = new TransactionScope(TransactionScopeOption.RequiresNew, TimeSpan.FromDays(1)))
             {
-                var clientFactory = Fluently.Configure("http://localhost:7474/db/data/").CreateSessionFactory();
+                var clientFactory = Fluently.Configure("server=http://localhost:7474/db/data/;User Id=neo4j;password=password").CreateSessionFactory();
                 var endpoint = clientFactory.Create();
 
                 var uniqueLabel = "uniqueLabel";
@@ -483,7 +495,7 @@
         [TestMethod]
         public void CreateConstraint_PreventsDuplicates()
         {
-            var clientFactory = Fluently.Configure("http://localhost:7474/db/data/").CreateSessionFactory();
+            var clientFactory = Fluently.Configure("server=http://localhost:7474/db/data/;User Id=neo4j;password=password").CreateSessionFactory();
             var endpoint = clientFactory.Create();
 
             var uniqueLabel = "anotherUniqueLabel";
@@ -514,7 +526,7 @@
         {
             using (var trans = new TransactionScope(TransactionScopeOption.RequiresNew, TimeSpan.FromDays(1)))
             {
-                var clientFactory = Fluently.Configure("http://localhost:7474/db/data/").CreateSessionFactory();
+                var clientFactory = Fluently.Configure("server=http://localhost:7474/db/data/;User Id=neo4j;password=password").CreateSessionFactory();
                 var endpoint = clientFactory.Create();
 
                 dynamic node = endpoint.CreateNode(new { firstname = "fred", age = 33 }, "person");
@@ -534,7 +546,7 @@
         {
             using (var trans = new TransactionScope(TransactionScopeOption.RequiresNew, TimeSpan.FromDays(1)))
             {
-                var clientFactory = Fluently.Configure("http://localhost:7474/db/data/").CreateSessionFactory();
+                var clientFactory = Fluently.Configure("server=http://localhost:7474/db/data/;User Id=neo4j;password=password").CreateSessionFactory();
                 var endpoint = clientFactory.Create();
 
                 dynamic node = endpoint.CreateNode(new { name = "fred", age = 33 }, "person");
@@ -553,7 +565,7 @@
         {
             using (var trans = new TransactionScope(TransactionScopeOption.RequiresNew, TimeSpan.FromDays(1)))
             {
-                var clientFactory = Fluently.Configure("http://localhost:7474/db/data/").CreateSessionFactory();
+                var clientFactory = Fluently.Configure("server=http://localhost:7474/db/data/;User Id=neo4j;password=password").CreateSessionFactory();
                 var endpoint = clientFactory.Create();
 
                 var acme = endpoint.CreateNode(new { role = "acme co." }, "company");
@@ -576,6 +588,56 @@
                 Assert.AreEqual(nodes.First().x.Id, frank.Id);
                 Assert.AreEqual(nodes.Last().x.Id, james.Id);
             }
+        }
+
+        [TestMethod]
+        public void UpdateCompleteTransaction_UpdateIsPersisted()
+        {
+            var clientFactory = Fluently.Configure("server=http://localhost:7474/db/data/;User Id=neo4j;password=password").CreateSessionFactory();
+            var endpoint = clientFactory.Create();
+
+            const int originalValue = 100;
+            const int newValue = 200;
+
+            var personNode = endpoint.CreateNode(new { name = "Plzensky Prazdroj", age = originalValue });
+
+            using (var transaction = new TransactionScope())
+            {
+                dynamic node = endpoint.GetNode(personNode.Id);
+
+                node.age = newValue;
+                endpoint.Save(node);
+
+                transaction.Complete();
+
+            }
+
+            dynamic actualPerson = endpoint.GetNode(personNode.Id);
+            Assert.AreEqual(newValue, actualPerson.age);
+        }
+
+        [TestMethod]
+        public void UpdateRollback_EnsureEverythingIsRolledBack()
+        {
+            var clientFactory = Fluently.Configure("server=http://localhost:7474/db/data/;User Id=neo4j;password=password").CreateSessionFactory();
+            var endpoint = clientFactory.Create();
+
+            const int originalValue = 100;
+            const int newValue = 200;
+
+            var personNode = endpoint.CreateNode(new { name = "Plzensky Prazdroj", age = originalValue });
+
+            using (var transaction = new TransactionScope())
+            {
+                dynamic node = endpoint.GetNode(personNode.Id);
+
+                node.age = newValue;
+                endpoint.Save(node);
+
+            }
+
+            dynamic actualPerson = endpoint.GetNode(personNode.Id);
+            Assert.AreEqual(originalValue, actualPerson.age);
         }
     }
 }

@@ -2,6 +2,7 @@
 using System.Net;
 using System.Threading.Tasks;
 using System.Transactions;
+using CypherNet.Configuration;
 using CypherNet.Dynamic;
 using CypherNet.Graph;
 using CypherNet.Http;
@@ -29,7 +30,7 @@ namespace CypherNet.UnitTests
         {
             var mock = InitializeMockWebClient(AutoCommitAddress);
 
-            var session = new CypherSession(BaseUri, mock.Object);
+            var session = new CypherSession(new ConnectionProperties(BaseUri), mock.Object);
             var node = session.CreateNode(new {name = Name}, "person");
             Assert.AreEqual(node.AsDynamic().name, Name);
             Assert.AreEqual((node).Labels.First(), "person");
@@ -47,7 +48,7 @@ namespace CypherNet.UnitTests
             //Commit
             mock.Setup(m => m.PostAsync(CommitAddress, EmptyRequest)).Returns(() => BuildResponse(EmptyResponse));
 
-            var session = new CypherSession(BaseUri, mock.Object);
+            var session = new CypherSession(new ConnectionProperties(BaseUri), mock.Object);
             using (var ts = new TransactionScope())
             {
                 session.CreateNode(new {name = Name}, "person");
@@ -66,7 +67,7 @@ namespace CypherNet.UnitTests
             //Rollback
             mock.Setup(m => m.DeleteAsync(KeepAliveAddress)).Returns(() => BuildResponse(EmptyResponse));
 
-            var session = new CypherSession(BaseUri, mock.Object);
+            var session = new CypherSession(new ConnectionProperties(BaseUri), mock.Object);
             
             using (new TransactionScope())
             {

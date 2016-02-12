@@ -1,4 +1,6 @@
-﻿namespace CypherNet.Transaction
+﻿using CypherNet.Configuration;
+
+namespace CypherNet.Transaction
 {
     #region
 
@@ -40,14 +42,14 @@
         private readonly IEntityCache _entityCache;
         private readonly IWebClient _webClient;
 
-        internal CypherSession(string uri)
-            : this(uri, new WebClient())
+        internal CypherSession(ConnectionProperties connectionProperties)
+            : this(connectionProperties, new WebClient(connectionProperties.BuildBasicAuthCredentials()))
         {
         }
 
-        internal CypherSession(string uri, IWebClient webClient)
+        internal CypherSession(ConnectionProperties connectionProperties, IWebClient webClient)
         {
-            _uri = uri;
+            _uri = connectionProperties.Url;
             _webClient = webClient;
             _entityCache = new DictionaryEntityCache();
             _webSerializer = new DefaultJsonSerializer(_entityCache);
@@ -105,13 +107,13 @@
 
         public ICypherQueryStart<TVariables> BeginQuery<TVariables>()
         {
-            return new FluentCypherQueryBuilder<TVariables>(new CypherClientFactory(_uri, _webClient, _webSerializer));
+            return new FluentCypherQueryBuilder<TVariables>(new CypherClientFactory(_uri, _webClient, _webSerializer, _entityCache));
         }
 
         public ICypherQueryStart<TVariables> BeginQuery<TVariables>(
             Expression<Func<ICypherPrototype, TVariables>> variablePrototype)
         {
-            return new FluentCypherQueryBuilder<TVariables>(new CypherClientFactory(_uri, _webClient, _webSerializer));
+            return new FluentCypherQueryBuilder<TVariables>(new CypherClientFactory(_uri, _webClient, _webSerializer, _entityCache));
         }
 
         public Node CreateNode(object properties)
@@ -131,7 +133,7 @@
                 propNames.PropertiesPropertyName,
                 propNames.IdPropertyName,
                 propNames.LabelsPropertyName);
-            var endpoint = new CypherClientFactory(_uri, _webClient, _webSerializer).Create();
+            var endpoint = new CypherClientFactory(_uri, _webClient, _webSerializer, _entityCache).Create();
             var result = endpoint.ExecuteQuery<SingleNodeResult>(clause);
             var node = result.First().NewNode;
             return node;
@@ -201,28 +203,28 @@
         public void CreateConstraint(string label, string property)
         {
             var clause = string.Format(CreateConstraintClauseFormat, NodeVariableName, label, property);
-            var endpoint = new CypherClientFactory(_uri, _webClient, _webSerializer).Create();
+            var endpoint = new CypherClientFactory(_uri, _webClient, _webSerializer, _entityCache).Create();
             endpoint.ExecuteCommand(clause);
         }
 
         public void DropConstraint(string label, string property)
         {
             var clause = string.Format(DropConstraintClauseFormat, NodeVariableName, label, property);
-            var endpoint = new CypherClientFactory(_uri, _webClient, _webSerializer).Create();
+            var endpoint = new CypherClientFactory(_uri, _webClient, _webSerializer, _entityCache).Create();
             endpoint.ExecuteCommand(clause);
         }
 
         public void CreateIndex(string label, string property)
         {
             var clause = string.Format(CreateIndexClauseFormat, label, property);
-            var endpoint = new CypherClientFactory(_uri, _webClient, _webSerializer).Create();
+            var endpoint = new CypherClientFactory(_uri, _webClient, _webSerializer, _entityCache).Create();
             endpoint.ExecuteCommand(clause);
         }
 
         public void DropIndex(string label, string property)
         {
             var clause = string.Format(DropIndexClauseFormat, label, property);
-            var endpoint = new CypherClientFactory(_uri, _webClient, _webSerializer).Create();
+            var endpoint = new CypherClientFactory(_uri, _webClient, _webSerializer, _entityCache).Create();
             endpoint.ExecuteCommand(clause);
         }
 
@@ -264,6 +266,19 @@
             }
 
             public Node NewNode { get; private set; }
+        }
+    }
+
+    internal static class ConnectionPropertiesExtension
+    {
+        public static BasicAuthCredentials BuildBasicAuthCredentials(this ConnectionProperties connectionProperties)
+        {
+            if (!(new[] {connectionProperties.Username, connectionProperties.Password}.All(string.IsNullOrEmpty)))
+            {
+                return new BasicAuthCredentials(connectionProperties.Username, connectionProperties.Password);
+            }
+
+            return null;
         }
     }
 }

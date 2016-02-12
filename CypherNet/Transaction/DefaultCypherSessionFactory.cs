@@ -1,30 +1,32 @@
-﻿using CypherNet.Serialization;
+﻿
 
 namespace CypherNet.Transaction
 {
     #region
 
     using Http;
+    using CypherNet.Configuration;
+    using CypherNet.Serialization;
 
     #endregion
 
     internal class DefaultCypherSessionFactory : ICypherSessionFactory
     {
-        private readonly string _sourceUri;
+        private readonly ConnectionProperties _connectionProperties;
 
-        public DefaultCypherSessionFactory(string sourceUri)
+        public DefaultCypherSessionFactory(ConnectionProperties connectionProperties)
         {
-            _sourceUri = sourceUri;
+            _connectionProperties = connectionProperties;
         }
 
         public ICypherSession Create()
         {
-            return Create(_sourceUri);
+            return Create(_connectionProperties);
         }
 
-        public ICypherSession Create(string sourceUri)
+        public ICypherSession Create(ConnectionProperties connectionProperties)
         {
-            var session = new CypherSession(sourceUri);
+            var session = new CypherSession(connectionProperties);
             session.Connect();
             return session;
         }
