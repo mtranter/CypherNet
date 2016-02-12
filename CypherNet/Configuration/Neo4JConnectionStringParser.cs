@@ -5,7 +5,7 @@ namespace CypherNet.Configuration
 {
     internal class Neo4JConnectionStringParser
     {
-        private readonly static Regex URL_REGEX = new Regex(@"https ?:\/\/(www\.)?[-a-zA-Z0-9@:%._\+~#=]{2,256}\.[a-z]{2,6}\b([-a-zA-Z0-9@:%_\+.~#?&//=]*)");
+        private readonly static Regex URL_REGEX = new Regex(@"^https?:\/\/(www\.)?[-a-zA-Z0-9@:%._\+~#=]{2,256}\b([-a-zA-Z0-9@:%_\+.~#?&//=]*)");
 
         internal static ConnectionProperties Parse(string connectionString)
         {
