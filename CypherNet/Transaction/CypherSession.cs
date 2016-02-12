@@ -1,4 +1,6 @@
-﻿namespace CypherNet.Transaction
+﻿using CypherNet.Configuration;
+
+namespace CypherNet.Transaction
 {
     #region
 
@@ -40,14 +42,14 @@
         private readonly IEntityCache _entityCache;
         private readonly IWebClient _webClient;
 
-        internal CypherSession(string uri)
-            : this(uri, new WebClient())
+        internal CypherSession(ConnectionProperties connectionProperties)
+            : this(connectionProperties, new WebClient(connectionProperties.BuildBasicAuthCredentials()))
         {
         }
 
-        internal CypherSession(string uri, IWebClient webClient)
+        internal CypherSession(ConnectionProperties connectionProperties, IWebClient webClient)
         {
-            _uri = uri;
+            _uri = connectionProperties.Url;
             _webClient = webClient;
             _entityCache = new DictionaryEntityCache();
             _webSerializer = new DefaultJsonSerializer(_entityCache);
@@ -264,6 +266,19 @@
             }
 
             public Node NewNode { get; private set; }
+        }
+    }
+
+    internal static class ConnectionPropertiesExtension
+    {
+        public static BasicAuthCredentials BuildBasicAuthCredentials(this ConnectionProperties connectionProperties)
+        {
+            if (!(new[] {connectionProperties.Username, connectionProperties.Password}.All(string.IsNullOrEmpty)))
+            {
+                return new BasicAuthCredentials(connectionProperties.Username, connectionProperties.Password);
+            }
+
+            return null;
         }
     }
 }

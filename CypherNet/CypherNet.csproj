@@ -51,6 +51,7 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Configuration\Fluently.cs" />
+    <Compile Include="Configuration\Neo4JConnectionStringParser.cs" />
     <Compile Include="Dynamic\CachedDictionaryPropertiesProvider.cs" />
     <Compile Include="Dynamic\DynamicEntity.cs" />
     <Compile Include="Dynamic\IDynamicMetaData.cs" />
@@ -59,6 +60,7 @@
     <Compile Include="Graph\IGraphEntity.cs" />
     <Compile Include="Graph\Node.cs" />
     <Compile Include="Graph\Relationship.cs" />
+    <Compile Include="Http\BasicAuthCredentials.cs" />
     <Compile Include="Http\IWebClient.cs" />
     <Compile Include="Http\WebClient.cs" />
     <Compile Include="ICypherSession.cs" />

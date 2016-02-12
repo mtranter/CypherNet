@@ -7,6 +7,17 @@ namespace CypherNet.Http
 {
     public class WebClient : IWebClient
     {
+        private readonly BasicAuthCredentials _credentials;
+
+        public WebClient()
+        {
+        }
+
+        public WebClient(BasicAuthCredentials credentials)
+        {
+            _credentials = credentials;
+        }
+
         #region IWebClient Members
 
         public async Task<IHttpResponseMessage> GetAsync(string url)
@@ -31,15 +42,9 @@ namespace CypherNet.Http
 
         #endregion
 
-        private async Task<IHttpResponseMessage> Execute(string url, HttpMethod method)
+        private Task<IHttpResponseMessage> Execute(string url, HttpMethod method)
         {
-            var msg = new HttpRequestMessage(method, url);
-
-            using (var client = new HttpClient())
-            {
-                var result = await client.SendAsync(msg).ConfigureAwait(false);
-                return new HttpResponseMessageWrapper(result);
-            }
+            return Execute(url, null, method);
         }
 
         private async Task<IHttpResponseMessage> Execute(string url, String content, HttpMethod method)
@@ -54,10 +59,14 @@ namespace CypherNet.Http
 
             using (var client = new HttpClient())
             {
+                if (_credentials != null)
+                {
+                    client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Basic", _credentials.EncodedCredentials);
+                }
+
                 var result = await client.SendAsync(msg).ConfigureAwait(false);
                 return new HttpResponseMessageWrapper(result);
             }
         }
     }
-
 }
