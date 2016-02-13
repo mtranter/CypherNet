@@ -14,6 +14,6 @@ function update-password
   Invoke-RestMethod -Uri $uri -Method Post -Headers @{Authorization=("Basic {0}" -f $base64AuthInfo)} -ContentType "application/json; charset=UTF-8" -Body $json
 }
  
-Install-Neo4jServer -Neo4jServer "c:\projects\CypherNet\neo4j-community-2.3.2" -PassThru | Start-Neo4jServer -Wait
+Install-Neo4jServer -Neo4jServer "c:\projects\CypherNet\neo4j-community-2.3.2" -PassThru | Start-Neo4jServer
 
 update-password
