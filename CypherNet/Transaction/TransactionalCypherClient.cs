@@ -93,7 +93,7 @@ namespace CypherNet.Transaction
             this._entityCache.Clear();
             if (cypherResponse.Errors.Any())
             {
-                throw new Exception("Errors returned from Neo Server: " + String.Join(",", cypherResponse.Errors.Select(e => e.Message)));
+                throw new CypherResponseException(cypherResponse.Errors.Select(e => e.Message).ToArray());
             }
         }
 
