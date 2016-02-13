@@ -513,6 +513,7 @@
             }
             catch(Exception ex)
             {
+                Trace.WriteLine(ex);
                 Assert.IsTrue(ex is CypherResponseException);
             }
             finally
