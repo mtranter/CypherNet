@@ -16,4 +16,6 @@ function update-password
  
 Install-Neo4jServer -Neo4jServer "c:\projects\CypherNet\neo4j-community-2.3.2" -PassThru | Start-Neo4jServer
 
+Start-Sleep -s 10
+
 update-password
