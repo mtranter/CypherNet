@@ -3,3 +3,9 @@ install:
   - cmd: 7z x c:\projects\CypherNet\neo4j-community-2.3.2-windows.zip
   - ps: .\setup-neo4j.ps1
 
+deploy:
+  provider: NuGet
+  api_key:
+    secure: TFTKac0CbCOvowsFmuUzFjjIcRNJNJnigSh568rlQcjSn2E3JjWbVcobqVD3wGtl
+  skip_symbols: true
+  artifact: /.*\.nupkg/
