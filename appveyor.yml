@@ -1,7 +1,8 @@
 install:
-  - ps: Start-FileDownload 'http://neo4j.com/artifact.php?name=neo4j-community-2.3.2-windows.zip' -FileName 'c:\projects\CypherNet\neo4j-community-2.3.2-windows.zip'
-  - cmd: 7z x c:\projects\CypherNet\neo4j-community-2.3.2-windows.zip
-  - ps: .\setup-neo4j.ps1
+  -
+  - ps: Start-FileDownload 'http://neo4j.com/artifact.php?name=neo4j-community-2.3.2-windows.zip' -FileName '$APPVEYOR_BUILD_FOLDER\neo4j-community-2.3.2-windows.zip'
+  - ps: 7z x $APPVEYOR_BUILD_FOLDER\neo4j-community-2.3.2-windows.zip
+  - ps: $APPVEYOR_BUILD_FOLDER\setup-neo4j.ps1
 version: 0.9.{build}
 pull_requests:
   do_not_increment_build_number: true
