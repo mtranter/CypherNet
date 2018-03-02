@@ -8,23 +8,18 @@ A .Net API for the Neo4j HTTP Transactional Endpoint. (v2.0.0)
 
 Exposes strongly typed Graph Query API based on the Neo4j [Cypher Query Language](http://docs.neo4j.org/chunked/milestone/cypher-query-lang.html).
 
-<dl>
-    <dt>Connection String</dt>
-    <dd></dd>
-</dl>
+### Connection String
 ```C#
 var clientFactory = Fluently.Configure("Server=http://localhost:7474/db/data/;User Id=neo4j;Password=password").CreateSessionFactory();
 var cypherEndpoint = clientFactory.Create();
 ```
+
 or for Unauthd:
 ```C#
 var clientFactory = Fluently.Configure("http://localhost:7474/db/data/").CreateSessionFactory();
 var cypherEndpoint = clientFactory.Create();
 ```
-<dl>
-    <dt>Usage</dt>
-    <dd></dd>
-</dl>
+### Usage
 ```C#
 var clientFactory = Fluently.Configure("http://localhost:7474/db/data/").CreateSessionFactory();
 var cypherEndpoint = clientFactory.Create();
@@ -58,10 +53,8 @@ foreach (var node in nodes)
         // Prints "mark IS_A developer"
 }
 ```
-<dl>
-    <dt>Transactional</dt>
-    <dd></dd>
-</dl>
+
+### Transactional
 ```C#
 var clientFactory = Fluently.Configure("http://localhost:7474/db/data/").CreateSessionFactory();
 var cypherEndpoint = clientFactory.Create();
