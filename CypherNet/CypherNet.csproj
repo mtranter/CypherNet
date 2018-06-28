@@ -50,6 +50,7 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Configuration\CypherJsonSerializerSettings.cs" />
     <Compile Include="Configuration\Fluently.cs" />
     <Compile Include="Configuration\Neo4JConnectionStringParser.cs" />
     <Compile Include="Dynamic\CachedDictionaryPropertiesProvider.cs" />
