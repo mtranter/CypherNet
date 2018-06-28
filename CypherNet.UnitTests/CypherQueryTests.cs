@@ -152,7 +152,24 @@
                 .Fetch();
 
             VerifyCypher(cypher, results.FirstOrDefault(),
-                         @"START actor=node(1), movie=node(2) CREATE (actor)-[actedIn:ACTED_IN {""name"": ""mark""}]->(movie) RETURN actedIn as actedIn, id(actedIn) as actedIn__Id, type(actedIn) as actedIn__Type");
+                         @"START actor=node(1), movie=node(2) CREATE (actor)-[actedIn:ACTED_IN {name:""mark""}]->(movie) RETURN actedIn as actedIn, id(actedIn) as actedIn__Id, type(actedIn) as actedIn__Type");
+        }
+
+        [TestMethod]
+        public void BuildCypherQuery_CreateRelationshipWithFloatProperty_SerializesValueWithDotNotComma()
+        {
+            FluentCypherQueryBuilder<TestCypherClause> query;
+            var cypher = SetupMocks(out query);
+            var results = query
+                .Start(ctx => ctx
+                    .StartAtId(ctx.Vars.actor, 1)
+                    .StartAtId(ctx.Vars.movie, 2))
+                .Create(ctx => ctx.CreateRel(ctx.Vars.actor, ctx.Vars.actedIn, "HAS_RATE", new { rate = 4.56 }, ctx.Vars.movie))
+                .Return(ctx => new { ctx.Vars.actedIn })
+                .Fetch();
+
+            VerifyCypher(cypher, results.FirstOrDefault(), 
+                @"START actor=node(1), movie=node(2) CREATE (actor)-[actedIn:HAS_RATE {rate:4.56}]->(movie) RETURN actedIn as actedIn, id(actedIn) as actedIn__Id, type(actedIn) as actedIn__Type");
         }
 
         [TestMethod]

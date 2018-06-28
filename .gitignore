@@ -109,4 +109,3 @@ UpgradeLog*.XML
 
 # Nuget Files
 *.nupkg
-*.nuspec

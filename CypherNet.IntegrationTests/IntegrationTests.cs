@@ -127,7 +127,7 @@
 
             var newNode1 = endpoint.CreateNode(new { name = "mark", age = 33 }, "person");
             var newNode2 = endpoint.CreateNode(new { role = "developer" }, "job");
-            var rel = endpoint.CreateRelationship(newNode1, newNode2, "WORKS_AS_A", new { created = DateTime.Now.ToString("s") });
+            var rel = endpoint.CreateRelationship(newNode1, newNode2, "WORKS_AS_A", new { created = DateTime.Now.ToString("s"), salary = 1000.5 });
             Assert.IsNotNull(rel);
             Assert.AreEqual("WORKS_AS_A", rel.Type);
         }
@@ -534,7 +534,7 @@
 
                 var nodes = endpoint.BeginQuery(p => new { node = p.Node })
                                           .Start(ctx => ctx.StartAtAny(ctx.Vars.node))
-                                          .Where(ctx => ctx.Has(ctx.Vars.node, "firstname"))
+                                          .Where(ctx => ctx.Exists(ctx.Vars.node, "firstname"))
                                           .Return(ctx => new { Node = ctx.Vars.node })
                                           .Fetch();
                 Assert.AreEqual(1, nodes.Count());
@@ -554,7 +554,7 @@
 
                 var nodes = endpoint.BeginQuery(p => new { node = p.Node })
                                           .Start(ctx => ctx.StartAtAny(ctx.Vars.node))
-                                          .Where(ctx => ctx.Has(ctx.Vars.node, "xxxxx"))
+                                          .Where(ctx => ctx.Exists(ctx.Vars.node, "xxxxx"))
                                           .Return(ctx => new { Node = ctx.Vars.node })
                                           .Fetch();
                 Assert.AreEqual(0, nodes.Count());
@@ -586,8 +586,8 @@
                         .Fetch();
 
                 Assert.AreEqual(2, nodes.Count());
-                Assert.AreEqual(nodes.First().x.Id, frank.Id);
-                Assert.AreEqual(nodes.Last().x.Id, james.Id);
+                Assert.IsTrue(nodes.Any(n => n.x.Id == frank.Id));
+                Assert.IsTrue(nodes.Any(n => n.x.Id == james.Id));
             }
         }
 

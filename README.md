@@ -1,18 +1,26 @@
 
 CypherNet
 =========
-[![Gitter](https://badges.gitter.im/Join Chat.svg)](https://gitter.im/mtranter/CypherNet?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge&utm_content=badge)
-[![Build status](https://ci.appveyor.com/api/projects/status/mtpg771qhljc3jai?svg=true)](https://ci.appveyor.com/project/mtranter/cyphernet)
+
+[![Build status](https://ci.appveyor.com/api/projects/status/5uv5y4x6xohbb5o3?svg=true)](https://ci.appveyor.com/project/mtranter/cyphernet-kv3k3)
+
 
 A .Net API for the Neo4j HTTP Transactional Endpoint. (v2.0.0)
 
 Exposes strongly typed Graph Query API based on the Neo4j [Cypher Query Language](http://docs.neo4j.org/chunked/milestone/cypher-query-lang.html).
 
+### Connection String
+```C#
+var clientFactory = Fluently.Configure("Server=http://localhost:7474/db/data/;User Id=neo4j;Password=password").CreateSessionFactory();
+var cypherEndpoint = clientFactory.Create();
+```
 
-<dl>
-    <dt>Usage</dt>
-    <dd></dd>
-</dl>
+or for Unauthd:
+```C#
+var clientFactory = Fluently.Configure("http://localhost:7474/db/data/").CreateSessionFactory();
+var cypherEndpoint = clientFactory.Create();
+```
+### Usage
 ```C#
 var clientFactory = Fluently.Configure("http://localhost:7474/db/data/").CreateSessionFactory();
 var cypherEndpoint = clientFactory.Create();
@@ -46,10 +54,8 @@ foreach (var node in nodes)
         // Prints "mark IS_A developer"
 }
 ```
-<dl>
-    <dt>Transactional</dt>
-    <dd></dd>
-</dl>
+
+### Transactional
 ```C#
 var clientFactory = Fluently.Configure("http://localhost:7474/db/data/").CreateSessionFactory();
 var cypherEndpoint = clientFactory.Create();
