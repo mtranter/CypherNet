@@ -29,6 +29,7 @@ namespace CypherNet.Transaction
 
         public IEnumerable<TOut> ExecuteQuery<TOut>(string cypherQuery)
         {
+            
             var request = CypherQueryRequest.Create(cypherQuery);
             var srequest = _serializer.Serialize(request);
             Logger.Current.Log("Executing: " + srequest, LogLevel.Info);

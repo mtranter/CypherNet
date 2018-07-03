@@ -1,4 +1,7 @@
-﻿namespace CypherNet.Queries
+﻿using System.IO;
+using Newtonsoft.Json;
+
+namespace CypherNet.Queries
 {
     #region
 
@@ -67,8 +70,6 @@
 
     internal class JsonArgumentEvaluator : ValueArgumentEvaluator
     {
-        private static readonly Type[] WrappedTypes = new[] {typeof (string), typeof (char)};
-
         public override object Evaluate(Expression argument, ParameterInfo paramInfo)
         {
             var value = base.Evaluate(argument, paramInfo);
@@ -76,15 +77,16 @@
             {
                 return "";
             }
-            var dict = CachedDictionaryPropertiesProvider.LoadProperties(value);
-            var json = new StringBuilder("{");
-            foreach (var kvp in dict)
+
+            JsonSerializer serializer = JsonSerializer.Create(Configuration.CypherJsonSerializerSettings.DefaultSerializerSettings?.Invoke());
+            var stringWriter = new StringWriter();
+            using (var writer = new JsonTextWriter(stringWriter))
             {
-                json.AppendFormat(@"""{0}"": {1}, ", kvp.Key, StringWrapperArgumentEvaluator.WrapValue(kvp.Value));
+                writer.QuoteName = false;
+                serializer.Serialize(writer, value);
             }
-            json.Remove(json.Length - 2, 2);
-            json.Append("}");
-            return json.ToString();
+
+            return stringWriter.ToString();
         }
     }
 

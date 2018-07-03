@@ -1,4 +1,6 @@
-﻿namespace CypherNet.Queries
+﻿using System;
+
+namespace CypherNet.Queries
 {
     using CypherNet.Graph;
 
@@ -28,8 +30,14 @@
             [ArgumentEvaluator(typeof(MemberNameArgumentEvaluator))] IGraphEntity entity,
             [ArgumentEvaluator(typeof(ValueArgumentEvaluator))] string property);
 
+        [Obsolete("Has is no longer supported in Cypher from version 3.0, please use Exists instead")]
         [ParseToCypher("has({0}.{1})")]
         bool Has(
+            [ArgumentEvaluator(typeof(MemberNameArgumentEvaluator))] IGraphEntity entity,
+            [ArgumentEvaluator(typeof(ValueArgumentEvaluator))] string property);
+
+        [ParseToCypher("exists({0}.{1})")]
+        bool Exists(
             [ArgumentEvaluator(typeof(MemberNameArgumentEvaluator))] IGraphEntity entity,
             [ArgumentEvaluator(typeof(ValueArgumentEvaluator))] string property);
 
