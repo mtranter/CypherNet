@@ -22,6 +22,8 @@
 
         #region IJsonSerializer Members
 
+        public JsonConverterCollection JsonConverters { get { return _serializer.Converters; } }
+
         public string Serialize(object objToSerialize)
         {
             var sw = new StringWriter();

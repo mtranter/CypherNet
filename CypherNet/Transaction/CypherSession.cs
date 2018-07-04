@@ -18,6 +18,7 @@ namespace CypherNet.Transaction
     using CypherNet.Serialization;
 
     using StaticReflection;
+    using Newtonsoft.Json;
 
     #endregion
 
@@ -41,6 +42,7 @@ namespace CypherNet.Transaction
         private readonly IWebSerializer _webSerializer;
         private readonly IEntityCache _entityCache;
         private readonly IWebClient _webClient;
+        public JsonConverterCollection JsonConverters { get { return _webSerializer.JsonConverters; } }
 
         internal CypherSession(ConnectionProperties connectionProperties)
             : this(connectionProperties, new WebClient(connectionProperties.BuildBasicAuthCredentials()))
